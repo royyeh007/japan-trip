@@ -7,7 +7,7 @@ import { useTrip } from "../trip";
 export function Join() {
   const { session, invite, refreshMember, signOut } = useTrip();
   const [fam, setFam] = useState<FamilyId | null>(null);
-  const [name, setName] = useState(session?.user.user_metadata?.full_name ?? "");
+  const [name, setName] = useState<string>(session?.user.user_metadata?.full_name ?? "");
   const [code, setCode] = useState(invite ?? "");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export function Join() {
   return (
     <div className="wrap pick">
       <header className="hero">
-        <div className="eyebrow">{session?.user.email}</div>
+        <div className="eyebrow">{session?.user.email ?? "用邀請連結進入"}</div>
         <h1>你是哪一家？</h1>
         <p className="note">選一下你的家庭，之後只會看到你們家的行程和大家一起的日子。</p>
       </header>
@@ -40,7 +40,7 @@ export function Join() {
         <label>邀請碼<input value={code} onChange={(e) => setCode(e.target.value)} placeholder="從邀請連結來的話會自動填好" /></label>
         <button type="button" className="btn primary big" onClick={submit} disabled={!fam || !code.trim() || busy}>{busy ? "加入中…" : "加入"}</button>
         {err && <p className="err">{err}</p>}
-        <button type="button" className="link" onClick={signOut}>不是這個帳號？登出</button>
+        <button type="button" className="link" onClick={signOut}>{session?.user.email ? "不是這個帳號？登出" : "回上一頁"}</button>
       </div>
     </div>
   );

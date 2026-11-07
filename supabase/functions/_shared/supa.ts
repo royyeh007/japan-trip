@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { HttpError } from "./http.ts";
 
-export interface Member { email: string; family_id: string; role: "member" | "admin"; name: string | null }
+export interface Member { user_id: string; email: string | null; family_id: string; role: "member" | "admin"; name: string | null }
 
 /** Two clients: `user` runs under the caller's JWT (RLS applies); `admin` uses the service role (bypasses RLS). */
 export function clients(req: Request) {
@@ -14,13 +14,14 @@ export function clients(req: Request) {
   return { user, admin };
 }
 
-/** The caller must be signed in and belong to a family. */
+/** The caller must be signed in (anonymous via invite link, or Google) and belong to a family. */
 export async function requireMember(req: Request) {
   const { user, admin } = clients(req);
   const { data, error } = await user.auth.getUser();
-  const email = data?.user?.email?.toLowerCase();
-  if (error || !email) throw new HttpError(401, "請先登入");
-  const { data: member } = await admin.from("members").select("email, family_id, role, name").eq("email", email).maybeSingle();
+  const u = data?.user;
+  if (error || !u) throw new HttpError(401, "請先登入");
+  const { data: member } = await admin.from("members").select("user_id, email, family_id, role, name").eq("user_id", u.id).maybeSingle();
   if (!member) throw new HttpError(403, "你還沒加入任何一家，請用邀請連結加入");
-  return { user, admin, member: member as Member, email };
+  const m = member as Member;
+  return { user, admin, member: m, uid: u.id, who: m.name ?? m.email ?? "家人" };
 }

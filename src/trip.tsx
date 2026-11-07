@@ -49,9 +49,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
   // 2. which family this person belongs to
   const refreshMember = useCallback(async () => {
-    const email = session?.user.email?.toLowerCase();
-    if (!supabase || !email) { setMember(null); setMemberChecked(true); return; }
-    const { data, error } = await supabase.from("members").select("email, family_id, role, name").eq("email", email).maybeSingle();
+    const uid = session?.user.id;
+    if (!supabase || !uid) { setMember(null); setMemberChecked(true); return; }
+    const { data, error } = await supabase.from("members").select("user_id, email, family_id, role, name").eq("user_id", uid).maybeSingle();
     if (error) { setError(error.message); return; }
     setMember((data as Member | null) ?? null);
     setMemberChecked(true);

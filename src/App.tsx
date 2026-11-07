@@ -101,8 +101,8 @@ function Main() {
             <select className="famselect" value={viewFam} aria-label="看哪一家的行程" onChange={(e) => setViewFam(e.target.value as FamilyId)}>
               {trip.families.map((f) => <option key={f.id} value={f.id}>看 {f.label}</option>)}
             </select>
-            <span className="muted who-am-i">{member?.name ?? member?.email}</span>
-            <button type="button" className="link" onClick={signOut}>登出</button>
+            <span className="muted who-am-i">{member?.name ?? member?.email ?? "家人"}</span>
+            <button type="button" className="link" onClick={() => { if (member?.email || confirm("你是用邀請連結進來的，登出後要再用邀請連結進來一次。確定要登出？")) signOut(); }}>登出</button>
           </div>
           <div className="eyebrow">
             2026.12.26 — 2027.1.2 ・ {own.length === days.length && days.length > 0 ? `${days.length} 天 ${days.length - 1} 夜` : `目前有 ${own.length} 天行程`}

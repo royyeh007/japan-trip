@@ -32,9 +32,15 @@ must("extras", await sb.from("extras").upsert([
   { key: "notes", data: { shared: trip.SHARED_NOTE ?? "" } },
 ]));
 
-if (env.ADMIN_EMAIL) {
-  must(`admin ${env.ADMIN_EMAIL}`, await sb.from("members").upsert({ email: env.ADMIN_EMAIL.toLowerCase(), family_id: env.ADMIN_FAMILY || "lily", role: "admin", name: env.ADMIN_NAME || null }));
-} else console.log("（沒設 ADMIN_EMAIL，跳過 admin 成員）");
+// 管理員用自己的邀請連結進入（role = admin）；一般成員用另一個
+const newCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("");
+async function ensureInvite(role, note, maxUses) {
+  const { data } = await sb.from("invites").select("code").eq("role", role).order("created_at").limit(1);
+  if (data?.[0]?.code) return data[0].code;
+  const code = newCode();
+  must(`邀請碼（${role}）`, await sb.from("invites").insert({ code, role, note, max_uses: maxUses }));
+  return code;
+}
 
 if (existsSync("seed/assets/trip-form.xlsx")) {
   must("填寫表單 → assets/trip-form.xlsx", await sb.storage.from("assets").upload("trip-form.xlsx", readFileSync("seed/assets/trip-form.xlsx"), {
@@ -42,11 +48,9 @@ if (existsSync("seed/assets/trip-form.xlsx")) {
   }));
 }
 
-const { data: inv } = await sb.from("invites").select("code").order("created_at").limit(1);
-let code = inv?.[0]?.code;
-if (!code) {
-  code = Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("");
-  must("邀請碼", await sb.from("invites").insert({ code, note: "seed", created_by: env.ADMIN_EMAIL ?? null, max_uses: 50 }));
-}
-console.log(`\n邀請連結：${(env.SITE_URL || "https://<你的網址>/").replace(/\/?$/, "/")}#invite=${code}`);
-console.log("（本機測試用 http://localhost:5173/#invite=" + code + "）");
+const site = (env.SITE_URL || "https://<你的網址>/").replace(/\/?$/, "/");
+const adminCode = await ensureInvite("admin", "管理員（自己用）", 3);
+const memberCode = await ensureInvite("member", "家人", 50);
+console.log(`\n管理員連結（自己用，可用 3 次）：${site}#invite=${adminCode}`);
+console.log(`家人邀請連結（可用 50 次）：${site}#invite=${memberCode}`);
+console.log(`本機測試：http://localhost:5173/#invite=${memberCode}`);

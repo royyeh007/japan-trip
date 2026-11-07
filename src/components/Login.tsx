@@ -1,37 +1,42 @@
 import { useState } from "react";
 import { supabase } from "../supabase";
 
-const GoogleIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18">
-    <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.3 12 2.3 6.6 2.3 2.3 6.6 2.3 12S6.6 21.7 12 21.7c5.6 0 9.3-3.9 9.3-9.5 0-.6-.1-1.1-.2-1.6H12z" />
-  </svg>
-);
+const GOOGLE = import.meta.env.VITE_GOOGLE_LOGIN === "1";
 
 export function Login({ invite }: { invite: string | null }) {
+  const [code, setCode] = useState(invite ?? "");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const go = async () => {
+
+  // 邀請連結進入：先匿名登入，下一個畫面選家庭時才會用邀請碼
+  const enter = async () => {
     if (!supabase) return;
     setBusy(true); setErr(null);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: location.origin + location.pathname },
-    });
+    try { localStorage.setItem("jp-invite", code.trim()); } catch { /* ignore */ }
+    const { error } = await supabase.auth.signInAnonymously();
     if (error) { setErr(error.message); setBusy(false); }
   };
+  const google = async () => {
+    if (!supabase) return;
+    setBusy(true); setErr(null);
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } });
+    if (error) { setErr(error.message); setBusy(false); }
+  };
+
   return (
     <div className="wrap pick">
       <header className="hero">
         <div className="eyebrow">2026.12.26 — 2027.1.2 ・ 日本跨年</div>
         <h1>日本跨年行程</h1>
-        <p className="note">
-          {invite ? "你拿到邀請連結了。用 Google 登入後，選一下你是哪一家就可以看行程。" : "行程只有家人看得到，請用 Google 登入。還沒加入的人需要邀請連結。"}
-        </p>
+        <p className="note">{invite ? "你拿到邀請了，按「進入」然後選一下你是哪一家。" : "行程只給家人看。請用家人傳給你的邀請連結打開，或在下面輸入邀請碼。"}</p>
       </header>
-      <button type="button" className="btn primary big" onClick={go} disabled={busy}>
-        <GoogleIcon />{busy ? "前往 Google…" : "用 Google 登入"}
-      </button>
-      {err && <p className="err">{err}</p>}
+      <div className="joinform">
+        <label>邀請碼<input value={code} onChange={(e) => setCode(e.target.value)} placeholder="從邀請連結來會自動填好" autoCapitalize="none" autoCorrect="off" /></label>
+        <button type="button" className="btn primary big" onClick={enter} disabled={busy || !code.trim()}>{busy ? "進入中…" : "進入"}</button>
+        {GOOGLE && <button type="button" className="btn big" onClick={google} disabled={busy}>用 Google 登入</button>}
+        {err && <p className="err">{err}</p>}
+        <p className="note">進入後會記在這台手機／電腦上，之後直接開網址就好。</p>
+      </div>
     </div>
   );
 }

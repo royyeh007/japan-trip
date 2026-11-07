@@ -9,7 +9,7 @@ interface Turn { role: "user" | "assistant"; content: string; proposals?: Prop[]
 
 export function Chat() {
   const { member } = useTrip();
-  const key = `jp-chat-${member?.email ?? ""}`;
+  const key = `jp-chat-${member?.user_id ?? ""}`;
   const [turns, setTurns] = useState<Turn[]>(() => { try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; } });
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);

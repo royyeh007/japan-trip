@@ -39,7 +39,7 @@ export function daysFor(days: Day[], f: FamilyId): { day: Day; has: boolean }[] 
 }
 
 /** A member's role in the app. */
-export interface Member { email: string; family_id: FamilyId; role: "member" | "admin"; name: string | null }
+export interface Member { user_id: string; email: string | null; family_id: FamilyId; role: "member" | "admin"; name: string | null }
 
 export type TodoItem = [string, string, string, boolean?];
 export type Contact = [string, string];

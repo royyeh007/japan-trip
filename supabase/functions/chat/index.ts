@@ -8,7 +8,7 @@ import { FORMAT_GUIDE, ProposalZ, normalize } from "../_shared/proposal.ts";
 interface Turn { role: "user" | "assistant"; content: string }
 
 Deno.serve(handle(async (req) => {
-  const { user, admin, member, email } = await requireMember(req);
+  const { user, admin, member, uid, who } = await requireMember(req);
   const body = await req.json().catch(() => ({})) as { messages?: Turn[] };
   const turns = (body.messages ?? []).filter((t) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string" && t.content.trim()).slice(-20);
   if (turns.length === 0 || turns[turns.length - 1].role !== "user") throw new HttpError(400, "沒有訊息");
@@ -21,7 +21,7 @@ Deno.serve(handle(async (req) => {
   ]);
   const context = {
     today: new Date().toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" }),
-    you: { email, name: member.name, family_id: member.family_id, role: member.role },
+    you: { name: who, family_id: member.family_id, role: member.role },
     families,
     days: (days ?? []).sort((a, b) => a.date_id.localeCompare(b.date_id)),
     extras: Object.fromEntries((extras ?? []).map((e) => [e.key, e.data])),
@@ -36,7 +36,7 @@ Deno.serve(handle(async (req) => {
       const proposal = normalize(input);
       const family_id = member.role === "admin" ? proposal.family_id : member.family_id;
       const { data, error } = await admin.from("uploads")
-        .insert({ family_id, uploaded_by: email, kind: "chat", parsed: { ...proposal, family_id }, text: turns[turns.length - 1].content })
+        .insert({ family_id, uploaded_by: uid, kind: "chat", parsed: { ...proposal, family_id }, text: turns[turns.length - 1].content })
         .select("id").single();
       if (error || !data) return `送出失敗：${error?.message}`;
       proposals.push({ id: data.id, proposal: { ...proposal, family_id } });
@@ -56,7 +56,7 @@ Deno.serve(handle(async (req) => {
       {
         type: "text",
         text: `你是「日本跨年行程」網頁裡的小幫手，用繁體中文、台灣用語回答，語氣輕鬆簡短。
-使用者是 ${member.name ?? email}（${member.family_id} 家）。資料裡有四家的行程，大家互相都看得到，哪一家的都可以回答。回答只根據下面的行程資料；資料裡沒有的就說不知道，不要編。
+使用者是 ${who}（${member.family_id} 家）。資料裡有四家的行程，大家互相都看得到，哪一家的都可以回答。回答只根據下面的行程資料；資料裡沒有的就說不知道，不要編。
 時間、訂位碼、地址這類細節要照資料逐字講。
 使用者想改行程、加行程、補自己家的 12/26、12/27、1/2 時，如果意思清楚就直接用 propose_itinerary_change 送出完整的那一天（不清楚才先問）；使用者會在畫面上按「確認更新」。
 一般成員只能提自己家的日子（scope=family）或大家一起的日子（scope=shared）。

@@ -20,7 +20,7 @@ function InviteBox() {
   const create = async () => {
     if (!supabase) return;
     const code = Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("");
-    const { error } = await supabase.from("invites").insert({ code, note: new Date().toLocaleDateString("zh-TW"), created_by: member?.email, max_uses: 50 });
+    const { error } = await supabase.from("invites").insert({ code, note: new Date().toLocaleDateString("zh-TW"), created_by: member?.user_id, max_uses: 50 });
     if (error) alert(error.message); else load();
   };
   const linkOf = (code: string) => `${location.origin}${location.pathname}#invite=${code}`;
@@ -82,7 +82,7 @@ export function UploadView() {
 
   // Earlier proposals still waiting for a decision (own ones; admin sees everyone's), minus the one just shown above
   const pending = rows.filter((r) => r.status === "pending" && r.parsed && r.id !== result?.id);
-  const history = rows.filter((r) => r.status !== "pending" && r.uploaded_by === member?.email);
+  const history = rows.filter((r) => r.status !== "pending" && r.uploaded_by === member?.user_id);
 
   return (
     <>
@@ -118,7 +118,7 @@ export function UploadView() {
           <h3>還沒確認的（{pending.length}）</h3>
           {pending.map((r) => (
             <ProposalCard key={r.id} id={r.id} proposal={r.parsed!}
-              meta={`${FAMILY_LABELS[r.family_id as FamilyId] ?? r.family_id}・${r.uploaded_by}・${r.kind === "chat" ? "從聊天" : "上傳"}・${new Date(r.created_at).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}`}
+              meta={`${FAMILY_LABELS[r.family_id as FamilyId] ?? r.family_id}・${r.kind === "chat" ? "從聊天" : "上傳"}・${new Date(r.created_at).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}`}
               onDone={loadRows} />
           ))}
         </div>

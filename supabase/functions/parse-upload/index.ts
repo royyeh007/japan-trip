@@ -31,7 +31,7 @@ ${FORMAT_GUIDE}
 只整理資料裡真的有的東西，不要自己補行程；不確定的寫進 notes。`;
 
 Deno.serve(handle(async (req) => {
-  const { admin, member, email } = await requireMember(req);
+  const { admin, member, uid, who } = await requireMember(req);
   const body = await req.json().catch(() => ({})) as { path?: string; text?: string; family_id?: string };
   const family_id = member.role === "admin" && body.family_id ? body.family_id : member.family_id;
 
@@ -51,10 +51,10 @@ Deno.serve(handle(async (req) => {
   }
   if (body.text?.trim()) content.push({ type: "text", text: body.text.trim() });
   if (content.length === 0) throw new HttpError(400, "沒有內容");
-  content.push({ type: "text", text: `上傳的人是 ${member.name ?? email}，屬於家庭 id「${family_id}」。表單裡沒寫家庭就用這個。` });
+  content.push({ type: "text", text: `上傳的人是 ${who}，屬於家庭 id「${family_id}」。表單裡沒寫家庭就用這個。` });
 
   const { data: row, error: insErr } = await admin.from("uploads")
-    .insert({ family_id, uploaded_by: email, kind, path: body.path ?? null, text: body.text ?? null })
+    .insert({ family_id, uploaded_by: uid, kind, path: body.path ?? null, text: body.text ?? null })
     .select("id").single();
   if (insErr || !row) throw new HttpError(500, `存不進資料庫：${insErr?.message}`);
 

@@ -102,8 +102,6 @@ setup: db-push fn-deploy seed
 
 ## Push auth settings incl. Google login (needs GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET in .env.local)
 auth-push:
-	@set -a; . ./.env.local; set +a; \
-	if [ -z "$$GOOGLE_CLIENT_ID" ] || [ -z "$$GOOGLE_CLIENT_SECRET" ]; then echo ".env.local 需要 GOOGLE_CLIENT_ID 和 GOOGLE_CLIENT_SECRET"; exit 1; fi; \
-	supabase config push --yes
+	@set -a; . ./.env.local; set +a; supabase config push --yes
 
 .PHONY: auth-push

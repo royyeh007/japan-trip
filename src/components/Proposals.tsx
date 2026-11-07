@@ -30,7 +30,7 @@ export function ProposalDays({ p }: { p: Proposal }) {
 }
 
 /** Write a confirmed proposal into the live itinerary (RLS limits members to their own family's days and shared days). */
-export async function applyProposal(id: string, p: Proposal, days: Day[], email: string) {
+export async function applyProposal(id: string, p: Proposal, days: Day[], reviewedBy: string) {
   if (!supabase) throw new Error("Supabase 還沒設定");
   const now = new Date().toISOString();
   for (const day of p.days) {
@@ -63,13 +63,13 @@ export async function applyProposal(id: string, p: Proposal, days: Day[], email:
     const { error } = await supabase.from("families").update({ flights: p.flights }).eq("id", p.family_id);
     if (error) throw new Error(error.message);
   }
-  const { error } = await supabase.from("uploads").update({ status: "approved", reviewed_at: now, reviewed_by: email }).eq("id", id);
+  const { error } = await supabase.from("uploads").update({ status: "approved", reviewed_at: now, reviewed_by: reviewedBy }).eq("id", id);
   if (error) throw new Error(error.message);
 }
 
-export async function cancelProposal(id: string, email: string) {
+export async function cancelProposal(id: string, reviewedBy: string) {
   if (!supabase) return;
-  const { error } = await supabase.from("uploads").update({ status: "rejected", reviewed_at: new Date().toISOString(), reviewed_by: email }).eq("id", id);
+  const { error } = await supabase.from("uploads").update({ status: "rejected", reviewed_at: new Date().toISOString(), reviewed_by: reviewedBy }).eq("id", id);
   if (error) throw new Error(error.message);
 }
 
@@ -83,8 +83,8 @@ export function ProposalCard({ id, proposal, meta, onDone }: { id: string; propo
     if (!member) return;
     setBusy(true); setErr(null);
     try {
-      if (ok) { await applyProposal(id, proposal, trip.days, member.email); await reload(); }
-      else await cancelProposal(id, member.email);
+      if (ok) { await applyProposal(id, proposal, trip.days, member.user_id); await reload(); }
+      else await cancelProposal(id, member.user_id);
       setDone(ok ? "approved" : "rejected");
       onDone?.(ok ? "approved" : "rejected");
     } catch (e) { setErr(e instanceof Error ? e.message : String(e)); }
