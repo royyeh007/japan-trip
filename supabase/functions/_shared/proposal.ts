@@ -1,5 +1,5 @@
 // 「行程提案」的格式：上傳解析和聊天機器人都產生這個，存進 uploads.parsed，等 admin 審核。
-import { z } from "npm:zod@3";
+import { z } from "npm:zod@4";
 
 export const DATE_IDS = ["d1226", "d1227", "d1228", "d1229", "d1230", "d1231", "d0101", "d0102"] as const;
 export const FAMILY_IDS = ["lily", "yanzhi", "claire", "iris"] as const;

@@ -60,16 +60,18 @@ Deno.serve(handle(async (req) => {
 
   try {
     const client = anthropic();
-    const res = await client.messages.parse({
+    // 串流版：SDK 對非串流的大 max_tokens 會拒絕；Edge Function 本身有 150 秒上限，所以 effort 用 medium
+    const res = await client.messages.stream({
       model: MODEL,
-      max_tokens: 32000,
+      max_tokens: 16000,
       system: SYSTEM,
       messages: [{ role: "user", content }],
-      output_config: { format: zodOutputFormat(ProposalZ), effort: "high" },
-    });
+      output_config: { format: zodOutputFormat(ProposalZ), effort: "medium" },
+    }).finalMessage();
     if (res.stop_reason === "refusal") throw new Error("Claude 拒絕處理這個內容");
-    if (res.stop_reason === "max_tokens" || !res.parsed_output) throw new Error("輸出不完整，請把檔案拆小一點再試");
-    const proposal = normalize(res.parsed_output);
+    if (res.stop_reason === "max_tokens") throw new Error("輸出不完整，請把檔案拆小一點（例如一次一天）再試");
+    const text = res.content.filter((b) => b.type === "text").map((b) => b.text).join("");
+    const proposal = normalize(ProposalZ.parse(JSON.parse(text)));
     await admin.from("uploads").update({ parsed: proposal }).eq("id", row.id);
     return json({ id: row.id, proposal });
   } catch (e) {
