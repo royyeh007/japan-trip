@@ -12,6 +12,22 @@ export const PLACES: Place[] = [
   { key: "kusatsu", name: "草津", lat: 36.621, lon: 138.596 },
   { key: "narita", name: "成田", lat: 35.776, lon: 140.318 },
   { key: "taoyuan", name: "桃園", lat: 25.080, lon: 121.232 },
+  // 家人自己加的日子可能去的其他地方
+  { key: "yokohama", name: "橫濱", lat: 35.444, lon: 139.638 },
+  { key: "kamakura", name: "鎌倉", lat: 35.319, lon: 139.550 },
+  { key: "hakone", name: "箱根", lat: 35.232, lon: 139.107 },
+  { key: "kawaguchiko", name: "河口湖", lat: 35.497, lon: 138.769 },
+  { key: "nikko", name: "日光", lat: 36.750, lon: 139.598 },
+  { key: "matsumoto", name: "松本", lat: 36.238, lon: 137.972 },
+  { key: "takayama", name: "高山", lat: 36.146, lon: 137.252 },
+  { key: "kanazawa", name: "金澤", lat: 36.561, lon: 136.656 },
+  { key: "nagoya", name: "名古屋", lat: 35.182, lon: 136.906 },
+  { key: "kyoto", name: "京都", lat: 35.011, lon: 135.768 },
+  { key: "osaka", name: "大阪", lat: 34.694, lon: 135.502 },
+  { key: "nara", name: "奈良", lat: 34.685, lon: 135.805 },
+  { key: "kobe", name: "神戶", lat: 34.690, lon: 135.196 },
+  { key: "sapporo", name: "札幌", lat: 43.062, lon: 141.354 },
+  { key: "fukuoka", name: "福岡", lat: 33.590, lon: 130.402 },
 ];
 
 /** Every date the site may show (families add their own days): 2026-12-15 .. 2027-01-15. */
@@ -23,7 +39,13 @@ export const TRIP_DATES: string[] = (() => {
 const TRIP_DATE_SET = new Set(TRIP_DATES);
 
 /** City name (as written in a day) -> weather place. Used for days without an explicit entry below. */
-export const CITY_PLACE: Record<string, string> = { 東京: "tokyo", 長野: "nagano", 輕井澤: "karuizawa", 草津: "kusatsu", 成田: "narita", 台北: "taipei", 桃園: "taoyuan", 地獄谷: "jigokudani" };
+export const CITY_PLACE: Record<string, string> = {
+  東京: "tokyo", 東京都: "tokyo", Tokyo: "tokyo", 新宿: "tokyo", 銀座: "tokyo", 淺草: "tokyo", 台場: "tokyo", 迪士尼: "tokyo", 舞浜: "tokyo", 羽田: "tokyo", 築地: "tokyo", 澀谷: "tokyo", 池袋: "tokyo",
+  長野: "nagano", Nagano: "nagano", 輕井澤: "karuizawa", 軽井沢: "karuizawa", Karuizawa: "karuizawa", 草津: "kusatsu", Kusatsu: "kusatsu", 地獄谷: "jigokudani", 湯田中: "jigokudani",
+  成田: "narita", Narita: "narita", 台北: "taipei", 松山: "taipei", Taipei: "taipei", 桃園: "taoyuan", Taoyuan: "taoyuan",
+  橫濱: "yokohama", 横浜: "yokohama", Yokohama: "yokohama", 鎌倉: "kamakura", 箱根: "hakone", Hakone: "hakone", 河口湖: "kawaguchiko", 富士: "kawaguchiko", 日光: "nikko", 松本: "matsumoto", 高山: "takayama", 金澤: "kanazawa", 金沢: "kanazawa",
+  名古屋: "nagoya", Nagoya: "nagoya", 京都: "kyoto", Kyoto: "kyoto", 大阪: "osaka", Osaka: "osaka", 梅田: "osaka", 難波: "osaka", 環球影城: "osaka", 奈良: "nara", 神戶: "kobe", 神戸: "kobe", 札幌: "sapporo", 福岡: "fukuoka",
+};
 
 /** Known trip dates (YYYY-MM-DD): where the day starts, any stop on the way, and where it ends. */
 export const DAY_PLACES: Record<string, string[]> = {

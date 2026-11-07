@@ -1,5 +1,8 @@
 import { Fragment, useEffect, useRef, useState } from "react";
-import type { Day, Stop } from "../data";
+import type { Day, Memo, Stop } from "../data";
+import { canEdit } from "../data";
+import { supabase } from "../supabase";
+import { useTrip } from "../trip";
 import { MODE, dirURL, placeURL } from "../maps";
 import type { LinkedLeg } from "../maps";
 import { ModeIcon, PinIcon } from "../icons";
@@ -30,6 +33,54 @@ function Copy({ value }: { value: string }) {
 
 const List = ({ items }: { items: string[] }) => <ul>{items.map((x, i) => <li key={i}>{x}</li>)}</ul>;
 
+/** Notes on a stop: anyone who can edit this day (own family, or a shared day) can add one; you can delete your own. */
+function Memos({ day, stop }: { day: Day; stop: Stop }) {
+  const { member, reload } = useTrip();
+  const [memos, setMemos] = useState<Memo[]>(stop.memo ?? []);
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const editable = canEdit(day.fam, member);
+
+  const write = async (next: Memo[]) => {
+    const idx = day.items.indexOf(stop);
+    if (idx < 0 || !supabase) return;
+    setBusy(true);
+    const items = day.items.map((it, i) => (i === idx ? { ...it, memo: next } : it));
+    let q = supabase.from("days").update({ items, updated_at: new Date().toISOString() }).eq("date_id", day.id);
+    q = day.fam ? q.contains("fam", day.fam) : q.is("fam", null);
+    const { error } = await q;
+    if (error) alert(error.message); else { setMemos(next); setText(""); reload(); }
+    setBusy(false);
+  };
+  const add = () => { if (member && text.trim()) write([...memos, { by: member.user_id, name: member.name ?? member.email ?? "家人", text: text.trim(), at: new Date().toISOString() }]); };
+  const del = (m: Memo) => { if (confirm("刪掉這則備註？")) write(memos.filter((x) => x !== m)); };
+
+  return (
+    <div className="sec memos">
+      <h4>備註</h4>
+      {memos.length === 0 && <p className="note">還沒有備註。</p>}
+      <ul>
+        {memos.map((m, i) => (
+          <li key={i}>
+            <span className="who-when">{m.name}・{new Date(m.at).toLocaleDateString("zh-TW", { month: "numeric", day: "numeric" })}</span>
+            <span className="mtext">{m.text}</span>
+            {member?.user_id === m.by && <button type="button" className="link" onClick={() => del(m)} disabled={busy}>刪</button>}
+          </li>
+        ))}
+      </ul>
+      {editable ? (
+        <div className="addrow memo-add">
+          <input value={text} onChange={(e) => setText(e.target.value)} placeholder="加一則備註，例：記得帶護照影本" onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) add(); }} />
+          <button type="button" className="btn primary" onClick={add} disabled={busy || !text.trim()}>＋ 新增</button>
+        </div>
+      ) : (
+        <p className="note">這是別家的行程，只能看不能加備註。</p>
+      )}
+    </div>
+  );
+}
+
+
 export function DetailSheet({ day, stop, arrive, onClose }: { day: Day; stop: Stop; arrive?: LinkedLeg; onClose: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -42,7 +93,7 @@ export function DetailSheet({ day, stop, arrive, onClose }: { day: Day; stop: St
   }, [onClose]);
 
   const codes = (stop.book ?? [])
-    .map((b) => b.match(/(?:編號|番号|ID)[：:\s]*([A-Z0-9-]{5,})/)?.[1])
+    .map((b) => b.match(/(?:編號|番號|番号|ID|確認碼|確認號|訂位碼|訂房碼|代碼|代號|Confirmation|Booking|Reservation|Ref\.?|No\.?)[：:#\s]*([A-Za-z0-9-]{5,})/i)?.[1])
     .filter((c): c is string => !!c);
   const travel = arrive ? MODE[arrive.leg].travel : null;
   const info = [...(stop.s ? [stop.s] : []), ...(stop.info ?? [])];
@@ -86,6 +137,7 @@ export function DetailSheet({ day, stop, arrive, onClose }: { day: Day; stop: St
           {stop.rec && <div className="sec"><h4>推薦</h4><List items={stop.rec} /></div>}
           {info.length > 0 && <div className="sec"><h4>資訊</h4><List items={info} /></div>}
           {stop.tips && <div className="sec"><h4>提醒</h4><List items={stop.tips} /></div>}
+          <Memos day={day} stop={stop} />
         </div>
       </aside>
     </>

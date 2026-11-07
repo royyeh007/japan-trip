@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components -- this file deliberately pairs the proposal UI with the apply logic it needs */
 import { useState } from "react";
 import { FAMILY_LABELS, isLeg } from "../data";
-import type { Day, Proposal, Upload as UploadRow } from "../data";
+import type { Day, Proposal, Stop, Upload as UploadRow } from "../data";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
 
@@ -35,8 +35,15 @@ export async function applyProposal(id: string, p: Proposal, days: Day[], review
   const now = new Date().toISOString();
   for (const day of p.days) {
     const fam = day.scope === "shared" ? null : [p.family_id];
+    // keep notes people wrote on stops that still exist (matched by name)
+    const existing = days.find((d) => d.id === day.id && (fam ? d.fam?.includes(p.family_id) : !d.fam)) ?? days.find((d) => d.id === day.id);
+    const items = day.items.map((it) => {
+      if (isLeg(it)) return it;
+      const prev = existing?.items.find((e): e is Stop => !isLeg(e) && e.n === it.n);
+      return prev?.memo?.length ? { ...it, memo: prev.memo } : it;
+    });
     const { error } = await supabase.from("days").upsert(
-      { date_id: day.id, fam, d: day.d, w: day.w, city: day.city, title: day.title, hotel: day.hotel, items: day.items, updated_at: now },
+      { date_id: day.id, fam, d: day.d, w: day.w, city: day.city, title: day.title, hotel: day.hotel, items, updated_at: now },
       { onConflict: "date_id,fam" },
     );
     if (error) throw new Error(error.message);

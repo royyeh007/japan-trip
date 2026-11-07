@@ -346,3 +346,12 @@ nav.days a.today .dd::after{content:"";display:inline-block;width:6px;height:6px
 .nowctl .link{font-size:.78rem}
 .previewbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;background:var(--amber-soft);color:var(--amber);border-radius:10px;padding:8px 12px;font-size:.86rem;font-weight:700}
 .previewbar .btn{padding:4px 10px;font-size:.8rem}
+
+/* notes on a stop */
+.memos ul{list-style:none;padding:0;display:grid;gap:8px}
+.memos li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.memos .who-when{grid-column:1;font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.memos .mtext{grid-column:1;white-space:pre-wrap}
+.memos li .link{grid-column:2;grid-row:1 / span 2;align-self:start;font-size:.76rem}
+.memo-add{grid-template-columns:minmax(0,1fr) auto !important;margin-top:8px}
+.memo-n{font-size:.72rem;font-weight:700;color:var(--amber);background:var(--amber-soft);border-radius:4px;padding:1px 6px}

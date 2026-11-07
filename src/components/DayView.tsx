@@ -52,6 +52,7 @@ function StopRow({ stop, done, onOpen }: { stop: Stop; done?: boolean; onOpen: (
         <div className="row">
           {stop.st && <span className={`seal ${stop.st}`}>{SEAL[stop.st]}</span>}
           {stop.who && <span className="who">{stop.who}</span>}
+          {stop.memo && stop.memo.length > 0 && <span className="memo-n">備註 {stop.memo.length}</span>}
           <span className="more">詳細資訊 ›</span>
         </div>
       </button>

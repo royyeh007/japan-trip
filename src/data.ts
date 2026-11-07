@@ -2,7 +2,9 @@
 export type Kind = "food" | "sight" | "hotel" | "shop" | "move";
 export type Status = "ok" | "todo" | "tbd";
 export type Mode = "taxi" | "walk" | "train" | "bus" | "charter" | "shuttle" | "flight";
-export interface Stop { t: string; n: string; q: string; k: Kind; st?: Status; who?: string; s?: string; info?: string[]; book?: string[]; rec?: string[]; tips?: string[]; addr?: string; tel?: string }
+/** A note someone added to a stop from the detail sheet. */
+export interface Memo { by: string; name: string; text: string; at: string }
+export interface Stop { t: string; n: string; q: string; k: Kind; st?: Status; who?: string; s?: string; info?: string[]; book?: string[]; rec?: string[]; tips?: string[]; addr?: string; tel?: string; memo?: Memo[] }
 export interface Leg { leg: Mode; txt: string; st?: Status }
 export type Item = Stop | Leg;
 /** One date's itinerary. `fam` missing = everyone's shared day; otherwise only those families have this version. */

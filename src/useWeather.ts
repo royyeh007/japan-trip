@@ -19,8 +19,8 @@ export interface WeatherState { data: WeatherMap | null; updatedAt: number | nul
 
 export function useWeather(): WeatherState {
   const [state, setState] = useState<WeatherState>(() => {
-    const n = readCache<WeatherMap>("wx-normals", NORMALS_TTL);
-    const f = readCache<WeatherMap>("wx-forecast", FORECAST_TTL);
+    const n = readCache<WeatherMap>("wx-normals2", NORMALS_TTL);
+    const f = readCache<WeatherMap>("wx-forecast2", FORECAST_TTL);
     return { data: n ? merge(n.data, f?.data ?? {}) : null, updatedAt: f?.at ?? null, error: false, loading: true };
   });
 
@@ -29,11 +29,11 @@ export function useWeather(): WeatherState {
     const load = async (force = false) => {
       setState((s) => ({ ...s, loading: true }));
       try {
-        const nc = readCache<WeatherMap>("wx-normals", NORMALS_TTL);
-        const normals = nc?.data ?? (await fetchNormals().then((d) => (writeCache("wx-normals", d), d)).catch(() => ({} as WeatherMap)));
-        const fc = force ? null : readCache<WeatherMap>("wx-forecast", FORECAST_TTL);
+        const nc = readCache<WeatherMap>("wx-normals2", NORMALS_TTL);
+        const normals = nc?.data ?? (await fetchNormals().then((d) => (writeCache("wx-normals2", d), d)).catch(() => ({} as WeatherMap)));
+        const fc = force ? null : readCache<WeatherMap>("wx-forecast2", FORECAST_TTL);
         let forecast = fc?.data, at = fc?.at ?? Date.now();
-        if (!forecast) { forecast = await fetchForecast(); writeCache("wx-forecast", forecast); at = Date.now(); }
+        if (!forecast) { forecast = await fetchForecast(); writeCache("wx-forecast2", forecast); at = Date.now(); }
         if (alive) setState({ data: merge(normals, forecast), updatedAt: at, error: false, loading: false });
       } catch {
         if (alive) setState((s) => ({ ...s, error: true, loading: false }));

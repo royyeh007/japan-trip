@@ -4,7 +4,7 @@ import type { Family } from "../data";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
 
-const CITIES = ["東京", "長野", "輕井澤", "草津", "成田", "台北", "其他"];
+const CITIES = ["東京", "長野", "輕井澤", "草津", "成田", "橫濱", "鎌倉", "箱根", "河口湖", "日光", "京都", "大阪", "名古屋", "台北", "其他"];
 
 /** Small form to add a date for this family (e.g. an earlier arrival or later departure). */
 export function AddDay({ family, onDone }: { family: Family; onDone: (dateId?: string) => void }) {
