@@ -3,7 +3,7 @@ import type { Day, Family } from "../src/data";
 
 export const FAMILIES: Family[] = [
   { id: "lily", name: "Lily", label: "Lily 家", flights: ["去 BR192 12/26 松山 07:15 → 羽田 T3 11:00"] },
-  { id: "yanzhi", name: "研芝", label: "研芝家", flights: [] },
+  { id: "yanzhi", name: "Yenchih", label: "Yenchih 家", flights: [] },
   { id: "claire", name: "Claire", label: "Claire 家", flights: [] },
   { id: "iris", name: "Iris", label: "Iris 家", flights: [] },
 ];

@@ -97,4 +97,4 @@ export const FORMAT_GUIDE = `行程格式說明：
 - q 是 Google 地圖的搜尋字，能用日文店名最好。
 - 12/28–1/1 是四家一起的日子（scope=shared）；12/26、12/27、1/2 各家自己走（scope=family）。
 - 如果某天是「跟某家一起」，放進 joins（有「從幾點開始」就填 from），不要重抄那家的行程。
-- 家庭 id：lily=Lily 家、yanzhi=研芝家、claire=Claire 家、iris=Iris 家。`;
+- 家庭 id：lily=Lily 家、yanzhi=Yenchih 家、claire=Claire 家、iris=Iris 家。`;

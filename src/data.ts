@@ -13,7 +13,7 @@ export const isLeg = (i: Item): i is Leg => "leg" in i;
 export type FamilyId = "lily" | "yanzhi" | "claire" | "iris";
 export const FAMILY_IDS: FamilyId[] = ["lily", "yanzhi", "claire", "iris"];
 export interface Family { id: FamilyId; name: string; label: string; flights: string[] }
-export const FAMILY_LABELS: Record<FamilyId, string> = { lily: "Lily 家", yanzhi: "研芝家", claire: "Claire 家", iris: "Iris 家" };
+export const FAMILY_LABELS: Record<FamilyId, string> = { lily: "Lily 家", yanzhi: "Yenchih 家", claire: "Claire 家", iris: "Iris 家" };
 
 export const DATE_IDS = ["d1226", "d1227", "d1228", "d1229", "d1230", "d1231", "d0101", "d0102"] as const;
 export const WEEKDAY = ["日", "一", "二", "三", "四", "五", "六"];
