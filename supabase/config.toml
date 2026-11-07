@@ -7,3 +7,8 @@ verify_jwt = false
 
 [functions.chat]
 verify_jwt = false
+
+# 登入後導回的網址：正式站和本機開發
+[auth]
+site_url = "https://royyeh007.github.io/japan-trip/"
+additional_redirect_urls = ["https://royyeh007.github.io/japan-trip/**", "http://localhost:5173/**"]
