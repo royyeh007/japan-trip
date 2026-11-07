@@ -68,7 +68,7 @@ export function ChatWidget() {
           <button type="button" className="x" aria-label="關閉" onClick={() => setOpen(false)}>×</button>
         </header>
         <div className="msgs">
-          {turns.length === 0 && <div className="msg bot">嗨！我看得到四家的行程。可以問「12/29 晚餐幾點」，也可以說「幫我把 12/26 晚餐改成 7 點」，整理好會出現確認按鈕。</div>}
+          {turns.length === 0 && <div className="msg bot">嗨！問我行程的事，或直接說要改什麼。</div>}
           {turns.map((t, i) => (
             <div key={i} className={`msg ${t.role === "user" ? "user" : "bot"}`}>
               {t.content}
