@@ -279,7 +279,21 @@ nav.days a.pending[aria-current="page"]{color:var(--paper)}
 .tag.shared{background:var(--pine-soft);color:var(--pine)}
 .tag.own{background:var(--ai-soft);color:var(--ai)}
 .tag.none{background:var(--line);color:var(--muted)}
-.allgrid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(280px,1fr);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;margin-top:8px;scrollbar-width:thin}
+.famtabs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
+.famtabs button{all:unset;cursor:pointer;font-size:.84rem;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.famtabs button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.famtabs .hint{margin-left:auto;font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.allbar{position:relative;margin-top:8px}
+.allbar::before,.allbar::after{content:"";position:absolute;top:0;bottom:14px;width:40px;pointer-events:none;z-index:1;transition:opacity .15s}
+.allbar::before{left:0;background:linear-gradient(90deg,var(--paper) 20%,transparent)}
+.allbar::after{right:0;background:linear-gradient(270deg,var(--paper) 20%,transparent)}
+.allbar.at-start::before,.allbar.at-end::after{opacity:0}
+.allbar .scrollbtn{top:16px;transform:none;width:34px;height:34px}
+.allbar.at-start .scrollbtn.left,.allbar.at-end .scrollbtn.right{display:none}
+.allgrid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(280px,44%);gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding:0 0 10px;scrollbar-width:auto;scrollbar-color:var(--muted) var(--line)}
+.allgrid::-webkit-scrollbar{height:10px}
+.allgrid::-webkit-scrollbar-track{background:var(--line);border-radius:5px}
+.allgrid::-webkit-scrollbar-thumb{background:var(--muted);border-radius:5px}
 .famcol{scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
 .famcol header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
 .famcol .sub{font-size:.84rem;color:var(--muted);line-height:1.45;margin-bottom:6px}

@@ -16,6 +16,7 @@ import { NotMember } from "./components/NotMember";
 import { getIntent, storedInvite } from "./supabase";
 import { useTrip } from "./trip";
 import { useNow } from "./now";
+import { useScrollEdges } from "./useScrollEdges";
 import type { LinkedLeg } from "./maps";
 
 const store = {
@@ -113,19 +114,7 @@ function Main() {
   useEffect(() => { document.title = `${fam.label}・日本跨年行程`; }, [fam.label]);
 
   // Scroll affordance for the date strip: fades + arrows that disappear at the ends
-  const navRef = useRef<HTMLElement>(null);
-  const [edge, setEdge] = useState({ start: true, end: true });
-  const updateEdge = useCallback(() => {
-    const el = navRef.current;
-    if (!el) return;
-    setEdge({ start: el.scrollLeft <= 2, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 });
-  }, []);
-  useEffect(() => {
-    updateEdge();
-    window.addEventListener("resize", updateEdge);
-    return () => window.removeEventListener("resize", updateEdge);
-  }, [updateEdge, dayIds]);
-  const scrollDays = (dir: 1 | -1) => navRef.current?.scrollBy({ left: dir * navRef.current.clientWidth * 0.7, behavior: "smooth" });
+  const { ref: navRef, edge, update: updateEdge, scrollBy: scrollDays } = useScrollEdges<HTMLElement>(dayIds);
 
   const close = useCallback(() => setSelected(null), []);
   const cur = days.find((d) => d.id === view);
