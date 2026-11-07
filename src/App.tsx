@@ -9,6 +9,7 @@ import { TodoView } from "./components/TodoView";
 import { UploadView } from "./components/Upload";
 import { ChatWidget } from "./components/Chat";
 import { AddDay } from "./components/AddDay";
+import { AllFamiliesDay } from "./components/AllFamiliesDay";
 import { Login } from "./components/Login";
 import { Join } from "./components/Join";
 import { NotMember } from "./components/NotMember";
@@ -68,10 +69,20 @@ function Main() {
   const { member, trip, viewFam, setViewFam, signOut } = useTrip();
   const fam = trip.families.find((f) => f.id === viewFam) ?? { id: viewFam, name: viewFam, label: viewFam, flights: [] };
 
-  // The days this family sees (shared + its own), and the city route built from them
-  const days = useMemo(() => daysFor(trip.days, viewFam), [trip.days, viewFam]);
+  // "one" = this family's itinerary; "all" = every family side by side for the chosen date
+  const [mode, setMode] = useState<"one" | "all">(() => (store.get("jp-mode") === "all" ? "all" : "one"));
+  useEffect(() => { store.set("jp-mode", mode); }, [mode]);
+
+  // The days this family sees (shared + its own); in "all" mode, every date any family has
+  const famDays = useMemo(() => daysFor(trip.days, viewFam), [trip.days, viewFam]);
+  const allDays = useMemo(() => {
+    const byDate = new Map<string, Day>();
+    for (const d of trip.days) { const cur = byDate.get(d.id); if (!cur || (cur.fam && !d.fam)) byDate.set(d.id, d); }
+    return [...byDate.values()].sort((a, b) => isoOf(a.d).localeCompare(isoOf(b.d)));
+  }, [trip.days]);
+  const days = mode === "all" ? allDays : famDays;
   const dayIds = useMemo(() => days.map((d) => d.id), [days]);
-  const route = useMemo(() => { const r: string[] = []; for (const d of days) if (r[r.length - 1] !== d.city) r.push(d.city); return r; }, [days]);
+  const route = useMemo(() => { const r: string[] = []; for (const d of famDays) if (r[r.length - 1] !== d.city) r.push(d.city); return r; }, [famDays]);
   const idsRef = useRef(dayIds);
   idsRef.current = dayIds;
 
@@ -112,7 +123,7 @@ function Main() {
 
   const close = useCallback(() => setSelected(null), []);
   const cur = days.find((d) => d.id === view);
-  const first = days[0], last = days[days.length - 1];
+  const first = famDays[0], last = famDays[famDays.length - 1];
 
   return (
     <>
@@ -126,7 +137,7 @@ function Main() {
             <span className="muted who-am-i">{member?.name ?? member?.email ?? "家人"}</span>
             <button type="button" className="link" onClick={signOut}>登出</button>
           </div>
-          <div className="eyebrow">{first && last ? `${isoOf(first.d).replace(/-/g, ".")} — ${isoOf(last.d).replace(/-/g, ".")} ・ ${days.length} 天` : "日本跨年"}</div>
+          <div className="eyebrow">{first && last ? `${isoOf(first.d).replace(/-/g, ".")} — ${isoOf(last.d).replace(/-/g, ".")} ・ ${famDays.length} 天` : "日本跨年"}</div>
           <h1>日本跨年行程</h1>
           <div className="route">
             {route.map((c, i) => (
@@ -163,9 +174,16 @@ function Main() {
         </div>
 
         <main>
+          {!PAGES.includes(view) && (
+            <div className="modebar" role="group" aria-label="顯示方式">
+              <button type="button" className={mode === "one" ? "on" : ""} onClick={() => setMode("one")}>只看 {fam.label}</button>
+              <button type="button" className={mode === "all" ? "on" : ""} onClick={() => setMode("all")}>看所有家</button>
+            </div>
+          )}
           {adding && <AddDay family={fam} onDone={(id) => { setAdding(false); if (id) location.hash = `#${id}`; }} />}
           {view === "todo" ? <TodoView />
             : view === "upload" ? <UploadView />
+            : cur && mode === "all" ? <AllFamiliesDay dateId={cur.id} onOpen={(day, stop, arrive) => setSelected({ day, stop, arrive })} />
             : cur ? <DayView day={cur} family={fam} wx={wx} onOpen={(stop, arrive) => setSelected({ day: cur, stop, arrive })} onRemoved={() => { location.hash = `#${dayIds.find((id) => id !== cur.id) ?? "todo"}`; }} />
             : !adding && <section className="dayhead"><h2>還沒有行程資料</h2><p className="note">管理員還沒把行程放進資料庫（`make seed`）。</p></section>}
         </main>

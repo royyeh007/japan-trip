@@ -86,13 +86,25 @@ async function removeDay(day: Day, familyId: string) {
 }
 
 export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; family: Family; onOpen: (s: Stop, arrive?: LinkedLeg) => void; onRemoved: () => void; wx: WeatherState }) {
-  const { reload } = useTrip();
+  const { trip, reload } = useTrip();
   const [busy, setBusy] = useState(false);
   const own = !!day.fam && day.fam.includes(family.id);
+  const shared = !day.fam;
+  const hasSharedVersion = trip.days.some((d) => d.id === day.id && !d.fam);
   const empty = day.items.length === 0;
 
+  // Copy the shared day into this family's own version so they can change hotel, meals, times without touching the others
+  const fork = async () => {
+    if (!supabase) return;
+    setBusy(true);
+    const { error } = await supabase.from("days").insert({ date_id: day.id, fam: [family.id], d: day.d, w: day.w, city: day.city, title: day.title, hotel: day.hotel, items: day.items });
+    if (error) alert(error.message); else await reload();
+    setBusy(false);
+  };
+
   const remove = async () => {
-    if (!confirm(`要把 ${day.d} 從${family.label}的行程拿掉嗎？`)) return;
+    const msg = hasSharedVersion ? `要把 ${family.label}自己的 ${day.d} 版本刪掉，改回大家一起的版本嗎？` : `要把 ${day.d} 從${family.label}的行程拿掉嗎？`;
+    if (!confirm(msg)) return;
     setBusy(true);
     try { await removeDay(day, family.id); await reload(); onRemoved(); }
     catch (e) { alert(e instanceof Error ? e.message : String(e)); }
@@ -104,8 +116,10 @@ export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; fami
       <section className="dayhead">
         <div className="meta">
           <span>{day.d}（{day.w}）</span>
-          <span className="hotel">{day.hotel ? `住 ${day.hotel}` : day.fam ? `${family.label}` : "大家一起"}</span>
-          {own && <button type="button" className="link" onClick={remove} disabled={busy}>刪除這天</button>}
+          <span className="hotel">{day.hotel ? `住 ${day.hotel}` : ""}</span>
+          <span className={`tag ${shared ? "shared" : "own"}`}>{shared ? "大家一起的版本" : `${family.label}自己的版本`}</span>
+          {shared && <button type="button" className="link" onClick={fork} disabled={busy}>做一份我們家的版本</button>}
+          {own && <button type="button" className="link" onClick={remove} disabled={busy}>{hasSharedVersion ? "改回大家一起的版本" : "刪除這天"}</button>}
         </div>
         <h2>{day.title}</h2>
         {!empty && (

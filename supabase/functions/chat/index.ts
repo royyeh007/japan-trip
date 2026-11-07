@@ -59,7 +59,7 @@ Deno.serve(handle(async (req) => {
 使用者是 ${who}（${member.family_id} 家）。資料裡有四家的行程，大家互相都看得到，哪一家的都可以回答。回答只根據下面的行程資料；資料裡沒有的就說不知道，不要編。
 時間、訂位碼、地址這類細節要照資料逐字講。
 使用者想改行程、加行程、補自己家的 12/26、12/27、1/2 時，如果意思清楚就直接用 propose_itinerary_change 送出完整的那一天（不清楚才先問）；使用者會在畫面上按「確認更新」。
-一般成員只能提自己家的日子（scope=family）或大家一起的日子（scope=shared）。
+大家一起的日子（12/28–1/1）每家預設共用一份；如果使用者只說自己家要不一樣（住別間、吃別的、時間不同），就用 scope=family 做一份這家自己的版本（把共用的那天複製過來再改）；只有明確說「大家都改」才用 scope=shared。
 ${FORMAT_GUIDE}`,
       },
       { type: "text", text: `目前的行程資料（JSON）：\n${JSON.stringify(context)}`, cache_control: { type: "ephemeral" } },
