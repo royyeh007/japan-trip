@@ -17,7 +17,7 @@ enable_anonymous_sign_ins = true
 
 # （選用）Google 登入。要開的話把下面三行取消註解，Client ID / Secret 放 .env.local，跑 `make auth-push`，
 # 並在 GitHub Variables 設 VITE_GOOGLE_LOGIN=1 讓登入頁顯示 Google 按鈕。
-# [auth.external.google]
-# enabled = true
-# client_id = "env(GOOGLE_CLIENT_ID)"
-# secret = "env(GOOGLE_CLIENT_SECRET)"
+[auth.external.google]
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_CLIENT_SECRET)"
