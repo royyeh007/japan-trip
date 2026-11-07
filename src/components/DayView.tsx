@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { isLeg, isoOf } from "../data";
 import { DayWeatherPanel } from "./Weather";
 import type { WeatherState } from "../useWeather";
@@ -10,8 +10,9 @@ import { KIND, SEAL } from "../labels";
 import { openForm } from "../form";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
+import { toMinutes, useNow } from "../now";
 
-function LegRow({ leg }: { leg: LinkedLeg }) {
+function LegRow({ leg, done }: { leg: LinkedLeg; done?: boolean }) {
   const { travel, label } = MODE[leg.leg];
   const inner = (
     <>
@@ -24,7 +25,7 @@ function LegRow({ leg }: { leg: LinkedLeg }) {
   );
   const canLink = travel && leg.from && leg.to && leg.from !== leg.to;
   return (
-    <li className="leg">
+    <li className={`leg${done ? " done" : ""}`}>
       <span />
       <span className="rail" />
       {canLink ? (
@@ -39,10 +40,10 @@ function LegRow({ leg }: { leg: LinkedLeg }) {
   );
 }
 
-function StopRow({ stop, onOpen }: { stop: Stop; onOpen: () => void }) {
+function StopRow({ stop, done, onOpen }: { stop: Stop; done?: boolean; onOpen: () => void }) {
   const sub = stop.s || stop.book?.[0] || stop.rec?.[0] || "";
   return (
-    <li className="stop">
+    <li className={`stop${done ? " done" : ""}`}>
       <span className="t">{stop.t}</span>
       <span className={`k ${stop.k}`} aria-hidden="true">{KIND[stop.k]}</span>
       <button className="card" type="button" aria-haspopup="dialog" onClick={onOpen}>
@@ -58,18 +59,28 @@ function StopRow({ stop, onOpen }: { stop: Stop; onOpen: () => void }) {
   );
 }
 
-/** Read-only timeline used by the day page and by the proposal preview. */
+/** Read-only timeline used by the day page and by the proposal preview. On the current day it dims what is past and draws a "now" line. */
 export function Timeline({ day, onOpen }: { day: Day; onOpen?: (s: Stop, arrive?: LinkedLeg) => void }) {
   const { legs, arrive } = useMemo(() => linkLegs(day), [day]);
+  const now = useNow();
+  const isToday = now.date === isoOf(day.d);
+  // index of the last stop whose time has passed; the line goes right after it (-1 = before everything)
+  let lastDone = -1;
+  if (isToday) day.items.forEach((it, i) => { if (!isLeg(it) && toMinutes(it.t) <= now.minutes) lastDone = i; });
+  const line = <li className="nowline" key="now" aria-label={`現在 ${now.hhmm}`}><span className="lbl">現在 {now.hhmm}</span></li>;
   return (
     <ol className="tl">
-      {day.items.map((it, i) =>
-        isLeg(it) ? (
-          <LegRow key={i} leg={legs.get(i)!} />
-        ) : (
-          <StopRow key={i} stop={it} onOpen={() => onOpen?.(it, arrive.get(i))} />
-        ),
-      )}
+      {isToday && lastDone < 0 && line}
+      {day.items.map((it, i) => (
+        <Fragment key={i}>
+          {isLeg(it) ? (
+            <LegRow leg={legs.get(i)!} done={isToday && i <= lastDone} />
+          ) : (
+            <StopRow stop={it} done={isToday && i <= lastDone} onOpen={() => onOpen?.(it, arrive.get(i))} />
+          )}
+          {isToday && i === lastDone && line}
+        </Fragment>
+      ))}
     </ol>
   );
 }

@@ -15,6 +15,7 @@ import { Join } from "./components/Join";
 import { NotMember } from "./components/NotMember";
 import { getIntent, storedInvite } from "./supabase";
 import { useTrip } from "./trip";
+import { useNow } from "./now";
 import type { LinkedLeg } from "./maps";
 
 const store = {
@@ -23,9 +24,12 @@ const store = {
 };
 
 const PAGES = ["todo", "upload"];
-function currentView(dayIds: string[]) {
-  const h = location.hash.slice(1) || store.get("jp-day") || "";
+function currentView(dayIds: string[], todayId?: string) {
+  const h = location.hash.slice(1);
   if (PAGES.includes(h) || dayIds.includes(h)) return h;
+  if (todayId && dayIds.includes(todayId)) return todayId; // during the trip, open on today
+  const s = store.get("jp-day") ?? "";
+  if (PAGES.includes(s) || dayIds.includes(s)) return s;
   return dayIds[0] ?? "todo";
 }
 
@@ -85,8 +89,10 @@ function Main() {
   const route = useMemo(() => { const r: string[] = []; for (const d of famDays) if (r[r.length - 1] !== d.city) r.push(d.city); return r; }, [famDays]);
   const idsRef = useRef(dayIds);
   idsRef.current = dayIds;
+  const now = useNow();
+  const todayId = `d${now.date.slice(5, 7)}${now.date.slice(8, 10)}`;
 
-  const [view, setView] = useState(() => currentView(dayIds));
+  const [view, setView] = useState(() => currentView(dayIds, todayId));
   const [selected, setSelected] = useState<Selected | null>(null);
   const [adding, setAdding] = useState(false);
   const wx = useWeather();
@@ -160,7 +166,7 @@ function Main() {
           <button type="button" className="scrollbtn left" onClick={() => scrollDays(-1)} aria-label="往前幾天" tabIndex={-1}>‹</button>
           <nav className="days" ref={navRef} onScroll={updateEdge} aria-label="選擇日期">
             {days.map((d) => (
-              <a key={d.id} href={`#${d.id}`} data-id={d.id} className={d.items.length === 0 ? "pending" : undefined} aria-current={view === d.id ? "page" : undefined}>
+              <a key={d.id} href={`#${d.id}`} data-id={d.id} className={[d.items.length === 0 ? "pending" : "", d.id === todayId ? "today" : ""].join(" ").trim() || undefined} aria-current={view === d.id ? "page" : undefined}>
                 <span className="dd">{d.d}</span>
                 <span className="dc">{d.w}・{d.city}</span>
                 <ChipWeather date={isoOf(d.d)} city={d.city} wx={wx} />

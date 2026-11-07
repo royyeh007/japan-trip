@@ -292,3 +292,15 @@ nav.days a.pending[aria-current="page"]{color:var(--paper)}
 .famcol .leg .go{display:none}
 @media (max-width:640px){.allgrid{grid-auto-columns:82vw}}
 .allfoot{margin-top:4px}
+
+/* "now" line through today's itinerary */
+.nowline{position:relative;list-style:none;height:2px;background:var(--shu);margin:10px 0 10px;border-radius:1px}
+.nowline::after{content:"";position:absolute;left:calc(58px + 10px + 17px - 5px);top:-4px;width:10px;height:10px;border-radius:50%;background:var(--shu);box-shadow:0 0 0 3px var(--shu-soft)}
+.nowline .lbl{position:absolute;right:0;top:-10px;font-family:var(--f-mono);font-size:.72rem;font-weight:700;color:var(--shu);background:var(--paper);padding:0 6px;line-height:1.4}
+@media (max-width:480px){.nowline::after{left:calc(44px + 8px + 15px - 5px)}}
+.famcol .nowline::after{left:calc(44px + 6px + 14px - 5px)}
+.famcol .nowline .lbl{background:var(--surface)}
+.stop.done .card{opacity:.55}
+.stop.done .t,.stop.done .k{opacity:.6}
+.leg.done{opacity:.5}
+nav.days a.today .dd::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--shu);margin-left:5px;vertical-align:middle}
