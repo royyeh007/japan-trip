@@ -7,6 +7,14 @@ import { ProposalCard } from "./Proposals";
 interface Prop { id: string; proposal: Proposal; status?: "approved" | "rejected" }
 interface Turn { role: "user" | "assistant"; content: string; proposals?: Prop[] }
 
+const EXAMPLES = [
+  "12/29 晚餐幾點、訂位碼多少？",
+  "12/28 從東京怎麼去長野？",
+  "我們家 12/26 15:00 到羽田，晚上住 Conrad，幫我加進去",
+  "12/30 我們家想住草津別間飯店，其他照舊",
+  "這個網站怎麼加一天？",
+];
+
 const SparkIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 2l1.8 5.7L19.5 9.5l-5.7 1.8L12 17l-1.8-5.7L4.5 9.5l5.7-1.8L12 2zM5 16l.9 2.6L8.5 19.5l-2.6.9L5 23l-.9-2.6L1.5 19.5l2.6-.9L5 16z" /></svg>
 );
@@ -35,8 +43,8 @@ export function ChatWidget() {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const send = async () => {
-    const content = text.trim();
+  const send = async (preset?: string) => {
+    const content = (preset ?? text).trim();
     if (!content || busy) return;
     const next = [...turns, { role: "user" as const, content }];
     setTurns(next); setText(""); setBusy(true); setErr(null);
@@ -68,7 +76,21 @@ export function ChatWidget() {
           <button type="button" className="x" aria-label="關閉" onClick={() => setOpen(false)}>×</button>
         </header>
         <div className="msgs">
-          {turns.length === 0 && <div className="msg bot">嗨！問我行程的事，或直接說要改什麼。</div>}
+          {turns.length === 0 && (
+            <>
+              <div className="msg bot intro">
+                嗨！我可以幫你：
+                {"\n"}✦ 查行程：幾點、在哪、訂位碼、怎麼去
+                {"\n"}✦ 改行程：說想改什麼，整理好按「確認」就更新
+                {"\n"}✦ 補你們家自己的日子：直接描述那天的安排
+                {"\n"}✦ 這個網站怎麼用
+                {"\n"}試試看點下面的例子 👇
+              </div>
+              <div className="chips">
+                {EXAMPLES.map((e) => <button key={e} type="button" className="chip-btn" onClick={() => send(e)} disabled={busy}>{e}</button>)}
+              </div>
+            </>
+          )}
           {turns.map((t, i) => (
             <div key={i} className={`msg ${t.role === "user" ? "user" : "bot"}`}>
               {t.content}
