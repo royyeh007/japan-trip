@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { DATE_IDS, daysFor, isoOf } from "./data";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { daysFor, isoOf } from "./data";
 import type { Day, FamilyId, Stop } from "./data";
 import { useWeather } from "./useWeather";
 import { ChipWeather } from "./components/Weather";
@@ -8,6 +8,7 @@ import { DetailSheet } from "./components/DetailSheet";
 import { TodoView } from "./components/TodoView";
 import { UploadView } from "./components/Upload";
 import { ChatWidget } from "./components/Chat";
+import { AddDay } from "./components/AddDay";
 import { Login } from "./components/Login";
 import { Join } from "./components/Join";
 import { NotMember } from "./components/NotMember";
@@ -21,10 +22,10 @@ const store = {
 };
 
 const PAGES = ["todo", "upload"];
-function currentView() {
+function currentView(dayIds: string[]) {
   const h = location.hash.slice(1) || store.get("jp-day") || "";
-  if (PAGES.includes(h) || (DATE_IDS as readonly string[]).includes(h)) return h;
-  return DATE_IDS[0];
+  if (PAGES.includes(h) || dayIds.includes(h)) return h;
+  return dayIds[0] ?? "todo";
 }
 
 export interface Selected { day: Day; stop: Stop; arrive?: LinkedLeg }
@@ -65,36 +66,53 @@ export default function App() {
 
 function Main() {
   const { member, trip, viewFam, setViewFam, signOut } = useTrip();
-  const [view, setView] = useState(currentView);
-  const [selected, setSelected] = useState<Selected | null>(null);
-  const wx = useWeather();
   const fam = trip.families.find((f) => f.id === viewFam) ?? { id: viewFam, name: viewFam, label: viewFam, flights: [] };
 
+  // The days this family sees (shared + its own), and the city route built from them
+  const days = useMemo(() => daysFor(trip.days, viewFam), [trip.days, viewFam]);
+  const dayIds = useMemo(() => days.map((d) => d.id), [days]);
+  const route = useMemo(() => { const r: string[] = []; for (const d of days) if (r[r.length - 1] !== d.city) r.push(d.city); return r; }, [days]);
+  const idsRef = useRef(dayIds);
+  idsRef.current = dayIds;
+
+  const [view, setView] = useState(() => currentView(dayIds));
+  const [selected, setSelected] = useState<Selected | null>(null);
+  const [adding, setAdding] = useState(false);
+  const wx = useWeather();
+
   useEffect(() => {
-    const onHash = () => { setSelected(null); setView(currentView()); window.scrollTo({ top: 0 }); };
+    const onHash = () => { setSelected(null); setAdding(false); setView(currentView(idsRef.current)); window.scrollTo({ top: 0 }); };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
+  // If the viewed family changes (or a day is removed), keep the view valid
+  useEffect(() => { if (!PAGES.includes(view) && !dayIds.includes(view)) setView(dayIds[0] ?? "todo"); }, [dayIds, view]);
 
   useEffect(() => {
     store.set("jp-day", view);
-    document.querySelector(`nav.days a[data-id="${view}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    document.querySelector(`nav.days [data-id="${view}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest" });
   }, [view, viewFam]);
 
   useEffect(() => { document.title = `${fam.label}・日本跨年行程`; }, [fam.label]);
 
-  // This family's day list (one per date), the days it actually has, and the city route built from them
-  const { days, own, route } = useMemo(() => {
-    const days = daysFor(trip.days, viewFam);
-    const own = days.filter((x) => x.has).map((x) => x.day);
-    const route: string[] = [];
-    for (const d of own) if (route[route.length - 1] !== d.city) route.push(d.city);
-    return { days, own, route };
-  }, [trip.days, viewFam]);
+  // Scroll affordance for the date strip: fades + arrows that disappear at the ends
+  const navRef = useRef<HTMLElement>(null);
+  const [edge, setEdge] = useState({ start: true, end: true });
+  const updateEdge = useCallback(() => {
+    const el = navRef.current;
+    if (!el) return;
+    setEdge({ start: el.scrollLeft <= 2, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 });
+  }, []);
+  useEffect(() => {
+    updateEdge();
+    window.addEventListener("resize", updateEdge);
+    return () => window.removeEventListener("resize", updateEdge);
+  }, [updateEdge, dayIds]);
+  const scrollDays = (dir: 1 | -1) => navRef.current?.scrollBy({ left: dir * navRef.current.clientWidth * 0.7, behavior: "smooth" });
 
   const close = useCallback(() => setSelected(null), []);
-  const cur = days.find((x) => x.day.id === view);
-  const isPage = PAGES.includes(view);
+  const cur = days.find((d) => d.id === view);
+  const first = days[0], last = days[days.length - 1];
 
   return (
     <>
@@ -108,9 +126,7 @@ function Main() {
             <span className="muted who-am-i">{member?.name ?? member?.email ?? "家人"}</span>
             <button type="button" className="link" onClick={signOut}>登出</button>
           </div>
-          <div className="eyebrow">
-            2026.12.26 — 2027.1.2 ・ {own.length === days.length && days.length > 0 ? `${days.length} 天 ${days.length - 1} 夜` : `目前有 ${own.length} 天行程`}
-          </div>
+          <div className="eyebrow">{first && last ? `${isoOf(first.d).replace(/-/g, ".")} — ${isoOf(last.d).replace(/-/g, ".")} ・ ${days.length} 天` : "日本跨年"}</div>
           <h1>日本跨年行程</h1>
           <div className="route">
             {route.map((c, i) => (
@@ -123,29 +139,35 @@ function Main() {
               : <span className="flight muted">去回航班待補</span>}
             {trip.notes.shared && <span className="flight">{trip.notes.shared}</span>}
           </div>
+          <div className="quick">
+            <a className="btn" href="#todo" aria-current={view === "todo" ? "page" : undefined}>✓ 待辦・聯絡</a>
+            <a className="btn" href="#upload" aria-current={view === "upload" ? "page" : undefined}>↑ 上傳行程</a>
+          </div>
         </header>
 
-        <nav className="days" aria-label="選擇頁面">
-          {days.map(({ day: d, has }) => (
-            <a key={d.id} href={`#${d.id}`} data-id={d.id} className={has ? undefined : "pending"} aria-current={view === d.id ? "page" : undefined}>
-              <span className="dd">{d.d}</span>
-              <span className="dc">{d.w}・{has ? d.city : "待補"}</span>
-              {has && <ChipWeather date={isoOf(d.d)} wx={wx} />}
-            </a>
-          ))}
-          <a href="#todo" data-id="todo" className="list" aria-current={view === "todo" ? "page" : undefined}>
-            <span className="dd">✓</span><span className="dc">待辦・聯絡</span>
-          </a>
-          <a href="#upload" data-id="upload" className="list" aria-current={view === "upload" ? "page" : undefined}>
-            <span className="dd">↑</span><span className="dc">上傳行程</span>
-          </a>
-        </nav>
+        <div className={`daysbar${edge.start ? " at-start" : ""}${edge.end ? " at-end" : ""}`}>
+          <button type="button" className="scrollbtn left" onClick={() => scrollDays(-1)} aria-label="往前幾天" tabIndex={-1}>‹</button>
+          <nav className="days" ref={navRef} onScroll={updateEdge} aria-label="選擇日期">
+            {days.map((d) => (
+              <a key={d.id} href={`#${d.id}`} data-id={d.id} className={d.items.length === 0 ? "pending" : undefined} aria-current={view === d.id ? "page" : undefined}>
+                <span className="dd">{d.d}</span>
+                <span className="dc">{d.w}・{d.city}</span>
+                <ChipWeather date={isoOf(d.d)} city={d.city} wx={wx} />
+              </a>
+            ))}
+            <button type="button" className="add" onClick={() => { setAdding(true); }} aria-expanded={adding}>
+              <span className="dd">＋</span><span className="dc">加一天</span>
+            </button>
+          </nav>
+          <button type="button" className="scrollbtn right" onClick={() => scrollDays(1)} aria-label="往後幾天" tabIndex={-1}>›</button>
+        </div>
 
         <main>
+          {adding && <AddDay family={fam} onDone={(id) => { setAdding(false); if (id) location.hash = `#${id}`; }} />}
           {view === "todo" ? <TodoView />
             : view === "upload" ? <UploadView />
-            : cur ? <DayView day={cur.day} has={cur.has} family={fam} wx={wx} onOpen={(stop, arrive) => setSelected({ day: cur.day, stop, arrive })} />
-            : !isPage && <section className="dayhead"><h2>還沒有行程資料</h2><p className="note">管理員還沒把行程放進資料庫（`make seed`）。</p></section>}
+            : cur ? <DayView day={cur} family={fam} wx={wx} onOpen={(stop, arrive) => setSelected({ day: cur, stop, arrive })} onRemoved={() => { location.hash = `#${dayIds.find((id) => id !== cur.id) ?? "todo"}`; }} />
+            : !adding && <section className="dayhead"><h2>還沒有行程資料</h2><p className="note">管理員還沒把行程放進資料庫（`make seed`）。</p></section>}
         </main>
       </div>
       <ChatWidget />

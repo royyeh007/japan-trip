@@ -14,7 +14,18 @@ export const PLACES: Place[] = [
   { key: "taoyuan", name: "桃園", lat: 25.080, lon: 121.232 },
 ];
 
-/** Each trip date (YYYY-MM-DD): where the day starts, any stop on the way, and where it ends. */
+/** Every date the site may show (families add their own days): 2026-12-15 .. 2027-01-15. */
+export const TRIP_DATES: string[] = (() => {
+  const out: string[] = [];
+  for (let t = Date.UTC(2026, 11, 15); t <= Date.UTC(2027, 0, 15); t += 86400000) out.push(new Date(t).toISOString().slice(0, 10));
+  return out;
+})();
+const TRIP_DATE_SET = new Set(TRIP_DATES);
+
+/** City name (as written in a day) -> weather place. Used for days without an explicit entry below. */
+export const CITY_PLACE: Record<string, string> = { 東京: "tokyo", 長野: "nagano", 輕井澤: "karuizawa", 草津: "kusatsu", 成田: "narita", 台北: "taipei", 桃園: "taoyuan", 地獄谷: "jigokudani" };
+
+/** Known trip dates (YYYY-MM-DD): where the day starts, any stop on the way, and where it ends. */
 export const DAY_PLACES: Record<string, string[]> = {
   "2026-12-26": ["taipei", "tokyo"],
   "2026-12-27": ["tokyo"],
@@ -26,8 +37,14 @@ export const DAY_PLACES: Record<string, string[]> = {
   "2027-01-02": ["tokyo", "narita", "taoyuan"],
 };
 
-export function roleOf(date: string, i: number) {
-  const n = DAY_PLACES[date]?.length ?? 0;
+/** Places to show for a day: the explicit list for known dates, otherwise the day's city. */
+export function placesFor(date: string, city: string): string[] {
+  if (DAY_PLACES[date]) return DAY_PLACES[date];
+  const key = CITY_PLACE[city.trim()] ?? Object.entries(CITY_PLACE).find(([name]) => city.includes(name))?.[1];
+  return key ? [key] : [];
+}
+
+export function roleOf(n: number, i: number) {
   if (n < 2) return "整天";
   return i === 0 ? "出發地" : i === n - 1 ? "目的地" : "途中";
 }
@@ -63,7 +80,7 @@ export async function fetchForecast(): Promise<WeatherMap> {
     const key = PLACES[i].key;
     const d = loc.daily;
     d.time.forEach((date, j) => {
-      if (!(date in DAY_PLACES)) return;
+      if (!TRIP_DATE_SET.has(date)) return;
       const max = d.temperature_2m_max[j], min = d.temperature_2m_min[j];
       if (max == null || min == null) return;
       (out[date] ??= {})[key] = {
@@ -84,7 +101,7 @@ const tripMD = (date: string) => date.slice(5); // "12-26"
 export async function fetchNormals(): Promise<WeatherMap> {
   const url =
     `https://archive-api.open-meteo.com/v1/archive?latitude=${lats}&longitude=${lons}` +
-    `&start_date=2015-12-20&end_date=2025-01-05` +
+    `&start_date=2015-12-10&end_date=2025-01-20` +
     `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum&timezone=Asia%2FTokyo`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`archive ${res.status}`);
@@ -93,7 +110,7 @@ export async function fetchNormals(): Promise<WeatherMap> {
 
 export function summarizeNormals(list: { daily: Daily }[]): WeatherMap {
   const out: WeatherMap = {};
-  const wanted = new Map(Object.keys(DAY_PLACES).map((d) => [tripMD(d), d]));
+  const wanted = new Map(TRIP_DATES.map((d) => [tripMD(d), d]));
   list.forEach((loc, i) => {
     const key = PLACES[i].key;
     const d = loc.daily;
@@ -152,7 +169,7 @@ export function describe(code: number): { label: string; icon: WIcon } {
 /** Merge: forecast wins where it exists; otherwise the past-years average. */
 export function merge(normals: WeatherMap, forecast: WeatherMap): WeatherMap {
   const out: WeatherMap = {};
-  for (const date of Object.keys(DAY_PLACES)) {
+  for (const date of TRIP_DATES) {
     out[date] = { ...(normals[date] ?? {}), ...(forecast[date] ?? {}) };
   }
   return out;

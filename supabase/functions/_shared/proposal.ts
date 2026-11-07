@@ -1,7 +1,8 @@
 // 「行程提案」的格式：上傳解析和聊天機器人都產生這個，存進 uploads.parsed，等 admin 審核。
 import { z } from "npm:zod@4";
 
-export const DATE_IDS = ["d1226", "d1227", "d1228", "d1229", "d1230", "d1231", "d0101", "d0102"] as const;
+// 日期 id：dMMDD，12 月 = 2026、1 月 = 2027，例如 d1225、d0103。各家的日期不一樣，不限定在 12/26–1/2。
+const DateIdZ = z.string().regex(/^d(12|01)(0[1-9]|[12]\d|3[01])$/).describe("日期 id，格式 dMMDD：12 月是 2026 年、1 月是 2027 年，例如 d1225 = 12/25、d0103 = 1/3");
 export const FAMILY_IDS = ["lily", "yanzhi", "claire", "iris"] as const;
 export const KINDS = ["food", "sight", "hotel", "shop", "move"] as const;
 export const MODES = ["taxi", "walk", "train", "bus", "charter", "shuttle", "flight"] as const;
@@ -31,7 +32,7 @@ const LegZ = z.object({
   st: z.enum(STATUSES).nullable().describe("這段交通要不要訂（包車、新幹線）"),
 });
 export const DayZ = z.object({
-  date_id: z.enum(DATE_IDS).describe("d1226 = 12/26 … d0102 = 1/2"),
+  date_id: DateIdZ,
   scope: z.enum(["family", "shared"]).describe("family = 這一家自己的那一天；shared = 12/28–1/1 大家一起的日子"),
   city: z.string().describe("那天主要在哪個城市，例如 東京、長野、輕井澤、草津、成田"),
   title: z.string().describe("那天的標題，例如「抵達東京・築地・濱離宮」"),
@@ -43,7 +44,7 @@ export const ProposalZ = z.object({
   flights: z.array(z.string()).describe("去回航班，例如「去 BR192 12/26 松山 07:15 → 羽田 T3 11:00」；沒提到就空陣列"),
   days: z.array(DayZ).describe("完整的每一天。改一天就要給那一天完整的內容（不是只給改的部分）"),
   joins: z.array(z.object({
-    date_id: z.enum(DATE_IDS),
+    date_id: DateIdZ,
     with: z.enum(FAMILY_IDS).describe("跟哪一家一起"),
     from: z.string().nullable().describe("從幾點開始一起（H:MM）；整天都一起就 null"),
   })).describe("某天是跟別家一起走的，列在這裡而不是重抄那家的行程"),
@@ -88,7 +89,7 @@ export function normalize(p: Proposal) {
 }
 
 export const FORMAT_GUIDE = `行程格式說明：
-- 一天 = date_id（d1226、d1227、d1228、d1229、d1230、d1231、d0101、d0102）+ city + title + hotel + items。
+- 一天 = date_id（格式 dMMDD，12 月＝2026、1 月＝2027，例如 d1225、d0103；各家的日期不一樣，可以是任何一天）+ city + title + hotel + items。
 - items 照時間順序：每個地點是 type=stop；兩個地點中間的交通是 type=leg。
 - stop 的 k：餐廳 food、景點 sight、住宿 hotel、購物 shop、機場車站等交通節點 move。
 - leg 的 leg：計程車 taxi、走路 walk、電車 train、巴士 bus、包車 charter、接駁車 shuttle、飛機 flight。

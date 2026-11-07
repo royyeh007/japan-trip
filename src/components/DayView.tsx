@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { isLeg, isoOf } from "../data";
 import { DayWeatherPanel } from "./Weather";
 import type { WeatherState } from "../useWeather";
@@ -8,6 +8,7 @@ import type { LinkedLeg } from "../maps";
 import { DownloadIcon, ModeIcon, RouteIcon } from "../icons";
 import { KIND, SEAL } from "../labels";
 import { openForm } from "../form";
+import { supabase } from "../supabase";
 import { useTrip } from "../trip";
 
 function LegRow({ leg }: { leg: LinkedLeg }) {
@@ -57,7 +58,7 @@ function StopRow({ stop, onOpen }: { stop: Stop; onOpen: () => void }) {
   );
 }
 
-/** Read-only timeline used by the day page and by the admin's review preview. */
+/** Read-only timeline used by the day page and by the proposal preview. */
 export function Timeline({ day, onOpen }: { day: Day; onOpen?: (s: Stop, arrive?: LinkedLeg) => void }) {
   const { legs, arrive } = useMemo(() => linkLegs(day), [day]);
   return (
@@ -73,45 +74,61 @@ export function Timeline({ day, onOpen }: { day: Day; onOpen?: (s: Stop, arrive?
   );
 }
 
-export function DayView({ day, has, family, onOpen, wx }: { day: Day; has: boolean; family: Family; onOpen: (s: Stop, arrive?: LinkedLeg) => void; wx: WeatherState }) {
-  const { trip } = useTrip();
-  if (!has) {
-    const shared = trip.days.filter((d) => !d.fam).sort((a, b) => isoOf(a.d).localeCompare(isoOf(b.d)));
-    return (
-      <section className="dayhead">
-        <div className="meta">
-          <span>{day.d}（{day.w}）</span>
-          <span className="hotel">各家分開走</span>
-        </div>
-        <h2>行程待補</h2>
-        <div className="pendingbox">
-          <p>這天各家分開走，{family.label}的行程還沒放上來。</p>
-          {shared.length > 0 && <p>{shared[0].d}–{shared[shared.length - 1].d} 是大家一起的行程，可以先看那幾天。</p>}
-          <p>要補的話：到「上傳行程」傳表單或截圖，或點右下角「問 Claude」直接說，確認後就會出現在這裡。</p>
-          <div className="actions">
-            <a className="btn" href="#upload"><DownloadIcon />上傳行程</a>
-            <button type="button" className="btn" onClick={openForm}><DownloadIcon />下載填寫表單</button>
-          </div>
-        </div>
-      </section>
-    );
-  }
+/** Remove this family from a day: delete the row if it is theirs alone, otherwise just drop them from `fam`. */
+async function removeDay(day: Day, familyId: string) {
+  if (!supabase || !day.fam) return;
+  const rest = day.fam.filter((f) => f !== familyId);
+  const q = supabase.from("days");
+  const { error } = rest.length === 0
+    ? await q.delete().eq("date_id", day.id).contains("fam", [familyId])
+    : await q.update({ fam: rest }).eq("date_id", day.id).contains("fam", [familyId]);
+  if (error) throw new Error(error.message);
+}
+
+export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; family: Family; onOpen: (s: Stop, arrive?: LinkedLeg) => void; onRemoved: () => void; wx: WeatherState }) {
+  const { reload } = useTrip();
+  const [busy, setBusy] = useState(false);
+  const own = !!day.fam && day.fam.includes(family.id);
+  const empty = day.items.length === 0;
+
+  const remove = async () => {
+    if (!confirm(`要把 ${day.d} 從${family.label}的行程拿掉嗎？`)) return;
+    setBusy(true);
+    try { await removeDay(day, family.id); await reload(); onRemoved(); }
+    catch (e) { alert(e instanceof Error ? e.message : String(e)); }
+    finally { setBusy(false); }
+  };
+
   return (
     <>
       <section className="dayhead">
         <div className="meta">
           <span>{day.d}（{day.w}）</span>
-          <span className="hotel">{day.hotel ? `住 ${day.hotel}` : "回台灣"}</span>
+          <span className="hotel">{day.hotel ? `住 ${day.hotel}` : day.fam ? `${family.label}` : "大家一起"}</span>
+          {own && <button type="button" className="link" onClick={remove} disabled={busy}>刪除這天</button>}
         </div>
         <h2>{day.title}</h2>
-        <div className="actions">
-          <a className="btn primary" href={dayRouteURL(day)} target="_blank" rel="noopener">
-            <RouteIcon />開啟今天的 Google 地圖路線
-          </a>
-        </div>
-        <DayWeatherPanel date={isoOf(day.d)} wx={wx} />
+        {!empty && (
+          <div className="actions">
+            <a className="btn primary" href={dayRouteURL(day)} target="_blank" rel="noopener">
+              <RouteIcon />開啟今天的 Google 地圖路線
+            </a>
+          </div>
+        )}
+        <DayWeatherPanel date={isoOf(day.d)} city={day.city} wx={wx} />
       </section>
-      <Timeline day={day} onOpen={onOpen} />
+      {empty ? (
+        <div className="pendingbox">
+          <p>這天還沒有行程。</p>
+          <p>到「上傳行程」傳表單或截圖，或點右下角「問 Claude」直接說這天要做什麼，確認後就會出現在這裡。</p>
+          <div className="actions">
+            <a className="btn" href="#upload"><DownloadIcon />上傳行程</a>
+            <button type="button" className="btn" onClick={openForm}><DownloadIcon />下載填寫表單</button>
+          </div>
+        </div>
+      ) : (
+        <Timeline day={day} onOpen={onOpen} />
+      )}
     </>
   );
 }

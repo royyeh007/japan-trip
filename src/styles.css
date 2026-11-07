@@ -32,15 +32,34 @@ h1{font-family:var(--f-display);font-weight:900;font-size:clamp(1.8rem,5vw,2.6re
 .flights{display:flex;flex-wrap:wrap;gap:8px}
 .flight{font-family:var(--f-mono);font-size:.78rem;background:var(--ai-soft);color:var(--ai);padding:4px 10px;border-radius:6px}
 
-/* day picker */
-nav.days{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--paper);display:flex;gap:8px;overflow-x:auto;padding-block:10px;scrollbar-width:none;border-bottom:1px solid var(--line)}
+/* day picker: sticky bar with fades + arrows so it is obviously scrollable */
+.daysbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--paper);border-bottom:1px solid var(--line)}
+.daysbar::before,.daysbar::after{content:"";position:absolute;top:0;bottom:0;width:44px;pointer-events:none;z-index:1;transition:opacity .15s}
+.daysbar::before{left:0;background:linear-gradient(90deg,var(--paper) 30%,transparent)}
+.daysbar::after{right:0;background:linear-gradient(270deg,var(--paper) 30%,transparent)}
+.daysbar.at-start::before,.daysbar.at-end::after{opacity:0}
+.scrollbtn{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);box-shadow:0 2px 8px rgba(27,39,64,.15);cursor:pointer;font-size:1.3rem;line-height:1;padding:0 0 2px;display:grid;place-items:center}
+.scrollbtn.left{left:2px}.scrollbtn.right{right:2px}
+.daysbar.at-start .scrollbtn.left,.daysbar.at-end .scrollbtn.right{display:none}
+nav.days{display:flex;gap:8px;overflow-x:auto;padding:10px 6px;scrollbar-width:none;scroll-snap-type:x proximity}
+nav.days > *{scroll-snap-align:start}
 nav.days::-webkit-scrollbar{display:none}
 nav.days a{flex:0 0 auto;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 12px 7px;display:grid;line-height:1.25;min-width:74px}
 nav.days a .dd{font-family:var(--f-mono);font-weight:600;font-size:1rem;font-variant-numeric:tabular-nums}
 nav.days a .dc{font-size:.74rem;color:var(--muted);white-space:nowrap}
 nav.days a[aria-current="page"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 nav.days a[aria-current="page"] .dc{color:var(--paper);opacity:.75}
-nav.days a.list{min-width:auto;align-content:center}
+nav.days button.add{all:unset;box-sizing:border-box;cursor:pointer;flex:0 0 auto;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:6px 12px 7px;display:grid;line-height:1.25;min-width:64px;align-content:center;text-align:center}
+nav.days button.add:hover{border-color:var(--ai);color:var(--ai)}
+nav.days button.add .dd{font-family:var(--f-mono);font-weight:600;font-size:1rem}
+nav.days button.add .dc{font-size:.74rem;white-space:nowrap}
+.quick{display:flex;flex-wrap:wrap;gap:8px}
+.quick .btn[aria-current="page"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.addday .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-block:8px 12px}
+.addday label{display:grid;gap:4px;font-size:.84rem;color:var(--muted)}
+.addday input,.addday select{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%}
+.addday .actions{display:flex;gap:8px;flex-wrap:wrap}
+.dayhead .meta .link{font-size:.8rem}
 
 /* day head */
 .dayhead{display:grid;gap:8px;padding-block:22px 10px}

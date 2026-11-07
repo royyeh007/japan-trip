@@ -1,4 +1,4 @@
-import { DAY_PLACES, PLACES, describe, roleOf } from "../weather";
+import { PLACES, describe, placesFor, roleOf } from "../weather";
 import type { DayWeather, WIcon } from "../weather";
 import type { WeatherState } from "../useWeather";
 
@@ -52,8 +52,9 @@ function Line({ w }: { w: DayWeather }) {
   );
 }
 
-export function DayWeatherPanel({ date, wx }: { date: string; wx: WeatherState }) {
-  const keys = DAY_PLACES[date] ?? [];
+export function DayWeatherPanel({ date, city, wx }: { date: string; city: string; wx: WeatherState }) {
+  const keys = placesFor(date, city);
+  if (keys.length === 0) return null;
   const day = wx.data?.[date] ?? {};
   const anyForecast = keys.some((k) => day[k]?.kind === "forecast");
   const updated = wx.updatedAt ? new Date(wx.updatedAt).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) : null;
@@ -74,7 +75,7 @@ export function DayWeatherPanel({ date, wx }: { date: string; wx: WeatherState }
           return (
             <div className="wx-row" key={k}>
               {w ? <WxIcon icon={describe(w.code).icon} /> : <span className="wx-i" />}
-              <span className="wx-p"><small>{roleOf(date, i)}</small>{place.name}</span>
+              <span className="wx-p"><small>{roleOf(keys.length, i)}</small>{place.name}</span>
               {w ? <Line w={w} /> : <span className="wx-x wx-xs">{wx.loading ? "載入中…" : "天氣資料暫時抓不到，稍後會自動重試"}</span>}
             </div>
           );
@@ -85,8 +86,9 @@ export function DayWeatherPanel({ date, wx }: { date: string; wx: WeatherState }
 }
 
 /** Tiny summary for the date chips: first place's icon + high/low. */
-export function ChipWeather({ date, wx }: { date: string; wx: WeatherState }) {
-  const k = DAY_PLACES[date]?.[DAY_PLACES[date].length - 1];
+export function ChipWeather({ date, city, wx }: { date: string; city: string; wx: WeatherState }) {
+  const keys = placesFor(date, city);
+  const k = keys[keys.length - 1];
   const w = k ? wx.data?.[date]?.[k] : undefined;
   if (!w) return null;
   return (

@@ -15,8 +15,11 @@ export const FAMILY_IDS: FamilyId[] = ["lily", "yanzhi", "claire", "iris"];
 export interface Family { id: FamilyId; name: string; label: string; flights: string[] }
 export const FAMILY_LABELS: Record<FamilyId, string> = { lily: "Lily 家", yanzhi: "Yenchih 家", claire: "Claire 家", iris: "Iris 家" };
 
-export const DATE_IDS = ["d1226", "d1227", "d1228", "d1229", "d1230", "d1231", "d0101", "d0102"] as const;
 export const WEEKDAY = ["日", "一", "二", "三", "四", "五", "六"];
+/** Any day in Dec 2026 or Jan 2027, as "dMMDD". */
+export const DATE_ID_RE = /^d(12|01)(0[1-9]|[12]\d|3[01])$/;
+/** "2026-12-25" -> "d1225" */
+export const dateIdOfIso = (iso: string) => `d${iso.slice(5, 7)}${iso.slice(8, 10)}`;
 /** "d1226" -> { d: "12/26", w: "六" } */
 export function dateOf(dateId: string) {
   const m = Number(dateId.slice(1, 3)), day = Number(dateId.slice(3, 5));
@@ -27,15 +30,15 @@ export function dateOf(dateId: string) {
 /** Does this family have an itinerary for this day? */
 export const hasDay = (d: Day, f: FamilyId) => !d.fam || d.fam.includes(f);
 
-/** One entry per date for this family: its own version of the day if there is one, otherwise the first one found (marked pending). Dates in trip order. */
-export function daysFor(days: Day[], f: FamilyId): { day: Day; has: boolean }[] {
-  const out: { day: Day; has: boolean }[] = [];
+/** The days this family sees, one per date, in trip order: its own version of a date wins over a shared one. */
+export function daysFor(days: Day[], f: FamilyId): Day[] {
+  const byDate = new Map<string, Day>();
   for (const d of days) {
-    const i = out.findIndex((x) => x.day.id === d.id);
-    if (i < 0) out.push({ day: d, has: hasDay(d, f) });
-    else if (!out[i].has && hasDay(d, f)) out[i] = { day: d, has: true };
+    if (!hasDay(d, f)) continue;
+    const cur = byDate.get(d.id);
+    if (!cur || (!cur.fam && d.fam)) byDate.set(d.id, d);
   }
-  return out.sort((a, b) => isoOf(a.day.d).localeCompare(isoOf(b.day.d)));
+  return [...byDate.values()].sort((a, b) => isoOf(a.d).localeCompare(isoOf(b.d)));
 }
 
 /** A member's role in the app. */
