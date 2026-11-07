@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FAMILY_LABELS, canEdit } from "../data";
+import { FAMILY_LABELS, canEdit, contactsFromDays, daysFor } from "../data";
 import type { ContactRow, FamilyId, TodoRow } from "../data";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
@@ -96,8 +96,15 @@ function Contacts({ fam, compact = false }: { fam: FamilyId; compact?: boolean }
   const del = (r: ContactRow) => supabase && confirm(`刪掉「${r.name}」？`) && run(supabase.from("contacts").delete().eq("id", r.id));
   const href = (v: string) => (v.includes("@") ? `mailto:${v}` : /^[+\d][\d\s-]{6,}$/.test(v) ? `tel:${v.replace(/[\s-]/g, "")}` : null);
 
+  const fromTrip = contactsFromDays(daysFor(trip.days, viewFam));
   const list = (
       <div className="contacts">
+        {fromTrip.map((c) => (
+          <div key={c.value} className="fromtrip">
+            <span className="cname">{c.name} <span className="tag trip">{c.d} 行程</span></span>
+            <span className="cval">{href(c.value) ? <a href={href(c.value)!}>{c.value}</a> : c.value}</span>
+          </div>
+        ))}
         {rows.map((r) => editing === r.id ? (
           <div className="editrow" key={r.id}>
             <input value={eName} onChange={(e) => setEName(e.target.value)} placeholder="名稱" />
@@ -116,13 +123,14 @@ function Contacts({ fam, compact = false }: { fam: FamilyId; compact?: boolean }
             )}
           </div>
         ))}
-        {rows.length === 0 && <p className="note">還沒有聯絡資料。</p>}
+        {rows.length === 0 && fromTrip.length === 0 && <p className="note">還沒有聯絡資料。</p>}
       </div>
   );
   if (compact) return list;
   return (
     <div className="panel">
       <h3>聯絡資料</h3>
+      <p className="note">有「行程」標籤的是從行程裡的地點自動帶出來的（電話、email），行程改了會跟著變；下面可以再自己加。</p>
       {list}
       <div className="addrow">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="名稱（例：飯店訂房）" />

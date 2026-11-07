@@ -64,3 +64,22 @@ export interface Proposal {
   notes: string[];
 }
 export interface Upload { id: string; family_id: FamilyId; uploaded_by: string; kind: string; path: string | null; status: "pending" | "approved" | "rejected" | "failed"; parsed: Proposal | null; error: string | null; created_at: string }
+
+/** Phone numbers and emails that appear in a set of days' stops, deduped, with the stop they belong to. */
+export function contactsFromDays(days: Day[]): { name: string; value: string; d: string }[] {
+  const out: { name: string; value: string; d: string }[] = [];
+  const seen = new Set<string>();
+  const push = (name: string, value: string, d: string) => { const v = value.trim(); if (v && !seen.has(v)) { seen.add(v); out.push({ name, value: v, d }); } };
+  for (const day of days) {
+    for (const it of day.items) {
+      if (isLeg(it)) continue;
+      const name = it.n.replace(/^(早餐|午餐|晚餐|下午茶|點心|元旦餐|宵夜)[：:]\s*/, "");
+      if (it.tel) push(name, it.tel, day.d);
+      for (const line of [...(it.book ?? []), ...(it.info ?? []), ...(it.tips ?? [])]) {
+        const m = line.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
+        if (m) push(name, m[0], day.d);
+      }
+    }
+  }
+  return out;
+}

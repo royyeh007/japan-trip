@@ -388,3 +388,4 @@ ul.todo li.note{display:block;color:var(--muted);font-size:.86rem;padding:2px 0}
 .famcol .contacts .rowacts{grid-column:2;grid-row:2}
 /* room for the floating chat button */
 .wrap{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+.tag.trip{background:var(--amber-soft);color:var(--amber)}

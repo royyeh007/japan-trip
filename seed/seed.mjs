@@ -29,8 +29,7 @@ must(`days（${trip.DAYS.length} 列）`, await sb.from("days").upsert(
 must("extras", await sb.from("extras").upsert([{ key: "notes", data: { shared: trip.SHARED_NOTE ?? "" } }]));
 must(`todos（${(trip.TODO ?? []).length} 筆，大家一起）`, await sb.from("todos").upsert(
   (trip.TODO ?? []).map(([key, due, text, done], i) => ({ key, fam: null, due, text, done: !!done, sort: i })), { onConflict: "key" }));
-must(`contacts（${(trip.CONTACTS ?? []).length} 筆，大家一起）`, await sb.from("contacts").upsert(
-  (trip.CONTACTS ?? []).map(([name, value], i) => ({ key: name, fam: null, name, value, sort: i })), { onConflict: "key" }));
+// 聯絡資料不再 seed：網頁會從行程裡有電話、email 的地點自動帶出；contacts 表只放大家自己加的。
 
 // 管理員用自己的邀請連結進入（role = admin）；一般成員用另一個
 const newCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("");
