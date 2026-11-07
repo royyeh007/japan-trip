@@ -10,7 +10,7 @@ import { KIND, SEAL } from "../labels";
 import { openForm } from "../form";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
-import { toMinutes, useNow } from "../now";
+import { toMinutes, useNow, useNowLine } from "../now";
 
 function LegRow({ leg, done }: { leg: LinkedLeg; done?: boolean }) {
   const { travel, label } = MODE[leg.leg];
@@ -63,7 +63,7 @@ function StopRow({ stop, done, onOpen }: { stop: Stop; done?: boolean; onOpen: (
 export function Timeline({ day, onOpen }: { day: Day; onOpen?: (s: Stop, arrive?: LinkedLeg) => void }) {
   const { legs, arrive } = useMemo(() => linkLegs(day), [day]);
   const now = useNow();
-  const isToday = now.date === isoOf(day.d);
+  const isToday = useNowLine() && now.date === isoOf(day.d);
   // index of the last stop whose time has passed; the line goes right after it (-1 = before everything)
   let lastDone = -1;
   if (isToday) day.items.forEach((it, i) => { if (!isLeg(it) && toMinutes(it.t) <= now.minutes) lastDone = i; });

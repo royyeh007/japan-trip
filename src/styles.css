@@ -318,3 +318,15 @@ nav.days a.pending[aria-current="page"]{color:var(--paper)}
 .stop.done .t,.stop.done .k{opacity:.6}
 .leg.done{opacity:.5}
 nav.days a.today .dd::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--shu);margin-left:5px;vertical-align:middle}
+
+/* toolbar under the date strip: view mode + now-line switch */
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin-top:12px}
+.toolbar .modebar{margin-top:0}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:.84rem;color:var(--muted);cursor:pointer;position:relative;user-select:none}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .track{width:38px;height:22px;border-radius:11px;background:var(--line);position:relative;transition:background .15s;flex:none}
+.switch .track::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .15s}
+.switch input:checked + .track{background:var(--shu)}
+.switch input:checked + .track::after{left:19px}
+.switch input:checked ~ span:last-child{color:var(--ink)}
+.switch input:focus-visible + .track{outline:2px solid var(--ai);outline-offset:2px}

@@ -15,7 +15,7 @@ import { Join } from "./components/Join";
 import { NotMember } from "./components/NotMember";
 import { getIntent, storedInvite } from "./supabase";
 import { useTrip } from "./trip";
-import { useNow } from "./now";
+import { setNowLine, useNow, useNowLine } from "./now";
 import { useScrollEdges } from "./useScrollEdges";
 import type { LinkedLeg } from "./maps";
 
@@ -91,6 +91,7 @@ function Main() {
   const idsRef = useRef(dayIds);
   idsRef.current = dayIds;
   const now = useNow();
+  const nowLine = useNowLine();
   const todayId = `d${now.date.slice(5, 7)}${now.date.slice(8, 10)}`;
 
   const [view, setView] = useState(() => currentView(dayIds, todayId));
@@ -170,9 +171,16 @@ function Main() {
 
         <main>
           {!PAGES.includes(view) && (
-            <div className="modebar" role="group" aria-label="顯示方式">
-              <button type="button" className={mode === "one" ? "on" : ""} onClick={() => setMode("one")}>只看 {fam.label}</button>
-              <button type="button" className={mode === "all" ? "on" : ""} onClick={() => setMode("all")}>看所有家</button>
+            <div className="toolbar">
+              <div className="modebar" role="group" aria-label="顯示方式">
+                <button type="button" className={mode === "one" ? "on" : ""} onClick={() => setMode("one")}>只看 {fam.label}</button>
+                <button type="button" className={mode === "all" ? "on" : ""} onClick={() => setMode("all")}>看所有家</button>
+              </div>
+              <label className="switch" title="當天打開時，行程上會有一條標示現在時間的線">
+                <input type="checkbox" checked={nowLine} onChange={(e) => setNowLine(e.target.checked)} />
+                <span className="track" aria-hidden="true" />
+                <span>「現在」的線</span>
+              </label>
             </div>
           )}
           {adding && <AddDay family={fam} onDone={(id) => { setAdding(false); if (id) location.hash = `#${id}`; }} />}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 export interface Now { date: string; minutes: number; hhmm: string }
 
@@ -30,4 +30,16 @@ export function useNow(): Now {
     return () => { clearInterval(t); document.removeEventListener("visibilitychange", onVis); };
   }, []);
   return now;
+}
+
+// ---- "now" line on/off (default on), remembered on this device, shared by every Timeline on the page ----
+const LINE_KEY = "jp-nowline";
+const listeners = new Set<() => void>();
+const readLine = () => { try { return localStorage.getItem(LINE_KEY) !== "off"; } catch { return true; } };
+export function setNowLine(on: boolean) {
+  try { localStorage.setItem(LINE_KEY, on ? "on" : "off"); } catch { /* ignore */ }
+  listeners.forEach((l) => l());
+}
+export function useNowLine(): boolean {
+  return useSyncExternalStore((cb) => { listeners.add(cb); return () => { listeners.delete(cb); }; }, readLine, () => true);
 }
