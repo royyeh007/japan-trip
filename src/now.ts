@@ -43,3 +43,16 @@ export function setNowLine(on: boolean) {
 export function useNowLine(): boolean {
   return useSyncExternalStore((cb) => { listeners.add(cb); return () => { listeners.delete(cb); }; }, readLine, () => true);
 }
+
+/** The `?now=` preview value, if the page was opened with one. */
+export function fakeNow(): string | null {
+  const v = new URLSearchParams(location.search).get("now");
+  return v && /^\d{4}-\d{2}-\d{2}T\d{1,2}:\d{2}/.test(v) ? v : null;
+}
+/** Reload the page pretending it is `iso` (YYYY-MM-DD) at the current Japan clock time, on the given day page. */
+export function startPreview(iso: string, hhmm: string, hash: string) {
+  location.assign(`${location.pathname}?now=${iso}T${hhmm}${hash}`);
+}
+export function endPreview() {
+  location.assign(location.pathname + location.hash);
+}

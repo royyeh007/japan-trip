@@ -330,3 +330,7 @@ nav.days a.today .dd::after{content:"";display:inline-block;width:6px;height:6px
 .switch input:checked + .track::after{left:19px}
 .switch input:checked ~ span:last-child{color:var(--ink)}
 .switch input:focus-visible + .track{outline:2px solid var(--ai);outline-offset:2px}
+.nowctl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.nowctl .link{font-size:.78rem}
+.previewbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;background:var(--amber-soft);color:var(--amber);border-radius:10px;padding:8px 12px;font-size:.86rem;font-weight:700}
+.previewbar .btn{padding:4px 10px;font-size:.8rem}

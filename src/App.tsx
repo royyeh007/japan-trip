@@ -15,7 +15,7 @@ import { Join } from "./components/Join";
 import { NotMember } from "./components/NotMember";
 import { getIntent, storedInvite } from "./supabase";
 import { useTrip } from "./trip";
-import { setNowLine, useNow, useNowLine } from "./now";
+import { endPreview, fakeNow, setNowLine, startPreview, useNow, useNowLine } from "./now";
 import { useScrollEdges } from "./useScrollEdges";
 import type { LinkedLeg } from "./maps";
 
@@ -170,17 +170,28 @@ function Main() {
         </div>
 
         <main>
+          {fakeNow() && (
+            <div className="previewbar">
+              <span>預覽模式：假裝現在是 {now.date.slice(5).replace("-", "/")} {now.hhmm}（日本時間）</span>
+              <button type="button" className="btn" onClick={endPreview}>結束預覽</button>
+            </div>
+          )}
           {!PAGES.includes(view) && (
             <div className="toolbar">
               <div className="modebar" role="group" aria-label="顯示方式">
                 <button type="button" className={mode === "one" ? "on" : ""} onClick={() => setMode("one")}>只看 {fam.label}</button>
                 <button type="button" className={mode === "all" ? "on" : ""} onClick={() => setMode("all")}>看所有家</button>
               </div>
-              <label className="switch" title="當天打開時，行程上會有一條標示現在時間的線">
-                <input type="checkbox" checked={nowLine} onChange={(e) => setNowLine(e.target.checked)} />
-                <span className="track" aria-hidden="true" />
-                <span>「現在」的線</span>
-              </label>
+              <div className="nowctl">
+                <label className="switch" title="旅行當天打開時，行程上會有一條標示現在時間的線">
+                  <input type="checkbox" checked={nowLine} onChange={(e) => setNowLine(e.target.checked)} />
+                  <span className="track" aria-hidden="true" />
+                  <span>「現在」的線</span>
+                </label>
+                {nowLine && !fakeNow() && cur && todayId !== cur.id && (
+                  <button type="button" className="link" onClick={() => startPreview(isoOf(cur.d), now.hhmm, `#${cur.id}`)}>旅行當天才會出現・預覽</button>
+                )}
+              </div>
             </div>
           )}
           {adding && <AddDay family={fam} onDone={(id) => { setAdding(false); if (id) location.hash = `#${id}`; }} />}
