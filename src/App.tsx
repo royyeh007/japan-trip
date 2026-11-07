@@ -7,7 +7,7 @@ import { DayView } from "./components/DayView";
 import { DetailSheet } from "./components/DetailSheet";
 import { TodoView } from "./components/TodoView";
 import { UploadView } from "./components/Upload";
-import { Chat } from "./components/Chat";
+import { ChatWidget } from "./components/Chat";
 import { Login } from "./components/Login";
 import { Join } from "./components/Join";
 import { NotMember } from "./components/NotMember";
@@ -20,7 +20,7 @@ const store = {
   set(k: string, v: string) { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } },
 };
 
-const PAGES = ["todo", "upload", "chat"];
+const PAGES = ["todo", "upload"];
 function currentView() {
   const h = location.hash.slice(1) || store.get("jp-day") || "";
   if (PAGES.includes(h) || (DATE_IDS as readonly string[]).includes(h)) return h;
@@ -139,19 +139,16 @@ function Main() {
           <a href="#upload" data-id="upload" className="list" aria-current={view === "upload" ? "page" : undefined}>
             <span className="dd">↑</span><span className="dc">上傳行程</span>
           </a>
-          <a href="#chat" data-id="chat" className="list" aria-current={view === "chat" ? "page" : undefined}>
-            <span className="dd">✦</span><span className="dc">問 Claude</span>
-          </a>
         </nav>
 
         <main>
           {view === "todo" ? <TodoView />
             : view === "upload" ? <UploadView />
-            : view === "chat" ? <Chat />
             : cur ? <DayView day={cur.day} has={cur.has} family={fam} wx={wx} onOpen={(stop, arrive) => setSelected({ day: cur.day, stop, arrive })} />
             : !isPage && <section className="dayhead"><h2>還沒有行程資料</h2><p className="note">管理員還沒把行程放進資料庫（`make seed`）。</p></section>}
         </main>
       </div>
+      <ChatWidget />
       {selected && <DetailSheet {...selected} onClose={close} />}
     </>
   );
