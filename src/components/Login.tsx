@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "../supabase";
+import { setIntent, supabase } from "../supabase";
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18">
@@ -28,6 +28,7 @@ export function Login({ invite }: { invite: string | null }) {
       if (error) throw new Error(error.message);
       if (!valid) throw new Error("邀請碼不對或已經用完，跟 Lily 家要一個新的連結。");
       try { localStorage.setItem("jp-invite", c); } catch { /* ignore */ }
+      setIntent("register");
       await google();
     } catch (e) { setErr(e instanceof Error ? e.message : String(e)); setBusy(null); }
   };
@@ -35,6 +36,7 @@ export function Login({ invite }: { invite: string | null }) {
   const login = async () => {
     if (!supabase) return;
     setBusy("login"); setErr(null);
+    setIntent("login");
     try { await google(); } catch (e) { setErr(e instanceof Error ? e.message : String(e)); setBusy(null); }
   };
 

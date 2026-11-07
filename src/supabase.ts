@@ -31,3 +31,9 @@ export function captureInvite() {
 }
 export function storedInvite() { try { return localStorage.getItem(INVITE_KEY); } catch { return null; } }
 export function clearInvite() { try { localStorage.removeItem(INVITE_KEY); } catch { /* ignore */ } }
+
+const INTENT_KEY = "jp-intent";
+/** "register" = clicked 用 Google 註冊 with a valid invite code; "login" = clicked 用 Google 登入. Survives the OAuth redirect. */
+export function setIntent(i: "register" | "login") { try { localStorage.setItem(INTENT_KEY, i); } catch { /* ignore */ } }
+export function getIntent(): "register" | "login" | null { try { return localStorage.getItem(INTENT_KEY) as "register" | "login" | null; } catch { return null; } }
+export function clearIntent() { try { localStorage.removeItem(INTENT_KEY); } catch { /* ignore */ } }

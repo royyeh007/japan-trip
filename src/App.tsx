@@ -10,6 +10,8 @@ import { UploadView } from "./components/Upload";
 import { Chat } from "./components/Chat";
 import { Login } from "./components/Login";
 import { Join } from "./components/Join";
+import { NotMember } from "./components/NotMember";
+import { getIntent, storedInvite } from "./supabase";
 import { useTrip } from "./trip";
 import type { LinkedLeg } from "./maps";
 
@@ -38,6 +40,8 @@ function Notice({ title, children }: { title: string; children?: React.ReactNode
 
 export default function App() {
   const { phase, error, invite, signOut, reload } = useTrip();
+  // Signed in but not a member: only someone who came through 用 Google 註冊 (or typed a valid code) sees the family picker
+  const [joining, setJoining] = useState(() => getIntent() === "register" && !!storedInvite());
   if (phase === "noconfig") {
     return (
       <Notice title="還沒接上 Supabase">
@@ -55,7 +59,7 @@ export default function App() {
   }
   if (phase === "loading") return <Notice title="載入中…" />;
   if (phase === "signedout") return <Login invite={invite} />;
-  if (phase === "join") return <Join />;
+  if (phase === "join") return joining ? <Join /> : <NotMember onInvite={() => setJoining(true)} />;
   return <Main />;
 }
 

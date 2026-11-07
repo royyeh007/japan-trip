@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { supabase, storedInvite } from "./supabase";
+import { clearIntent, supabase, storedInvite } from "./supabase";
 import type { Contact, Day, Family, FamilyId, Member, TodoItem } from "./data";
 
 export interface TripData { families: Family[]; days: Day[]; todo: TodoItem[]; contacts: Contact[]; notes: Record<string, string> }
@@ -82,6 +82,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (member) { setTripLoaded(false); reload(); } }, [member, reload]);
 
   const signOut = async () => {
+    clearIntent();
     await supabase?.auth.signOut();
     setMember(null); setViewFam(null); setTrip(EMPTY); setTripLoaded(false);
   };

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FAMILY_IDS, FAMILY_LABELS } from "../data";
 import type { FamilyId } from "../data";
-import { clearInvite, supabase } from "../supabase";
+import { clearIntent, clearInvite, supabase } from "../supabase";
 import { useTrip } from "../trip";
 
 export function Join() {
@@ -17,7 +17,7 @@ export function Join() {
     setBusy(true); setErr(null);
     const { error } = await supabase.rpc("join_with_invite", { p_code: code.trim(), p_family: fam, p_name: name.trim() });
     if (error) { setErr(error.message); setBusy(false); return; }
-    clearInvite();
+    clearInvite(); clearIntent();
     await refreshMember();
   };
 
