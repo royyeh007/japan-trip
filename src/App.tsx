@@ -64,7 +64,6 @@ function Main() {
   const [view, setView] = useState(currentView);
   const [selected, setSelected] = useState<Selected | null>(null);
   const wx = useWeather();
-  const isAdmin = member?.role === "admin";
   const fam = trip.families.find((f) => f.id === viewFam) ?? { id: viewFam, name: viewFam, label: viewFam, flights: [] };
 
   useEffect(() => {
@@ -99,11 +98,9 @@ function Main() {
         <header className="hero">
           <div className="fambar">
             <span className="fampill">{fam.label}</span>
-            {isAdmin && (
-              <select className="famselect" value={viewFam} aria-label="檢視哪一家" onChange={(e) => setViewFam(e.target.value as FamilyId)}>
-                {trip.families.map((f) => <option key={f.id} value={f.id}>看 {f.label}</option>)}
-              </select>
-            )}
+            <select className="famselect" value={viewFam} aria-label="看哪一家的行程" onChange={(e) => setViewFam(e.target.value as FamilyId)}>
+              {trip.families.map((f) => <option key={f.id} value={f.id}>看 {f.label}</option>)}
+            </select>
             <span className="muted who-am-i">{member?.name ?? member?.email}</span>
             <button type="button" className="link" onClick={signOut}>登出</button>
           </div>
@@ -136,7 +133,7 @@ function Main() {
             <span className="dd">✓</span><span className="dc">待辦・聯絡</span>
           </a>
           <a href="#upload" data-id="upload" className="list" aria-current={view === "upload" ? "page" : undefined}>
-            <span className="dd">↑</span><span className="dc">{isAdmin ? "上傳・審核" : "上傳行程"}</span>
+            <span className="dd">↑</span><span className="dc">上傳行程</span>
           </a>
           <a href="#chat" data-id="chat" className="list" aria-current={view === "chat" ? "page" : undefined}>
             <span className="dd">✦</span><span className="dc">問 Claude</span>

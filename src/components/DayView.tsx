@@ -87,7 +87,7 @@ export function DayView({ day, has, family, onOpen, wx }: { day: Day; has: boole
         <div className="pendingbox">
           <p>這天各家分開走，{family.label}的行程還沒放上來。</p>
           {shared.length > 0 && <p>{shared[0].d}–{shared[shared.length - 1].d} 是大家一起的行程，可以先看那幾天。</p>}
-          <p>要補的話：到「上傳行程」傳表單或截圖，或直接跟「問 Claude」說。</p>
+          <p>要補的話：到「上傳行程」傳表單或截圖，或直接跟「問 Claude」說，確認後就會出現在這裡。</p>
           <div className="actions">
             <a className="btn" href="#upload"><DownloadIcon />上傳行程</a>
             <button type="button" className="btn" onClick={openForm}><DownloadIcon />下載填寫表單</button>

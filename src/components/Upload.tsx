@@ -1,73 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { FAMILY_LABELS, isLeg } from "../data";
-import type { Day, FamilyId, Proposal, Upload as UploadRow } from "../data";
+import { FAMILY_LABELS } from "../data";
+import type { FamilyId, Proposal, Upload as UploadRow } from "../data";
 import { invoke, supabase } from "../supabase";
 import { useTrip } from "../trip";
 import { openForm } from "../form";
 import { DownloadIcon } from "../icons";
-
-const STATUS: Record<UploadRow["status"], string> = { pending: "等確認", approved: "已更新", rejected: "已退回", failed: "解析失敗" };
-
-/** Compact read-only rendering of a proposed day, for the review list. */
-function ProposalDays({ p }: { p: Proposal }) {
-  return (
-    <div className="preview">
-      {p.summary && <p><b>{p.summary}</b></p>}
-      {p.flights.length > 0 && <p>航班：{p.flights.join("／")}</p>}
-      {p.joins.map((j, i) => <p key={i}>{j.date_id.slice(1, 3)}/{Number(j.date_id.slice(3))}：跟{FAMILY_LABELS[j.with]}一起{j.from ? `（${j.from} 起）` : ""}</p>)}
-      {p.days.map((day) => (
-        <details key={day.id + day.scope} open={p.days.length <= 2}>
-          <summary>{day.d}（{day.w}）{day.scope === "shared" ? "・大家一起" : ""} ・ {day.title}{day.hotel && ` ・ 住 ${day.hotel}`}</summary>
-          <ul>
-            {day.items.map((it, i) => isLeg(it)
-              ? <li key={i} className="pl">→ {it.txt}</li>
-              : <li key={i}><b>{it.t}</b> {it.n}{it.st && ` [${it.st}]`}{it.book?.length ? `：${it.book.join("；")}` : ""}</li>)}
-          </ul>
-        </details>
-      ))}
-      {p.notes.length > 0 && <ul className="notes">{p.notes.map((n, i) => <li key={i}>⚠ {n}</li>)}</ul>}
-    </div>
-  );
-}
-
-/** Admin: write an approved proposal into the live itinerary. */
-async function applyProposal(row: UploadRow, days: Day[], email: string) {
-  if (!supabase || !row.parsed) return;
-  const p = row.parsed;
-  for (const day of p.days) {
-    const fam = day.scope === "shared" ? null : [p.family_id];
-    const { error } = await supabase.from("days").upsert(
-      { date_id: day.id, fam, d: day.d, w: day.w, city: day.city, title: day.title, hotel: day.hotel, items: day.items, updated_at: new Date().toISOString() },
-      { onConflict: "date_id,fam" },
-    );
-    if (error) throw new Error(error.message);
-  }
-  for (const j of p.joins) {
-    const target = days.find((d) => d.id === j.date_id && d.fam?.includes(j.with)) ?? days.find((d) => d.id === j.date_id && !d.fam);
-    if (!target) continue;
-    if (!target.fam) continue; // already a shared day
-    if (!j.from) {
-      if (!target.fam.includes(p.family_id)) {
-        const { error } = await supabase.from("days").update({ fam: [...target.fam, p.family_id] }).eq("date_id", j.date_id).contains("fam", [j.with]);
-        if (error) throw new Error(error.message);
-      }
-    } else {
-      const idx = target.items.findIndex((it) => !isLeg(it) && it.t === j.from);
-      const items = idx >= 0 ? target.items.slice(idx) : target.items;
-      const { error } = await supabase.from("days").upsert(
-        { date_id: j.date_id, fam: [p.family_id], d: target.d, w: target.w, city: target.city, title: `${j.from} 起和${FAMILY_LABELS[j.with]}一起`, hotel: target.hotel, items, updated_at: new Date().toISOString() },
-        { onConflict: "date_id,fam" },
-      );
-      if (error) throw new Error(error.message);
-    }
-  }
-  if (p.flights.length > 0) {
-    const { error } = await supabase.from("families").update({ flights: p.flights }).eq("id", p.family_id);
-    if (error) throw new Error(error.message);
-  }
-  const { error } = await supabase.from("uploads").update({ status: "approved", reviewed_at: new Date().toISOString(), reviewed_by: email }).eq("id", row.id);
-  if (error) throw new Error(error.message);
-}
+import { ProposalCard, STATUS } from "./Proposals";
 
 function InviteBox() {
   const { member } = useTrip();
@@ -106,15 +44,14 @@ function InviteBox() {
 }
 
 export function UploadView() {
-  const { member, trip, reload } = useTrip();
+  const { member } = useTrip();
   const isAdmin = member?.role === "admin";
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [result, setResult] = useState<Proposal | null>(null);
+  const [result, setResult] = useState<{ id: string; proposal: Proposal } | null>(null);
   const [rows, setRows] = useState<UploadRow[]>([]);
-  const [acting, setActing] = useState<string | null>(null);
 
   const loadRows = useCallback(async () => {
     if (!supabase) return;
@@ -137,54 +74,22 @@ export function UploadView() {
       }
       setBusy("Claude 讀取中，大約 20–60 秒…");
       const res = await invoke<{ id: string; proposal: Proposal }>("parse-upload", { path, text: text.trim() || undefined });
-      setResult(res.proposal); setFile(null); setText("");
-      loadRows();
+      setResult(res); setFile(null); setText("");
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally { setBusy(null); }
   };
 
-  const decide = async (row: UploadRow, ok: boolean) => {
-    if (!supabase || !member) return;
-    setActing(row.id);
-    try {
-      if (ok) { await applyProposal(row, trip.days, member.email); await reload(); }
-      else { const { error } = await supabase.from("uploads").update({ status: "rejected", reviewed_at: new Date().toISOString(), reviewed_by: member.email }).eq("id", row.id); if (error) throw new Error(error.message); }
-      await loadRows();
-    } catch (e) { alert(e instanceof Error ? e.message : String(e)); }
-    finally { setActing(null); }
-  };
-
-  const pending = rows.filter((r) => r.status === "pending" && r.parsed);
-  const mine = rows.filter((r) => r.uploaded_by === member?.email);
+  // Earlier proposals still waiting for a decision (own ones; admin sees everyone's), minus the one just shown above
+  const pending = rows.filter((r) => r.status === "pending" && r.parsed && r.id !== result?.id);
+  const history = rows.filter((r) => r.status !== "pending" && r.uploaded_by === member?.email);
 
   return (
     <>
       <section className="dayhead">
-        <h2>{isAdmin ? "上傳與審核" : "上傳行程"}</h2>
-        <p className="note">傳填好的表單（xlsx）、行程截圖、PDF，或直接貼文字，Claude 會整理成行程，Lily 家確認後就會出現在網頁上。</p>
+        <h2>上傳行程</h2>
+        <p className="note">傳填好的表單（xlsx）、行程截圖、PDF，或直接貼文字。Claude 整理好後你看一下，按「確認，更新行程」就會更新到網頁上。</p>
       </section>
-
-      {isAdmin && (
-        <div className="panel">
-          <h3>待確認（{pending.length}）</h3>
-          {pending.length === 0 && <p className="note">目前沒有。</p>}
-          {pending.map((r) => (
-            <div className="review" key={r.id}>
-              <div className="meta">
-                <span>{FAMILY_LABELS[r.family_id as FamilyId] ?? r.family_id}</span>
-                <span>{r.uploaded_by}</span>
-                <span>{r.kind === "chat" ? "從聊天" : "上傳"}・{new Date(r.created_at).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
-              </div>
-              {r.parsed && <ProposalDays p={r.parsed} />}
-              <div className="actions">
-                <button type="button" className="btn primary" disabled={acting === r.id} onClick={() => decide(r, true)}>確認，更新行程</button>
-                <button type="button" className="btn" disabled={acting === r.id} onClick={() => decide(r, false)}>退回</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
       <div className="panel">
         <h3>上傳</h3>
@@ -201,18 +106,29 @@ export function UploadView() {
           {err && <p className="err">{err}</p>}
           {result && (
             <div className="resultbox">
-              <p><b>已送出，等 Lily 家確認。</b>Claude 讀出來的內容：</p>
-              <ProposalDays p={result} />
+              <p><b>Claude 讀出來的內容，看一下沒問題就按確認：</b></p>
+              <ProposalCard id={result.id} proposal={result.proposal} onDone={loadRows} />
             </div>
           )}
         </div>
       </div>
 
-      {mine.length > 0 && (
+      {pending.length > 0 && (
         <div className="panel">
-          <h3>我送過的</h3>
+          <h3>還沒確認的（{pending.length}）</h3>
+          {pending.map((r) => (
+            <ProposalCard key={r.id} id={r.id} proposal={r.parsed!}
+              meta={`${FAMILY_LABELS[r.family_id as FamilyId] ?? r.family_id}・${r.uploaded_by}・${r.kind === "chat" ? "從聊天" : "上傳"}・${new Date(r.created_at).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}`}
+              onDone={loadRows} />
+          ))}
+        </div>
+      )}
+
+      {history.length > 0 && (
+        <div className="panel">
+          <h3>之前送過的</h3>
           <ul className="ulist">
-            {mine.map((r) => (
+            {history.map((r) => (
               <li key={r.id}>
                 <span className={`status ${r.status}`}>{STATUS[r.status]}</span>
                 <span>{r.parsed?.summary || r.error || (r.kind === "chat" ? "聊天提案" : r.path?.split("/").pop())}</span>

@@ -27,10 +27,10 @@ Deno.serve(handle(async (req) => {
     extras: Object.fromEntries((extras ?? []).map((e) => [e.key, e.data])),
   };
 
-  const proposals: string[] = [];
+  const proposals: { id: string; proposal: unknown }[] = [];
   const propose = betaZodTool({
     name: "propose_itinerary_change",
-    description: "使用者想新增或修改行程時用這個工具送出提案。提案不會直接生效，會交給 Lily 家（admin）審核。改某一天就要給那一天完整的 items（含沒改的部分）。",
+    description: "使用者想新增或修改行程時用這個工具送出整理好的行程。送出後畫面上會出現「確認更新」按鈕，使用者按了才生效。改某一天就要給那一天完整的 items（含沒改的部分）。",
     inputSchema: ProposalZ,
     run: async (input) => {
       const proposal = normalize(input);
@@ -39,8 +39,8 @@ Deno.serve(handle(async (req) => {
         .insert({ family_id, uploaded_by: email, kind: "chat", parsed: { ...proposal, family_id }, text: turns[turns.length - 1].content })
         .select("id").single();
       if (error || !data) return `送出失敗：${error?.message}`;
-      proposals.push(data.id);
-      return `提案已送出（id ${data.id}），等 Lily 家確認後才會更新到行程上。`;
+      proposals.push({ id: data.id, proposal: { ...proposal, family_id } });
+      return `已整理好（id ${data.id}）。請簡短告訴使用者：畫面上會出現這份行程和「確認，更新行程」按鈕，按了就會更新。`;
     },
   });
 
@@ -56,9 +56,9 @@ Deno.serve(handle(async (req) => {
       {
         type: "text",
         text: `你是「日本跨年行程」網頁裡的小幫手，用繁體中文、台灣用語回答，語氣輕鬆簡短。
-使用者是 ${member.name ?? email}（${member.family_id} 家）。回答只根據下面的行程資料；資料裡沒有的就說不知道，不要編。
+使用者是 ${member.name ?? email}（${member.family_id} 家）。資料裡有四家的行程，大家互相都看得到，哪一家的都可以回答。回答只根據下面的行程資料；資料裡沒有的就說不知道，不要編。
 時間、訂位碼、地址這類細節要照資料逐字講。
-使用者想改行程、加行程、補自己家的 12/26、12/27、1/2 時，先確認你理解對了，再用 propose_itinerary_change 送出完整的那一天，並告訴對方要等 Lily 家確認。
+使用者想改行程、加行程、補自己家的 12/26、12/27、1/2 時，如果意思清楚就直接用 propose_itinerary_change 送出完整的那一天（不清楚才先問）；使用者會在畫面上按「確認更新」。
 一般成員只能提自己家的日子（scope=family）或大家一起的日子（scope=shared）。
 ${FORMAT_GUIDE}`,
       },

@@ -1,5 +1,5 @@
 -- 日本跨年行程：資料表、權限（RLS）、邀請加入、Storage。
--- 原則：網頁本身是公開的空殼，所有行程只有登入且加入某一家的人才讀得到。
+-- 原則：網頁本身是公開的空殼，行程只有登入且加入某一家的人才讀得到；加入後四家的行程互相都看得到。
 
 create extension if not exists pgcrypto;
 
@@ -53,7 +53,7 @@ create table public.extras (
   data jsonb not null
 );
 
--- 上傳或聊天機器人產生的「行程提案」，等 admin 審核
+-- 上傳或聊天機器人產生的「行程提案」，使用者自己在畫面上按「確認更新」才會寫進 days
 create table public.uploads (
   id uuid primary key default gen_random_uuid(),
   family_id text not null references public.families (id),
@@ -100,6 +100,10 @@ alter table public.uploads  enable row level security;
 
 create policy "members read families" on public.families
   for select to authenticated using (public.is_member());
+create policy "members update own family" on public.families
+  for update to authenticated
+  using (public.is_member() and (id = public.my_family() or public.is_admin()))
+  with check (public.is_member() and (id = public.my_family() or public.is_admin()));
 create policy "admin writes families" on public.families
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
@@ -111,11 +115,13 @@ create policy "admin writes members" on public.members
 create policy "admin manages invites" on public.invites
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
-create policy "members read their days" on public.days
-  for select to authenticated
-  using (public.is_member() and (fam is null or public.my_family() = any (fam) or public.is_admin()));
-create policy "admin writes days" on public.days
-  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "members read all days" on public.days
+  for select to authenticated using (public.is_member());
+-- 每個人可以改自己家的日子和大家一起的日子（提案按「確認更新」時寫入）；admin 可以改全部
+create policy "members write own or shared days" on public.days
+  for all to authenticated
+  using (public.is_member() and (fam is null or public.my_family() = any (fam) or public.is_admin()))
+  with check (public.is_member() and (fam is null or public.my_family() = any (fam) or public.is_admin()));
 
 create policy "members read extras" on public.extras
   for select to authenticated using (public.is_member());
@@ -124,6 +130,10 @@ create policy "admin writes extras" on public.extras
 
 create policy "read own uploads" on public.uploads
   for select to authenticated using (uploaded_by = public.auth_email() or public.is_admin());
+create policy "update own uploads" on public.uploads
+  for update to authenticated
+  using (uploaded_by = public.auth_email() or public.is_admin())
+  with check (uploaded_by = public.auth_email() or public.is_admin());
 create policy "admin writes uploads" on public.uploads
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
