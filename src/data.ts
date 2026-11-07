@@ -46,6 +46,11 @@ export interface Member { user_id: string; email: string | null; family_id: Fami
 
 export type TodoItem = [string, string, string, boolean?];
 export type Contact = [string, string];
+/** Rows of the todos / contacts tables. `fam` null = everyone's. */
+export interface TodoRow { id: string; fam: FamilyId[] | null; due: string; text: string; done: boolean; sort: number; created_at: string }
+export interface ContactRow { id: string; fam: FamilyId[] | null; name: string; value: string; sort: number; created_at: string }
+/** Can this member change the item (shared, their own family's, or admin)? */
+export const canEdit = (fam: FamilyId[] | null | undefined, m: Member | null) => !!m && (!fam || fam.includes(m.family_id) || m.role === "admin");
 
 /** What the AI produces from an upload or a chat, waiting for the admin to approve. */
 export interface Proposal {

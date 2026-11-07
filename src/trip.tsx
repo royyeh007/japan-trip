@@ -2,9 +2,9 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { clearIntent, supabase, storedInvite } from "./supabase";
-import type { Contact, Day, Family, FamilyId, Member, TodoItem } from "./data";
+import type { ContactRow, Day, Family, FamilyId, Member, TodoRow } from "./data";
 
-export interface TripData { families: Family[]; days: Day[]; todo: TodoItem[]; contacts: Contact[]; notes: Record<string, string> }
+export interface TripData { families: Family[]; days: Day[]; todos: TodoRow[]; contacts: ContactRow[]; notes: Record<string, string> }
 export type Phase = "noconfig" | "loading" | "signedout" | "join" | "ready" | "error";
 
 interface Ctx {
@@ -22,7 +22,7 @@ interface Ctx {
   signOut: () => Promise<void>;
 }
 
-const EMPTY: TripData = { families: [], days: [], todo: [], contacts: [], notes: {} };
+const EMPTY: TripData = { families: [], days: [], todos: [], contacts: [], notes: {} };
 const TripContext = createContext<Ctx | null>(null);
 
 export function TripProvider({ children }: { children: ReactNode }) {
@@ -62,19 +62,21 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const reload = useCallback(async () => {
     if (!supabase || !member) return;
     setError(null);
-    const [f, d, x] = await Promise.all([
+    const [f, d, x, t, c] = await Promise.all([
       supabase.from("families").select("id, name, label, flights").order("sort"),
       supabase.from("days").select("date_id, fam, d, w, city, title, hotel, items"),
       supabase.from("extras").select("key, data"),
+      supabase.from("todos").select("id, fam, due, text, done, sort, created_at").order("sort").order("created_at"),
+      supabase.from("contacts").select("id, fam, name, value, sort, created_at").order("sort").order("created_at"),
     ]);
-    const err = f.error ?? d.error ?? x.error;
+    const err = f.error ?? d.error ?? x.error ?? t.error ?? c.error;
     if (err) { setError(err.message); return; }
     const extras = Object.fromEntries((x.data ?? []).map((e) => [e.key, e.data]));
     setTrip({
       families: (f.data ?? []) as Family[],
       days: (d.data ?? []).map((r) => ({ id: r.date_id, fam: r.fam, d: r.d, w: r.w, city: r.city, title: r.title, hotel: r.hotel, items: r.items })),
-      todo: extras.todo ?? [],
-      contacts: extras.contacts ?? [],
+      todos: (t.data ?? []) as TodoRow[],
+      contacts: (c.data ?? []) as ContactRow[],
       notes: extras.notes ?? {},
     });
     setTripLoaded(true);

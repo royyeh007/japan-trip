@@ -14,17 +14,21 @@ Deno.serve(handle(async (req) => {
   if (turns.length === 0 || turns[turns.length - 1].role !== "user") throw new HttpError(400, "沒有訊息");
 
   // 這個人看得到的行程（RLS 會過濾），當作聊天的背景資料
-  const [{ data: days }, { data: families }, { data: extras }] = await Promise.all([
+  const [{ data: days }, { data: families }, { data: extras }, { data: todos }, { data: contacts }] = await Promise.all([
     user.from("days").select("date_id, fam, d, w, city, title, hotel, items"),
     user.from("families").select("id, name, label, flights").order("sort"),
     user.from("extras").select("key, data"),
+    user.from("todos").select("fam, due, text, done").order("sort"),
+    user.from("contacts").select("fam, name, value").order("sort"),
   ]);
   const context = {
     today: new Date().toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" }),
     you: { name: who, family_id: member.family_id, role: member.role },
     families,
     days: (days ?? []).sort((a, b) => a.date_id.localeCompare(b.date_id)),
-    extras: Object.fromEntries((extras ?? []).map((e) => [e.key, e.data])),
+    notes: Object.fromEntries((extras ?? []).map((e) => [e.key, e.data])),
+    todos: todos ?? [],
+    contacts: contacts ?? [],
   };
 
   const proposals: { id: string; proposal: unknown }[] = [];

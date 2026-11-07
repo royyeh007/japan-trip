@@ -26,11 +26,11 @@ must(`days（${trip.DAYS.length} 列）`, await sb.from("days").upsert(
   trip.DAYS.map((d) => ({ date_id: d.id, fam: d.fam ?? null, d: d.d, w: d.w, city: d.city, title: d.title, hotel: d.hotel, items: d.items, updated_at: new Date().toISOString() })),
   { onConflict: "date_id,fam" },
 ));
-must("extras", await sb.from("extras").upsert([
-  { key: "todo", data: trip.TODO ?? [] },
-  { key: "contacts", data: trip.CONTACTS ?? [] },
-  { key: "notes", data: { shared: trip.SHARED_NOTE ?? "" } },
-]));
+must("extras", await sb.from("extras").upsert([{ key: "notes", data: { shared: trip.SHARED_NOTE ?? "" } }]));
+must(`todos（${(trip.TODO ?? []).length} 筆，大家一起）`, await sb.from("todos").upsert(
+  (trip.TODO ?? []).map(([key, due, text, done], i) => ({ key, fam: null, due, text, done: !!done, sort: i })), { onConflict: "key" }));
+must(`contacts（${(trip.CONTACTS ?? []).length} 筆，大家一起）`, await sb.from("contacts").upsert(
+  (trip.CONTACTS ?? []).map(([name, value], i) => ({ key: name, fam: null, name, value, sort: i })), { onConflict: "key" }));
 
 // 管理員用自己的邀請連結進入（role = admin）；一般成員用另一個
 const newCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("");

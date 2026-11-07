@@ -115,8 +115,19 @@ ul.todo .when{display:block;font-family:var(--f-mono);font-size:.74rem;color:var
 ul.todo .when.done{color:var(--pine)}
 ul.todo input:checked + label .what{text-decoration:line-through;color:var(--muted)}
 .contacts{display:grid;gap:6px;font-size:.88rem}
-.contacts div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;border-bottom:1px dashed var(--line);padding-bottom:6px}
-.contacts span{font-family:var(--f-mono);user-select:all}
+.contacts > div{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+.contacts .cname{flex:1 1 auto}
+.contacts .cval{font-family:var(--f-mono);user-select:all}
+.contacts .cval a{color:var(--ai);text-decoration:none}
+ul.todo li{grid-template-columns:22px minmax(0,1fr) auto}
+.rowacts{display:inline-flex;gap:8px;align-self:start;padding-top:2px}
+.rowacts .link{font-size:.76rem}
+.addrow,.editrow{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;margin-top:12px}
+.editrow{margin-top:0;grid-column:2 / -1}
+.addrow input,.editrow input,.addrow select{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%}
+.addrow .btn,.editrow .btn{justify-content:center}
+@media (min-width:560px){.addrow{grid-template-columns:150px minmax(0,1fr) auto auto}.editrow{grid-template-columns:150px minmax(0,1fr) auto}}
+ul.todo .when .tag{margin-left:6px;vertical-align:middle}
 
 /* detail sheet */
 .scrim{position:fixed;inset:0;background:rgba(10,16,30,.42);z-index:20}
