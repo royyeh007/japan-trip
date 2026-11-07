@@ -12,3 +12,10 @@ verify_jwt = false
 [auth]
 site_url = "https://royyeh007.github.io/japan-trip/"
 additional_redirect_urls = ["https://royyeh007.github.io/japan-trip/**", "http://localhost:5173/**"]
+
+# Google 登入。Client ID / Secret 放在 .env.local 的 GOOGLE_CLIENT_ID、GOOGLE_CLIENT_SECRET，用 `make auth-push` 推上去。
+# 直接跑 `supabase config push` 而沒設這兩個環境變數會失敗，這是故意的。
+[auth.external.google]
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_CLIENT_SECRET)"

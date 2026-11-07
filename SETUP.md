@@ -17,10 +17,9 @@ Claude 的 API key 只放在 Supabase 的 Edge Function 裡，不會出現在 re
 2. **Credentials → Create credentials → OAuth client ID** → Web application。
    Authorized redirect URIs 加：`https://<ref>.supabase.co/auth/v1/callback`。
    記下 Client ID 和 Client secret。
-3. Supabase → **Authentication → Providers → Google**：打開，貼 Client ID / Secret，存檔。
-4. Supabase → **Authentication → URL Configuration**：
-   - Site URL：`https://royyeh007.github.io/japan-trip/`
-   - Redirect URLs 加兩個：`https://royyeh007.github.io/japan-trip/**` 和 `http://localhost:5173/**`
+3. 把 Client ID / Secret 填進 `.env.local` 的 `GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET`，跑 `make auth-push`。
+   （或在 Supabase 後台 **Authentication → Providers → Google** 手動貼。）
+4. Site URL 和 Redirect URLs 已經在 `supabase/config.toml` 裡，`make auth-push` 會一起推上去。
 
 ## 3. 本機設定檔
 
