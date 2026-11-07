@@ -369,3 +369,22 @@ nav.days a.today .dd::after{content:"";display:inline-block;width:6px;height:6px
 .famcol ul.todo{gap:8px;font-size:.86rem}
 .famcol ul.todo li{grid-template-columns:20px minmax(0,1fr) auto}
 .famcol .contacts{font-size:.84rem}
+
+/* mobile fixes on the todo page */
+ul.todo li.note{display:block;color:var(--muted);font-size:.86rem;padding:2px 0}
+.contacts > div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center}
+.contacts .cname{grid-column:1 / -1;min-width:0}
+.contacts .cval{grid-column:1;min-width:0;word-break:break-all}
+.contacts .rowacts{grid-column:2;grid-row:2;align-self:center;padding-top:0}
+@media (min-width:560px){
+  .contacts > div{grid-template-columns:minmax(0,1fr) auto auto}
+  .contacts .cname{grid-column:1}
+  .contacts .cval{grid-column:2;word-break:normal}
+  .contacts .rowacts{grid-column:3;grid-row:1}
+}
+.famcol .contacts > div{grid-template-columns:minmax(0,1fr) auto}
+.famcol .contacts .cname{grid-column:1 / -1}
+.famcol .contacts .cval{grid-column:1;word-break:break-all}
+.famcol .contacts .rowacts{grid-column:2;grid-row:2}
+/* room for the floating chat button */
+.wrap{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
