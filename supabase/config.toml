@@ -1,0 +1,9 @@
+# Supabase CLI 設定。project_id 只是本機識別名，真正的專案用 `supabase link --project-ref <ref>` 連。
+project_id = "japan-trip"
+
+# 兩個 Edge Function 自己用 getUser() 驗證登入與家庭，所以關掉 gateway 的 JWT 檢查。
+[functions.parse-upload]
+verify_jwt = false
+
+[functions.chat]
+verify_jwt = false

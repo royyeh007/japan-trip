@@ -1,0 +1,74 @@
+// 行程聊天機器人：看得到這一家看得到的行程，回答問題；要改行程時用工具送出提案，等 admin 審核。
+import { betaZodTool } from "npm:@anthropic-ai/sdk/helpers/beta/zod";
+import { handle, json, HttpError } from "../_shared/http.ts";
+import { requireMember } from "../_shared/supa.ts";
+import { anthropic, MODEL } from "../_shared/claude.ts";
+import { FORMAT_GUIDE, ProposalZ, normalize } from "../_shared/proposal.ts";
+
+interface Turn { role: "user" | "assistant"; content: string }
+
+Deno.serve(handle(async (req) => {
+  const { user, admin, member, email } = await requireMember(req);
+  const body = await req.json().catch(() => ({})) as { messages?: Turn[] };
+  const turns = (body.messages ?? []).filter((t) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string" && t.content.trim()).slice(-20);
+  if (turns.length === 0 || turns[turns.length - 1].role !== "user") throw new HttpError(400, "沒有訊息");
+
+  // 這個人看得到的行程（RLS 會過濾），當作聊天的背景資料
+  const [{ data: days }, { data: families }, { data: extras }] = await Promise.all([
+    user.from("days").select("date_id, fam, d, w, city, title, hotel, items"),
+    user.from("families").select("id, name, label, flights").order("sort"),
+    user.from("extras").select("key, data"),
+  ]);
+  const context = {
+    today: new Date().toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" }),
+    you: { email, name: member.name, family_id: member.family_id, role: member.role },
+    families,
+    days: (days ?? []).sort((a, b) => a.date_id.localeCompare(b.date_id)),
+    extras: Object.fromEntries((extras ?? []).map((e) => [e.key, e.data])),
+  };
+
+  const proposals: string[] = [];
+  const propose = betaZodTool({
+    name: "propose_itinerary_change",
+    description: "使用者想新增或修改行程時用這個工具送出提案。提案不會直接生效，會交給 Lily 家（admin）審核。改某一天就要給那一天完整的 items（含沒改的部分）。",
+    inputSchema: ProposalZ,
+    run: async (input) => {
+      const proposal = normalize(input);
+      const family_id = member.role === "admin" ? proposal.family_id : member.family_id;
+      const { data, error } = await admin.from("uploads")
+        .insert({ family_id, uploaded_by: email, kind: "chat", parsed: { ...proposal, family_id }, text: turns[turns.length - 1].content })
+        .select("id").single();
+      if (error || !data) return `送出失敗：${error?.message}`;
+      proposals.push(data.id);
+      return `提案已送出（id ${data.id}），等 Lily 家確認後才會更新到行程上。`;
+    },
+  });
+
+  const client = anthropic();
+  const runner = client.beta.messages.toolRunner({
+    model: MODEL,
+    max_tokens: 16000,
+    max_iterations: 4,
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    output_config: { effort: "medium" },
+    system: [
+      {
+        type: "text",
+        text: `你是「日本跨年行程」網頁裡的小幫手，用繁體中文、台灣用語回答，語氣輕鬆簡短。
+使用者是 ${member.name ?? email}（${member.family_id} 家）。回答只根據下面的行程資料；資料裡沒有的就說不知道，不要編。
+時間、訂位碼、地址這類細節要照資料逐字講。
+使用者想改行程、加行程、補自己家的 12/26、12/27、1/2 時，先確認你理解對了，再用 propose_itinerary_change 送出完整的那一天，並告訴對方要等 Lily 家確認。
+一般成員只能提自己家的日子（scope=family）或大家一起的日子（scope=shared）。
+${FORMAT_GUIDE}`,
+      },
+      { type: "text", text: `目前的行程資料（JSON）：\n${JSON.stringify(context)}`, cache_control: { type: "ephemeral" } },
+    ],
+    tools: [propose],
+    messages: turns.map((t) => ({ role: t.role, content: t.content })),
+  });
+  const final = await runner.runUntilDone();
+  if (final.stop_reason === "refusal") throw new HttpError(502, "Claude 不方便回答這個問題");
+  const reply = final.content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+  return json({ reply: reply || "（沒有回覆）", proposals });
+}));
