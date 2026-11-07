@@ -74,9 +74,8 @@ function Main() {
   const { member, trip, viewFam, setViewFam, signOut } = useTrip();
   const fam = trip.families.find((f) => f.id === viewFam) ?? { id: viewFam, name: viewFam, label: viewFam, flights: [] };
 
-  // "one" = this family's itinerary; "all" = every family side by side for the chosen date
-  const [mode, setMode] = useState<"one" | "all">(() => (store.get("jp-mode") === "all" ? "all" : "one"));
-  useEffect(() => { store.set("jp-mode", mode); }, [mode]);
+  // "one" = this family's itinerary; "all" = every family side by side. Always starts on "one" so people land on their own itinerary.
+  const [mode, setMode] = useState<"one" | "all">("one");
 
   // The days this family sees (shared + its own); in "all" mode, every date any family has
   const famDays = useMemo(() => daysFor(trip.days, viewFam), [trip.days, viewFam]);
@@ -128,7 +127,7 @@ function Main() {
           <div className="fambar">
             <span className="fampill">{fam.label}</span>
             <select className="famselect" value={viewFam} aria-label="看哪一家的行程" onChange={(e) => setViewFam(e.target.value as FamilyId)}>
-              {trip.families.map((f) => <option key={f.id} value={f.id}>看 {f.label}</option>)}
+              {[...trip.families].sort((a, b) => (a.id === member?.family_id ? -1 : b.id === member?.family_id ? 1 : 0)).map((f) => <option key={f.id} value={f.id}>{f.id === member?.family_id ? `看我們家（${f.label}）` : `看 ${f.label}`}</option>)}
             </select>
             <span className="muted who-am-i">{member?.name ?? member?.email ?? "家人"}</span>
             <button type="button" className="link" onClick={signOut}>登出</button>
