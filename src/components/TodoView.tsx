@@ -3,6 +3,7 @@ import { FAMILY_LABELS, canEdit } from "../data";
 import type { ContactRow, FamilyId, TodoRow } from "../data";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
+import { HScroll } from "./HScroll";
 
 type Scope = "mine" | "shared";
 const visible = <T extends { fam: FamilyId[] | null }>(rows: T[], fam: FamilyId) => rows.filter((r) => !r.fam || r.fam.includes(fam));
@@ -21,9 +22,10 @@ function ScopePick({ value, onChange, mine }: { value: Scope; onChange: (s: Scop
   );
 }
 
-function Todos() {
-  const { trip, member, viewFam, reload } = useTrip();
+function Todos({ fam, compact = false }: { fam: FamilyId; compact?: boolean }) {
+  const { trip, member, reload } = useTrip();
   const mine = member!.family_id;
+  const viewFam = fam;
   const rows = visible(trip.todos, viewFam);
   const [due, setDue] = useState(""); const [text, setText] = useState(""); const [scope, setScope] = useState<Scope>("mine");
   const [editing, setEditing] = useState<string | null>(null); const [eDue, setEDue] = useState(""); const [eText, setEText] = useState("");
@@ -35,10 +37,7 @@ function Todos() {
   const save = (r: TodoRow) => supabase && run(supabase.from("todos").update({ due: eDue.trim(), text: eText.trim() }).eq("id", r.id)).then(() => setEditing(null));
   const del = (r: TodoRow) => supabase && confirm(`刪掉「${r.text}」？`) && run(supabase.from("todos").delete().eq("id", r.id));
 
-  return (
-    <div className="panel">
-      <h3>要訂、要搶的</h3>
-      <p className="note">{viewFam === mine ? "大家一起的和你們家的都在這裡，勾選全家都看得到。" : `這是${FAMILY_LABELS[viewFam]}的清單；你新增的會加到自己家或大家一起。`}</p>
+  const list = (
       <ul className="todo">
         {rows.map((r) => (
           <li key={r.id}>
@@ -65,6 +64,13 @@ function Todos() {
         ))}
         {rows.length === 0 && <li className="note">還沒有項目。</li>}
       </ul>
+  );
+  if (compact) return list;
+  return (
+    <div className="panel">
+      <h3>要訂、要搶的</h3>
+      <p className="note">{viewFam === mine ? "大家一起的和你們家的都在這裡，勾選全家都看得到。" : `這是${FAMILY_LABELS[viewFam]}的清單；你新增的會加到自己家或大家一起。`}</p>
+      {list}
       <div className="addrow">
         <input value={due} onChange={(e) => setDue(e.target.value)} placeholder="時間（例：11/20 前）" />
         <input value={text} onChange={(e) => setText(e.target.value)} placeholder="要做什麼" onKeyDown={(e) => e.key === "Enter" && add()} />
@@ -75,9 +81,10 @@ function Todos() {
   );
 }
 
-function Contacts() {
-  const { trip, member, viewFam, reload } = useTrip();
+function Contacts({ fam, compact = false }: { fam: FamilyId; compact?: boolean }) {
+  const { trip, member, reload } = useTrip();
   const mine = member!.family_id;
+  const viewFam = fam;
   const rows = visible(trip.contacts, viewFam);
   const [name, setName] = useState(""); const [value, setValue] = useState(""); const [scope, setScope] = useState<Scope>("mine");
   const [editing, setEditing] = useState<string | null>(null); const [eName, setEName] = useState(""); const [eValue, setEValue] = useState("");
@@ -89,9 +96,7 @@ function Contacts() {
   const del = (r: ContactRow) => supabase && confirm(`刪掉「${r.name}」？`) && run(supabase.from("contacts").delete().eq("id", r.id));
   const href = (v: string) => (v.includes("@") ? `mailto:${v}` : /^[+\d][\d\s-]{6,}$/.test(v) ? `tel:${v.replace(/[\s-]/g, "")}` : null);
 
-  return (
-    <div className="panel">
-      <h3>聯絡資料</h3>
+  const list = (
       <div className="contacts">
         {rows.map((r) => editing === r.id ? (
           <div className="editrow" key={r.id}>
@@ -113,6 +118,12 @@ function Contacts() {
         ))}
         {rows.length === 0 && <p className="note">還沒有聯絡資料。</p>}
       </div>
+  );
+  if (compact) return list;
+  return (
+    <div className="panel">
+      <h3>聯絡資料</h3>
+      {list}
       <div className="addrow">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="名稱（例：飯店訂房）" />
         <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="電話或 email" onKeyDown={(e) => e.key === "Enter" && add()} />
@@ -124,12 +135,45 @@ function Contacts() {
 }
 
 export function TodoView() {
-  const { viewFam } = useTrip();
+  const { trip, viewFam } = useTrip();
+  const [mode, setMode] = useState<"one" | "all">("one");
   return (
     <>
-      <section className="dayhead"><h2>待辦與聯絡資料</h2><p className="note">正在看：{FAMILY_LABELS[viewFam]}（含大家一起的）。頁首可以切換看別家。</p></section>
-      <Todos />
-      <Contacts />
+      <section className="dayhead"><h2>待辦與聯絡資料</h2></section>
+      <div className="toolbar">
+        <div className="modebar" role="group" aria-label="顯示方式">
+          <button type="button" className={mode === "one" ? "on" : ""} onClick={() => setMode("one")}>只看 {FAMILY_LABELS[viewFam]}</button>
+          <button type="button" className={mode === "all" ? "on" : ""} onClick={() => setMode("all")}>看所有家</button>
+        </div>
+      </div>
+      {mode === "one" ? (
+        <>
+          <Todos fam={viewFam} />
+          <Contacts fam={viewFam} />
+        </>
+      ) : (
+        <>
+          <h3 className="allh">要訂、要搶的</h3>
+          <HScroll hint="← 左右滑動看四家 →" deps={trip.todos.length}>
+            {trip.families.map((f) => (
+              <section className="famcol" key={f.id}>
+                <header><b>{f.label}</b></header>
+                <Todos fam={f.id} compact />
+              </section>
+            ))}
+          </HScroll>
+          <h3 className="allh">聯絡資料</h3>
+          <HScroll hint="" deps={trip.contacts.length}>
+            {trip.families.map((f) => (
+              <section className="famcol" key={f.id}>
+                <header><b>{f.label}</b></header>
+                <Contacts fam={f.id} compact />
+              </section>
+            ))}
+          </HScroll>
+          <p className="note">要新增項目請切回「只看」模式。</p>
+        </>
+      )}
     </>
   );
 }

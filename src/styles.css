@@ -365,3 +365,7 @@ nav.days a.today .dd::after{content:"";display:inline-block;width:6px;height:6px
 .chip-btn:hover{border-color:var(--ai)}
 .chip-btn:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
 .msg.intro{white-space:pre-line}
+.allh{font-family:var(--f-display);font-size:1.05rem;margin:16px 0 0}
+.famcol ul.todo{gap:8px;font-size:.86rem}
+.famcol ul.todo li{grid-template-columns:20px minmax(0,1fr) auto}
+.famcol .contacts{font-size:.84rem}
