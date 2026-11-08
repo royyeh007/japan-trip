@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { clearIntent, supabase, storedInvite } from "./supabase";
@@ -83,15 +83,31 @@ export function TripProvider({ children }: { children: ReactNode }) {
     setTripLoaded(true);
   }, [member]);
   useEffect(() => { if (member) { setTripLoaded(false); reload(); } }, [member, reload]);
-  // Other people's changes: refresh when the page comes back into view, and every 2 minutes while open
+  // Other people's changes: every 5 minutes (and when the page comes back into view) ask only "did anything change?"
+  // with three tiny queries; do the full reload only when the answer is yes.
+  const sigRef = useRef<string>("");
+  const checkForChanges = useCallback(async () => {
+    if (!supabase || !member || document.visibilityState !== "visible") return;
+    const [d, t, c] = await Promise.all([
+      supabase.from("days").select("date_id, fam, updated_at"),
+      supabase.from("todos").select("id, done, text"),
+      supabase.from("contacts").select("id, name, value"),
+    ]);
+    if (d.error || t.error || c.error) return;
+    const sig = JSON.stringify([d.data, t.data, c.data]);
+    if (sigRef.current && sig !== sigRef.current) await reload();
+    sigRef.current = sig;
+  }, [member, reload]);
   useEffect(() => {
     if (!member) return;
-    const onVis = () => { if (document.visibilityState === "visible") reload(); };
+    sigRef.current = "";
+    checkForChanges();
+    const onVis = () => { if (document.visibilityState === "visible") checkForChanges(); };
     document.addEventListener("visibilitychange", onVis);
     window.addEventListener("focus", onVis);
-    const t = setInterval(() => { if (document.visibilityState === "visible") reload(); }, 120_000);
-    return () => { document.removeEventListener("visibilitychange", onVis); window.removeEventListener("focus", onVis); clearInterval(t); };
-  }, [member, reload]);
+    const timer = setInterval(checkForChanges, 300_000);
+    return () => { document.removeEventListener("visibilitychange", onVis); window.removeEventListener("focus", onVis); clearInterval(timer); };
+  }, [member, checkForChanges]);
 
   const signOut = async () => {
     clearIntent();
