@@ -130,6 +130,11 @@ function TripMenu() {
   const ref = useRef<HTMLDetailsElement>(null);
   const [leaving, setLeaving] = useState(false);
   const close = () => { if (ref.current) ref.current.open = false; };
+  useEffect(() => {
+    const open = () => { if (ref.current) { ref.current.open = true; ref.current.scrollIntoView({ block: "center", behavior: "smooth" }); } };
+    window.addEventListener("jp-open-menu", open);
+    return () => window.removeEventListener("jp-open-menu", open);
+  }, []);
   const rename = async () => {
     if (!supabase || !current) return;
     const name = prompt("你在這個行程裡顯示的名字", member?.name ?? "");
@@ -207,6 +212,11 @@ function Main() {
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, [dayKey]);
+  useEffect(() => {
+    const onAdd = () => { const first = idsRef.current[0]; if (first && location.hash !== `#${first}`) location.hash = `#${first}`; setTimeout(() => setAdding(true), 0); };
+    window.addEventListener("jp-add-day", onAdd);
+    return () => window.removeEventListener("jp-add-day", onAdd);
+  }, []);
   // If the viewed family changes (or a day is removed), keep the view valid
   useEffect(() => { if (!PAGES.includes(view) && !dayIds.includes(view)) setView(dayIds[0] ?? "todo"); }, [dayIds, view]);
 
