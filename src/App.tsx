@@ -10,6 +10,7 @@ import { UploadView } from "./components/Upload";
 import { ChatWidget } from "./components/Chat";
 import { AddDay } from "./components/AddDay";
 import { AllFamiliesDay } from "./components/AllFamiliesDay";
+import { InfoView } from "./components/InfoView";
 import { Login } from "./components/Login";
 import { Join } from "./components/Join";
 import { NotMember } from "./components/NotMember";
@@ -24,7 +25,7 @@ const store = {
   set(k: string, v: string) { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } },
 };
 
-const PAGES = ["todo", "upload"];
+const PAGES = ["todo", "upload", "info"];
 function currentView(dayIds: string[], todayId?: string) {
   const h = location.hash.slice(1);
   if (PAGES.includes(h) || dayIds.includes(h)) return h;
@@ -148,6 +149,7 @@ function Main() {
           <div className="quick">
             <a className="btn" href="#todo" aria-current={view === "todo" ? "page" : undefined}>✓ 待辦・聯絡</a>
             <a className="btn" href="#upload" aria-current={view === "upload" ? "page" : undefined}>↑ 上傳行程</a>
+            <a className="btn" href="#info" aria-current={view === "info" ? "page" : undefined}>ⓘ 其他資訊</a>
           </div>
         </header>
 
@@ -196,6 +198,7 @@ function Main() {
           {adding && <AddDay family={fam} onDone={(id) => { setAdding(false); if (id) location.hash = `#${id}`; }} />}
           {view === "todo" ? <TodoView />
             : view === "upload" ? <UploadView />
+            : view === "info" ? <InfoView />
             : cur && mode === "all" ? <AllFamiliesDay dateId={cur.id} onOpen={(day, stop, arrive) => setSelected({ day, stop, arrive })} />
             : cur ? <DayView day={cur} family={fam} wx={wx} onOpen={(stop, arrive) => setSelected({ day: cur, stop, arrive })} onRemoved={() => { location.hash = `#${dayIds.find((id) => id !== cur.id) ?? "todo"}`; }} />
             : !adding && <section className="dayhead"><h2>還沒有行程資料</h2><p className="note">管理員還沒把行程放進資料庫（`make seed`）。</p></section>}

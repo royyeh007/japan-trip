@@ -2,9 +2,9 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { clearIntent, supabase, storedInvite } from "./supabase";
-import type { ContactRow, Day, Family, FamilyId, Member, TodoRow } from "./data";
+import type { ContactRow, Day, Family, FamilyId, InfoTab, Member, TodoRow } from "./data";
 
-export interface TripData { families: Family[]; days: Day[]; todos: TodoRow[]; contacts: ContactRow[]; notes: Record<string, string> }
+export interface TripData { families: Family[]; days: Day[]; todos: TodoRow[]; contacts: ContactRow[]; notes: Record<string, string>; info: InfoTab[] }
 export type Phase = "noconfig" | "loading" | "signedout" | "join" | "ready" | "error";
 
 interface Ctx {
@@ -22,7 +22,7 @@ interface Ctx {
   signOut: () => Promise<void>;
 }
 
-const EMPTY: TripData = { families: [], days: [], todos: [], contacts: [], notes: {} };
+const EMPTY: TripData = { families: [], days: [], todos: [], contacts: [], notes: {}, info: [] };
 const TripContext = createContext<Ctx | null>(null);
 
 export function TripProvider({ children }: { children: ReactNode }) {
@@ -78,6 +78,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       todos: (t.data ?? []) as TodoRow[],
       contacts: (c.data ?? []) as ContactRow[],
       notes: extras.notes ?? {},
+      info: Array.isArray(extras.info) ? extras.info : [],
     });
     setTripLoaded(true);
   }, [member]);

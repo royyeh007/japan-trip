@@ -83,3 +83,12 @@ export function contactsFromDays(days: Day[]): { name: string; value: string; d:
   }
   return out;
 }
+
+/** "其他資訊" page content (seed/info.json → extras.info). */
+export type InfoBlock =
+  | { type: "p"; text: string }
+  | { type: "list"; h?: string; items: string[] }
+  | { type: "table"; h?: string; cols: string[]; rows: string[][] }
+  | { type: "flow"; h?: string; steps: { t: string; d: string }[]; branch?: { after: number; options: { tone: "ok" | "bad" | "neutral"; label: string; t: string; d: string }[] } }
+  | { type: "sources"; items: { t: string; u: string }[] };
+export interface InfoTab { id: string; title: string; updated: string; blocks: InfoBlock[] }

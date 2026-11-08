@@ -26,7 +26,10 @@ must(`days（${trip.DAYS.length} 列）`, await sb.from("days").upsert(
   trip.DAYS.map((d) => ({ date_id: d.id, fam: d.fam ?? null, d: d.d, w: d.w, city: d.city, title: d.title, hotel: d.hotel, items: d.items, updated_at: new Date().toISOString() })),
   { onConflict: "date_id,fam" },
 ));
-must("extras", await sb.from("extras").upsert([{ key: "notes", data: { shared: trip.SHARED_NOTE ?? "" } }]));
+must("extras", await sb.from("extras").upsert([
+  { key: "notes", data: { shared: trip.SHARED_NOTE ?? "" } },
+  { key: "info", data: JSON.parse(readFileSync("seed/info.json", "utf8")) },
+]));
 must(`todos（${(trip.TODO ?? []).length} 筆，大家一起）`, await sb.from("todos").upsert(
   (trip.TODO ?? []).map(([key, due, text, done], i) => ({ key, fam: null, due, text, done: !!done, sort: i })), { onConflict: "key" }));
 // 聯絡資料不再 seed：網頁會從行程裡有電話、email 的地點自動帶出；contacts 表只放大家自己加的。
