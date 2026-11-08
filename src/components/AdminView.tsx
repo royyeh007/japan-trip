@@ -160,7 +160,7 @@ function Families() {
           )}
         </div>
       ))}
-      <div className="addrow">
+      <div className="addrow pair">
         <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="新的一家，例：Iris 家" onKeyDown={(e) => e.key === "Enter" && add()} />
         <button type="button" className="btn primary" onClick={add} disabled={busy || !label.trim()}>＋ 新增</button>
       </div>
@@ -222,7 +222,7 @@ function Settings() {
       <div className="panel admin dangerzone">
         <h3>刪除整個行程</h3>
         <p className="note">所有人的行程、待辦、聯絡資料、上傳和聊天紀錄都會刪掉，無法復原。輸入行程名稱「{current?.name}」確認。</p>
-        <div className="addrow">
+        <div className="addrow pair">
           <input value={confirmName} onChange={(e) => setConfirmName(e.target.value)} placeholder={current?.name} />
           <button type="button" className="btn danger" onClick={destroy} disabled={busy || confirmName.trim() !== current?.name}>刪除行程</button>
         </div>

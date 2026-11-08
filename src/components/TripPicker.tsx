@@ -101,7 +101,7 @@ export function TripPicker() {
       <div className="panel">
         <h3>用邀請碼加入</h3>
         <p className="note">家人傳給你的邀請連結點開會自動帶入；也可以把邀請碼貼在這裡。</p>
-        <div className="addrow">
+        <div className="addrow pair">
           <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="邀請碼，例：abc123" autoCapitalize="none" autoCorrect="off" onKeyDown={(e) => e.key === "Enter" && code.trim() && setInvite(code.trim())} />
           <button type="button" className="btn primary" onClick={() => setInvite(code.trim())} disabled={!code.trim()}>加入</button>
         </div>

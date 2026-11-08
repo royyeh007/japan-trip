@@ -623,3 +623,9 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none;bor
 .admin .row .inline input,.admin .row .inline .btn{height:auto;min-height:36px;box-sizing:border-box;align-self:stretch}
 .admin .row .inline .btn{padding-block:0;display:inline-flex;align-items:center}
 .admin .row .inline input{line-height:1.2}
+
+/* two-element add rows (one input + one button): input takes the width, button hugs it, both the same height */
+.addrow.pair{grid-template-columns:minmax(0,1fr) auto !important;align-items:stretch}
+.addrow.pair input,.addrow.pair .btn{height:auto;min-height:38px;box-sizing:border-box}
+.addrow.pair .btn{padding-block:0;white-space:nowrap}
+.addrow.pair input{line-height:1.2}
