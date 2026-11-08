@@ -568,3 +568,13 @@ ol.overview{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:10px}
   .overview > li{break-inside:avoid;border-color:#bbb}
   .ovstops button{border-color:#bbb;background:#fff}
 }
+
+/* centered confirm dialog */
+.dialog{position:fixed;z-index:21;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px 20px 16px;display:grid;gap:10px}
+.dialog h3{font-family:var(--f-display);font-size:1.15rem;margin:0}
+.dialog .note{margin:0}
+.dialog label{display:grid;gap:6px;font-size:.86rem;color:var(--muted)}
+.dialog code{font-family:var(--f-mono);background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--ink)}
+.dialog input{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:9px 12px;width:100%}
+.dialog .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.btn.danger:disabled{opacity:.45;cursor:not-allowed}
