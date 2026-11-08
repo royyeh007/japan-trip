@@ -500,3 +500,11 @@ ul.todo li.note{display:block;color:var(--muted);font-size:.86rem;padding:2px 0}
 @media (max-width:600px){.admin .row{grid-template-columns:1fr 1fr auto}.admin .row .person{grid-column:1 / -1}}
 .dangerzone{border-color:var(--shu)}
 .btn.danger{border-color:var(--shu);color:var(--shu)}
+
+/* selects: our own chevron with room to breathe (the native one sits right on the text) */
+.formgrid select,.admin .row select,.addday select,.addrow select,.famselect,.chatpanel select{
+  appearance:none;-webkit-appearance:none;padding-right:32px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a95ab' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;background-size:14px}
+.famselect{padding-right:28px;background-position:right 9px center;background-size:12px}
+.admin .row select{min-width:7.5em}
