@@ -121,7 +121,7 @@ function StopEditor({ day, stop, arrive, mode, onDone, onCancel }: { day: Day; s
     const e = await editDayItems(current.id, day, (items) => {
       const idx = findStop(items, stop);
       if (idx < 0) return null;
-      let out: Item[] = [...items];
+      const out: Item[] = [...items];
       if (mode === "edit") {
         out[idx] = next;
         const prevIsLeg = idx > 0 && isLeg(out[idx - 1]);
