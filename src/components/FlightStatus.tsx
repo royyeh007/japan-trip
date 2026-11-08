@@ -3,20 +3,20 @@ import { invoke } from "../supabase";
 import { useNow } from "../now";
 
 /** "去 BR192 12/26 松山 07:15 → 羽田 T3 11:00" → { airline: "BR", number: "192", date: "2026-12-26", viaHaneda: true } */
-export function parseFlight(text: string) {
+export function parseFlight(text: string, fallbackDate?: string) {
   const m = text.match(/\b([A-Z]{2}|[A-Z]\d|\d[A-Z])\s?(\d{2,4})\b/);
   const d = text.match(/(\d{1,2})\/(\d{1,2})/);
-  if (!m || !d) return null;
-  const month = Number(d[1]), day = Number(d[2]);
-  const date = `${month === 12 ? 2026 : 2027}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  if (!m || (!d && !fallbackDate)) return null;
+  const month = d ? Number(d[1]) : 0, day = d ? Number(d[2]) : 0;
+  const date = d ? `${month === 12 ? 2026 : 2027}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}` : fallbackDate!;
   return { airline: m[1].toUpperCase(), number: m[2], date, viaHaneda: /羽田|HND/i.test(text), viaNarita: /成田|NRT/i.test(text) };
 }
 
 interface Status { kind: "arr" | "dep"; sched: string; est: string | null; actual: string | null; delayMin: number | null; remark: string; terminal: string; gate: string; counter: string; updated: string }
 
 /** Live status for one flight line. Haneda flights get live data on the day; everything else gets links. */
-export function FlightStatus({ text }: { text: string }) {
-  const f = parseFlight(text);
+export function FlightStatus({ text, date }: { text: string; date?: string }) {
+  const f = parseFlight(text, date);
   const now = useNow();
   const [st, setSt] = useState<Status | null | undefined>(undefined); // undefined = not asked yet
   const [err, setErr] = useState<string | null>(null);

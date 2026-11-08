@@ -440,3 +440,6 @@ ul.todo li.note{display:block;color:var(--muted);font-size:.86rem;padding:2px 0}
 .fl-status.bad .fl-remark{color:var(--shu)}
 .fl-links{display:inline-flex;gap:10px}
 .fl-links a{color:var(--ai);font-size:.78rem}
+.sheet .sec p svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+.askrow{display:grid;gap:6px;border-top:1px dashed var(--line);padding-top:12px}
+.askrow .note{margin:0}

@@ -35,6 +35,12 @@ export function ChatWidget() {
   openRef.current = open;
 
   useEffect(() => { try { localStorage.setItem(key, JSON.stringify(turns.slice(-40))); } catch { /* ignore */ } }, [key, turns]);
+  // Other parts of the page can open the chat with a question ready to send
+  useEffect(() => {
+    const onAsk = (e: Event) => { const t = (e as CustomEvent<string>).detail; if (t) setText(t); setOpen(true); };
+    window.addEventListener("jp-chat-ask", onAsk);
+    return () => window.removeEventListener("jp-chat-ask", onAsk);
+  }, []);
   useEffect(() => { if (open) { setUnread(false); endRef.current?.scrollIntoView({ block: "end" }); setTimeout(() => inputRef.current?.focus(), 50); } }, [open, turns, busy]);
   useEffect(() => {
     if (!open) return;
@@ -112,4 +118,9 @@ export function ChatWidget() {
       </section>
     </>
   );
+}
+
+/** Open the chat panel with this question typed in (the person still presses 送出). */
+export function askClaude(text: string) {
+  window.dispatchEvent(new CustomEvent("jp-chat-ask", { detail: text }));
 }

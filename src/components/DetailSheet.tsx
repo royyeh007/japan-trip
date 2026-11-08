@@ -1,4 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
+import { FlightStatus } from "./FlightStatus";
+import { askClaude } from "./Chat";
+import { isLeg, isoOf } from "../data";
 import type { Day, Memo, Stop } from "../data";
 import { canEdit } from "../data";
 import { supabase } from "../supabase";
@@ -105,6 +108,12 @@ export function DetailSheet({ day, stop, arrive, onClose }: { day: Day; stop: St
     .filter((c): c is string => !!c);
   const travel = arrive ? MODE[arrive.leg].travel : null;
   const info = [...(stop.s ? [stop.s] : []), ...(stop.info ?? [])];
+  // what comes after this stop: the leg out of it and the next stop
+  const idx = day.items.indexOf(stop);
+  const nextItem = idx >= 0 ? day.items[idx + 1] : undefined;
+  const departLeg = nextItem && isLeg(nextItem) ? nextItem : undefined;
+  const nextStop = day.items.slice(idx + 1).find((it): it is Stop => !isLeg(it));
+  const ask = () => { onClose(); setTimeout(() => askClaude(`「${stop.n}」（${day.d}）這個地方幫我查一下：營業時間或開放時間、怎麼去、要注意什麼、有什麼推薦。`), 50); };
 
   return (
     <>
@@ -130,6 +139,14 @@ export function DetailSheet({ day, stop, arrive, onClose }: { day: Day; stop: St
             )}
           </div>
           {arrive && <div className="sec"><h4>怎麼去</h4><p>{arrive.txt}</p></div>}
+          {(departLeg || nextStop) && (
+            <div className="sec">
+              <h4>接下來</h4>
+              {departLeg && <p><ModeIcon mode={departLeg.leg} /> {departLeg.txt}</p>}
+              {departLeg?.leg === "flight" && <FlightStatus text={departLeg.txt} date={isoOf(day.d)} />}
+              {nextStop && <p className="muted">下一站 {nextStop.t} {nextStop.n}</p>}
+            </div>
+          )}
           {stop.book && (
             <div className="sec"><h4>訂位資訊</h4><div className={`bookbox ${stop.st ?? ""}`}><List items={stop.book} /></div></div>
           )}
@@ -146,6 +163,10 @@ export function DetailSheet({ day, stop, arrive, onClose }: { day: Day; stop: St
           {info.length > 0 && <div className="sec"><h4>資訊</h4><List items={info} /></div>}
           {stop.tips && <div className="sec"><h4>提醒</h4><List items={stop.tips} /></div>}
           <Memos day={day} stop={stop} />
+          <div className="sec askrow">
+            <button type="button" className="btn" onClick={ask}>✦ 問 Claude 這個地點</button>
+            <span className="note">資料不夠的話，讓它上網查營業時間、怎麼去、推薦。</span>
+          </div>
         </div>
       </aside>
     </>
