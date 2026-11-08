@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
 import { COMMON_TZ } from "../data";
+import { fillTripDays } from "../days";
 import type { InviteRow, Member, Role } from "../data";
 
 const newCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("");
@@ -166,7 +167,7 @@ function Families() {
 }
 
 function Settings() {
-  const { current, refreshMemberships, leaveToPicker } = useTrip();
+  const { current, trip, reload, refreshMemberships, leaveToPicker } = useTrip();
   const [name, setName] = useState(current?.name ?? "");
   const [start, setStart] = useState(current?.start_date ?? "");
   const [end, setEnd] = useState(current?.end_date ?? "");
@@ -179,7 +180,12 @@ function Settings() {
     if (!supabase || !current) return;
     setBusy(true); setMsg(null);
     const { error } = await supabase.from("trips").update({ name: name.trim(), start_date: start, end_date: end, place: place.trim(), tz }).eq("id", current.id);
-    if (error) setMsg(error.message); else { await refreshMemberships(); setMsg("已儲存"); }
+    if (error) { setMsg(error.message); setBusy(false); return; }
+    // dates extended → add the missing empty days
+    let added = 0;
+    try { added = await fillTripDays(current.id, start, end, place, trip.days.filter((d) => !d.fam).map((d) => d.id)); } catch { /* ignore */ }
+    await Promise.all([refreshMemberships(), reload()]);
+    setMsg(added ? `已儲存，補了 ${added} 個空白日子` : "已儲存");
     setBusy(false);
   };
   const destroy = async () => {
@@ -196,6 +202,7 @@ function Settings() {
     <>
       <div className="panel admin">
         <h3>行程設定</h3>
+        <p className="note">延長日期時，多出來的日子會自動補上空白的「大家一起」版本。</p>
         <div className="formgrid">
           <label>行程名稱<input value={name} onChange={(e) => setName(e.target.value)} /></label>
           <label>去哪裡<input value={place} onChange={(e) => setPlace(e.target.value)} placeholder="例：日本・東京、長野" /></label>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
 import { dotDate, tripLength } from "../data";
+import { fillTripDays } from "../days";
 
 function CreateTrip({ onCreated, onCancel }: { onCreated: (id: string) => void; onCancel: () => void }) {
   const { session } = useTrip();
@@ -20,13 +21,15 @@ function CreateTrip({ onCreated, onCancel }: { onCreated: (id: string) => void; 
     setBusy(true); setErr(null);
     const { data, error } = await supabase.rpc("create_trip", { p_name: name.trim(), p_start: start, p_end: end, p_place: place.trim(), p_family_label: famLabel.trim(), p_my_name: myName.trim() });
     if (error) { setErr(error.message); setBusy(false); return; }
+    // every date gets an empty "everyone" day so the trip is ready to fill in
+    try { await fillTripDays(String(data), start, end, place); } catch { /* the days can be added later from the date strip */ }
     onCreated(String(data));
   };
 
   return (
     <div className="panel">
       <h3>建立新行程</h3>
-      <p className="note">建立的人就是這個行程的管理員，之後可以邀請家人、管理團員。</p>
+      <p className="note">建立的人就是這個行程的管理員，之後可以邀請家人、管理團員。開始到結束的每一天會先建好空白的日子。</p>
       <div className="formgrid">
         <label>行程名稱<input value={name} onChange={(e) => setName(e.target.value)} placeholder="例：2027 春天京都" /></label>
         <label>去哪裡（可空）<input value={place} onChange={(e) => setPlace(e.target.value)} placeholder="例：日本・京都、大阪" /></label>
