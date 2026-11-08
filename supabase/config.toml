@@ -24,3 +24,6 @@ secret = "env(GOOGLE_CLIENT_SECRET)"
 
 [functions.flight-status]
 verify_jwt = false
+
+[functions.flight-refresh]
+verify_jwt = false

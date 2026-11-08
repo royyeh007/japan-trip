@@ -443,3 +443,23 @@ ul.todo li.note{display:block;color:var(--muted);font-size:.86rem;padding:2px 0}
 .sheet .sec p svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
 .askrow{display:grid;gap:6px;border-top:1px dashed var(--line);padding-top:12px}
 .askrow .note{margin:0}
+
+/* flight card in the timeline */
+.leg.flight{align-items:start}
+.flightcard{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 16px;margin-block:4px;display:grid;gap:6px;min-width:0}
+.flightcard.bad{border-color:var(--shu);background:var(--shu-soft)}
+.flightcard.ok{border-color:var(--pine)}
+.fc-top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.fc-code{font-family:var(--f-display);font-weight:900;font-size:1.35rem;line-height:1.2}
+.fc-status{font-weight:800;font-size:1.05rem;color:var(--ai);background:var(--ai-soft);border-radius:999px;padding:3px 12px}
+.fc-status.bad{color:var(--surface);background:var(--shu)}
+.fc-status.ok{color:var(--surface);background:var(--pine)}
+.fc-route{font-size:1rem;font-weight:600}
+.fc-times{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.86rem;font-family:var(--f-mono)}
+.fc-gate{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin-top:2px}
+.fc-big{font-family:var(--f-mono);font-weight:800;font-size:1.6rem;line-height:1.2;letter-spacing:.02em}
+.fc-mid{font-family:var(--f-mono);font-weight:700;font-size:1.05rem;color:var(--muted)}
+.fc-extra{font-size:.84rem}
+.flightcard .fl-status{font-size:.76rem}
+.leg.flight.done .flightcard{opacity:.6}
+@media (max-width:480px){.fc-code{font-size:1.2rem}.fc-big{font-size:1.4rem}}

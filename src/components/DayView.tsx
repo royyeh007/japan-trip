@@ -6,14 +6,24 @@ import type { Day, Family, Stop } from "../data";
 import { MODE, dayRouteURL, dirURL, linkLegs } from "../maps";
 import type { LinkedLeg } from "../maps";
 import { DownloadIcon, ModeIcon, RouteIcon } from "../icons";
+import { FlightCard } from "./FlightStatus";
 import { KIND, SEAL } from "../labels";
 import { openForm } from "../form";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
 import { toMinutes, useNow, useNowLine } from "../now";
 
-function LegRow({ leg, done }: { leg: LinkedLeg; done?: boolean }) {
+function LegRow({ leg, done, date }: { leg: LinkedLeg; done?: boolean; date?: string }) {
   const { travel, label } = MODE[leg.leg];
+  if (leg.leg === "flight") {
+    return (
+      <li className={`leg flight${done ? " done" : ""}`}>
+        <span />
+        <span className="rail" />
+        <FlightCard text={leg.txt} date={date} />
+      </li>
+    );
+  }
   const inner = (
     <>
       <span className="mi"><ModeIcon mode={leg.leg} /></span>
@@ -75,7 +85,7 @@ export function Timeline({ day, onOpen }: { day: Day; onOpen?: (s: Stop, arrive?
       {day.items.map((it, i) => (
         <Fragment key={i}>
           {isLeg(it) ? (
-            <LegRow leg={legs.get(i)!} done={isToday && i <= lastDone} />
+            <LegRow leg={legs.get(i)!} done={isToday && i <= lastDone} date={isoOf(day.d)} />
           ) : (
             <StopRow stop={it} done={isToday && i <= lastDone} onOpen={() => onOpen?.(it, arrive.get(i))} />
           )}

@@ -1,0 +1,18 @@
+# 每 15 分鐘叫一次 flight-refresh：新航班查一次、出發前一天查一次、當天每 12～25 分鐘更新（aviationstack 省著用）。
+# 松山、羽田的航班不經過這裡，直接讀機場免費資料。需要 repo secret FLIGHT_CRON_TOKEN（和 Supabase 的 CRON_TOKEN 相同）。
+name: Refresh flight status
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -fsS -X POST "${{ vars.VITE_SUPABASE_URL }}/functions/v1/flight-refresh" \
+            -H "Authorization: Bearer ${{ secrets.FLIGHT_CRON_TOKEN }}" \
+            -H "apikey: ${{ vars.VITE_SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json" -d '{}'

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { FAMILY_LABELS, isLeg } from "../data";
 import type { Day, Proposal, Stop, Upload as UploadRow } from "../data";
-import { supabase } from "../supabase";
+import { invoke, supabase } from "../supabase";
 import { useTrip } from "../trip";
 
 export const STATUS: Record<UploadRow["status"], string> = { pending: "等你確認", approved: "已更新", rejected: "已取消", failed: "解析失敗" };
@@ -69,6 +69,7 @@ export async function applyProposal(id: string, p: Proposal, days: Day[], review
   if (p.flights.length > 0) {
     const { error } = await supabase.from("families").update({ flights: p.flights }).eq("id", p.family_id);
     if (error) throw new Error(error.message);
+    invoke("flight-refresh", { flights: p.flights }).catch(() => { /* best effort: the 15-minute schedule will pick it up */ });
   }
   const { error } = await supabase.from("uploads").update({ status: "approved", reviewed_at: now, reviewed_by: reviewedBy }).eq("id", id);
   if (error) throw new Error(error.message);
