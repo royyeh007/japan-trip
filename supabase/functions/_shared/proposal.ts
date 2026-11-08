@@ -95,7 +95,7 @@ export const FORMAT_GUIDE = `行程格式說明：
 - leg 的 leg：計程車 taxi、走路 walk、電車 train、巴士 bus、包車 charter、接駁車 shuttle、飛機 flight。
 - 訂位狀態 st：已訂 ok、要訂 todo、待定 tbd、不用訂 null。
 - 時間用 24 小時制 H:MM（8:30、13:00）。清單欄位（book、rec、tips、info）一條一項，表單裡用「；」分開的要拆開。
-- q 是 Google 地圖的搜尋字，能用日文店名最好。
+- q 是 Google 地圖的搜尋字：用官方日文店名＋區域（例「ミキモト 銀座本店」）；新開的店、連鎖店或名字很普通的店，一定在 q 後面加上地址（例「東京銀座 茅乃舎 東京都中央区銀座3-4-8」），不然地圖會找錯。有查到地址就同時填 addr。
 - 12/28–1/1 是四家一起的日子（scope=shared）；12/26、12/27、1/2 各家自己走（scope=family）。
 - 如果某天是「跟某家一起」，放進 joins（有「從幾點開始」就填 from），不要重抄那家的行程。
 - 家庭 id：lily=Lily 家、yanzhi=Yenchih 家、claire=Claire 家、iris=Iris 家。`;
