@@ -48,6 +48,23 @@ ${FORMAT_GUIDE}
 - 點開地點最下面可以加備註。旅行當天打開會有一條「現在」的線，旁邊有開關和預覽。航班卡片當天會顯示準點狀態和登機門。
 - 右下角就是我（問 Claude）。`;
 
+// Sonnet 5.5 牌價（美金／百萬 token，2026-11 官方定價頁）：輸入 2、快取寫入 5 分鐘 2.5／1 小時 4、快取讀取 0.1、輸出 10；網頁搜尋每次 0.01
+const PRICE = { input: 2, cache_5m: 2.5, cache_1h: 4, read: 0.1, output: 10, search: 0.01 };
+/** 把這則訊息所有 API 呼叫的用量加總，估算美金。工具每跑一輪就是一次完整呼叫（前面的規則＋行程會重送，但有快取）。 */
+function summarizeUsage(calls: Record<string, unknown>[], tools: string[], lookup: boolean, toolErrors: string[], model?: string) {
+  const n = (v: unknown) => (typeof v === "number" ? v : 0);
+  const t = { calls: calls.length, input: 0, cache_write_1h: 0, cache_write_5m: 0, cache_read: 0, output: 0, searches: 0 };
+  for (const u of calls) {
+    t.input += n(u.input_tokens); t.cache_read += n(u.cache_read_input_tokens); t.output += n(u.output_tokens);
+    const cc = u.cache_creation as Record<string, unknown> | undefined;
+    if (cc) { t.cache_write_1h += n(cc.ephemeral_1h_input_tokens); t.cache_write_5m += n(cc.ephemeral_5m_input_tokens); }
+    else t.cache_write_1h += n(u.cache_creation_input_tokens);
+    t.searches += n((u.server_tool_use as Record<string, unknown> | undefined)?.web_search_requests);
+  }
+  const usd = (t.input * PRICE.input + t.cache_write_1h * PRICE.cache_1h + t.cache_write_5m * PRICE.cache_5m + t.cache_read * PRICE.read + t.output * PRICE.output) / 1e6 + t.searches * PRICE.search;
+  return { ...t, tools, tool_errors: toolErrors, lookup, model, usd: Math.round(usd * 10000) / 10000 };
+}
+
 Deno.serve(handle(async (req) => {
   const { user, admin, member, uid, who } = await requireMember(req);
   const body = await req.json().catch(() => ({})) as { text?: string };
@@ -63,6 +80,10 @@ Deno.serve(handle(async (req) => {
   const { data: ph, error: phErr } = await admin.from("chat_messages").insert({ user_id: uid, role: "assistant", content: "", status: "pending" }).select("id").single();
   if (phErr || !ph) throw new HttpError(500, `存不進資料庫：${phErr?.message}`);
 
+  const calls: Record<string, unknown>[] = [];
+  const toolsUsed: string[] = [];
+  const toolErrors: string[] = []; // 網頁搜尋／讀取失敗的錯誤碼
+  let lookup = false;
   const work = (async () => {
     try {
       const [{ data: days }, { data: families }, { data: extras }, { data: todos }, { data: contacts }] = await Promise.all([
@@ -84,6 +105,7 @@ Deno.serve(handle(async (req) => {
       };
       const today = new Date().toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" });
       const needsLookup = /https?:\/\//i.test(text) || /(這家|這間|這個地方|哪裡|在哪|怎麼去|營業|幾點開|推薦|好吃|值得)/.test(text);
+      lookup = needsLookup;
 
       const proposals: { id: string; proposal: unknown }[] = [];
       const propose = betaZodTool({
@@ -134,14 +156,27 @@ Deno.serve(handle(async (req) => {
         ],
         messages: turns.map((t) => ({ role: t.role, content: t.content })),
       });
-      const final = await runner.runUntilDone();
+      // 一輪一輪跑，順便記每次呼叫的用量
+      let final: Awaited<ReturnType<typeof runner.runUntilDone>> | undefined;
+      for await (const m of runner) {
+        calls.push(m.usage as unknown as Record<string, unknown>);
+        for (const b of m.content) {
+          if (b.type === "tool_use" || b.type === "server_tool_use") toolsUsed.push(b.name);
+          const c = (b as { content?: unknown }).content as { error_code?: string } | unknown[] | undefined;
+          if ((b.type === "web_search_tool_result" || b.type === "web_fetch_tool_result") && c && !Array.isArray(c) && typeof c.error_code === "string") toolErrors.push(`${b.type}:${c.error_code}`);
+        }
+        final = m;
+      }
+      if (!final) throw new Error("沒有回覆");
       if (final.stop_reason === "refusal") throw new Error("Claude 不方便回答這個問題");
       const reply = final.content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
-      await admin.from("chat_messages").update({ content: reply || "（沒有回覆）", proposals, status: "done" }).eq("id", ph.id);
+      const usage = summarizeUsage(calls, toolsUsed, lookup, toolErrors, final.model);
+      console.log("chat usage", JSON.stringify(usage));
+      await admin.from("chat_messages").update({ content: reply || "（沒有回覆）", proposals, status: "done", usage }).eq("id", ph.id);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("chat failed:", msg);
-      await admin.from("chat_messages").update({ status: "error", error: msg, content: `出錯了：${msg}` }).eq("id", ph.id);
+      await admin.from("chat_messages").update({ status: "error", error: msg, content: `出錯了：${msg}`, usage: calls.length ? summarizeUsage(calls, toolsUsed, lookup, toolErrors) : null }).eq("id", ph.id);
     }
   })();
   EdgeRuntime.waitUntil(work); // 回應送出後繼續在背景跑

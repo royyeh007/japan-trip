@@ -69,6 +69,7 @@ help:
 	@echo "  fn-deploy        deploy Edge Functions (parse-upload, chat)"
 	@echo "  secrets ANTHROPIC_API_KEY=...  store the Claude key"
 	@echo "  seed             push seed/trip.ts into the database"
+	@echo "  usage [N=15]     what the AI chat cost, per day and for the last N replies"
 	@echo "  setup            db-push + fn-deploy + seed"
 
 # ---------- Supabase ----------
@@ -77,6 +78,11 @@ REF ?=
 ## Push local seed/trip.ts (families, days, todo, contacts, form, admin, invite) into Supabase
 seed: node_modules
 	node seed/seed.mjs
+
+## Show what the AI chat cost (per day, and the last N replies): make usage N=30
+N ?= 15
+usage: node_modules
+	node seed/usage.mjs $(N)
 
 ## Link this folder to your Supabase project: make link REF=<project-ref>
 link:
