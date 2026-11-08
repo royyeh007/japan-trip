@@ -1,12 +1,12 @@
 // 排程更新航班資料（aviationstack 省著用）。
 //   GitHub Actions 每小時用 CRON_TOKEN 呼叫一次（全部航班），或成員在新增航班後呼叫（只做「新增時查一次」）。
-//   每個非羽田／松山的航班：
+//   每個航班（羽田、松山也一樣走 aviationstack，機場免費資料只當備援）：
 //     info：第一次看到這個航班時查一次（確認航班號、拿正式時間和航廈）
 //     eve ：出發前一天查一次
 //     live：當天從起飛前 3 小時到起飛後 3 小時，每 30 分鐘一次（起飛前後一小時內每 12 分鐘），降落或取消就停，每班最多 12 次
 import { handle, json, HttpError } from "../_shared/http.ts";
 import { clients, requireMember } from "../_shared/supa.ts";
-import { LIVE_BUDGET_PER_FLIGHT, avFetchAndStore, flightKey, freeCovered, minutes, nowJST, parseFlightText } from "../_shared/flights.ts";
+import { LIVE_BUDGET_PER_FLIGHT, avFetchAndStore, flightKey, minutes, nowJST, parseFlightText } from "../_shared/flights.ts";
 import type { AvCache, Query, Row } from "../_shared/flights.ts";
 
 const addDays = (iso: string, n: number) => { const d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -20,13 +20,13 @@ Deno.serve(handle(async (req) => {
   if (!isCron) {
     await requireMember(req); // a member adding flights: only the "info" pass, only for what they sent
     const body = await req.json().catch(() => ({})) as { flights?: string[] };
-    onlyFlights = (body.flights ?? []).map(parseFlightText).filter((f): f is NonNullable<typeof f> => !!f && !freeCovered(f.airports));
+    onlyFlights = (body.flights ?? []).map(parseFlightText).filter((f): f is NonNullable<typeof f> => !!f);
     if (onlyFlights.length === 0) return json({ done: [], note: "沒有需要查的航班" });
   }
 
   // all flights from every family's flight lines
   const { data: fams } = await admin.from("families").select("id, flights");
-  const all = (fams ?? []).flatMap((f: Row) => (f.flights as string[]).map(parseFlightText).filter((x): x is NonNullable<typeof x> => !!x && !freeCovered(x.airports)));
+  const all = (fams ?? []).flatMap((f: Row) => (f.flights as string[]).map(parseFlightText).filter((x): x is NonNullable<typeof x> => !!x));
   const targets = onlyFlights ?? all;
   const now = nowJST();
   const today = now.slice(0, 10), nowMin = minutes(now.slice(11, 16));

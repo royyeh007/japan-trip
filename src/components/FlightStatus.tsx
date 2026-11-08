@@ -28,7 +28,7 @@ export function useFlightStatus(text: string, date?: string) {
   const [res, setRes] = useState<Result | undefined>(undefined);
   const [err, setErr] = useState<string | null>(null);
   const today = !!f && f.date === now.date;
-  const shouldAsk = !!f && (today || !f.freeOnly);
+  const shouldAsk = !!f;
   useEffect(() => {
     if (!shouldAsk || !f) return;
     let alive = true;
