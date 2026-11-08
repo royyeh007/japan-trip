@@ -3,6 +3,7 @@ import { supabase } from "../supabase";
 import { useTrip } from "../trip";
 import { dotDate, tripLength } from "../data";
 import { fillTripDays } from "../days";
+import { GuideView } from "./GuideView";
 
 function CreateTrip({ onCreated, onCancel }: { onCreated: (id: string) => void; onCancel: () => void }) {
   const { session } = useTrip();
@@ -95,6 +96,8 @@ export function TripPicker() {
           <button type="button" className="btn primary" onClick={() => setCreating(true)}>＋ 建立新行程</button>
         </div>
       ))}
+      <h2>使用教學</h2>
+      <GuideView role="member" compact />
       <div className="panel">
         <h3>用邀請碼加入</h3>
         <p className="note">家人傳給你的邀請連結點開會自動帶入；也可以把邀請碼貼在這裡。</p>

@@ -14,6 +14,7 @@ import { FlightStatus } from "./components/FlightStatus";
 import { InfoView } from "./components/InfoView";
 import { AdminView } from "./components/AdminView";
 import { Overview } from "./components/Overview";
+import { GuideView } from "./components/GuideView";
 import { Login } from "./components/Login";
 import { JoinTrip } from "./components/JoinTrip";
 import { TripPicker } from "./components/TripPicker";
@@ -28,7 +29,7 @@ const store = {
   set(k: string, v: string) { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } },
 };
 
-const PAGES = ["overview", "todo", "upload", "info", "admin"];
+const PAGES = ["overview", "todo", "upload", "info", "admin", "guide"];
 function currentView(dayIds: string[], dayKey: string, todayId?: string) {
   const h = location.hash.slice(1);
   if (PAGES.includes(h) || dayIds.includes(h)) return h;
@@ -152,6 +153,7 @@ function TripMenu() {
         <small>{member?.name ?? member?.email}</small>
         <button type="button" onClick={() => { close(); leaveToPicker(); }}>切換行程</button>
         {member?.role === "admin" && <a href="#admin" onClick={close}>管理行程</a>}
+        <a href="#guide" onClick={close}>使用教學</a>
         <button type="button" onClick={rename}>改我的名字</button>
         <button type="button" className="danger" onClick={leave}>退出這個行程</button>
         <button type="button" onClick={signOut}>登出</button>
@@ -321,6 +323,7 @@ function Main() {
             : view === "upload" ? <UploadView />
             : view === "info" ? <InfoView />
             : view === "admin" ? <AdminView />
+            : view === "guide" ? <GuideView role={member?.role ?? "member"} />
             : cur && mode === "all" ? <AllFamiliesDay dateId={cur.id} onOpen={(day, stop, arrive) => setSelected({ day, stop, arrive })} />
             : cur ? <DayView day={cur} family={fam} wx={wx} onOpen={(stop, arrive) => setSelected({ day: cur, stop, arrive })} onRemoved={() => { location.hash = `#${dayIds.find((id) => id !== cur.id) ?? "todo"}`; }} />
             : !adding && (
