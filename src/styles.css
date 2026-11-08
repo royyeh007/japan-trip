@@ -428,3 +428,15 @@ ul.todo li.note{display:block;color:var(--muted);font-size:.86rem;padding:2px 0}
 .branch .opt p{margin:2px 0 0;font-size:.82rem;color:var(--muted)}
 .othersown{margin:8px 0 0;font-size:.82rem}
 .othersown .link{margin-left:6px;font-size:.82rem}
+
+/* live flight status under the flight chips */
+.flightlive{display:grid;gap:4px}
+.fl-status{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:.8rem;line-height:1.5}
+.fl-status.live{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.fl-status.live.bad{border-color:var(--shu);background:var(--shu-soft)}
+.fl-status.live.ok{border-color:var(--pine)}
+.fl-tag{font-family:var(--f-mono);font-size:.7rem;font-weight:800;letter-spacing:.08em;background:var(--ink);color:var(--paper);border-radius:4px;padding:1px 6px}
+.fl-remark{font-weight:700;color:var(--ai)}
+.fl-status.bad .fl-remark{color:var(--shu)}
+.fl-links{display:inline-flex;gap:10px}
+.fl-links a{color:var(--ai);font-size:.78rem}

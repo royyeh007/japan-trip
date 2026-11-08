@@ -10,6 +10,7 @@ import { UploadView } from "./components/Upload";
 import { ChatWidget } from "./components/Chat";
 import { AddDay } from "./components/AddDay";
 import { AllFamiliesDay } from "./components/AllFamiliesDay";
+import { FlightStatus } from "./components/FlightStatus";
 import { InfoView } from "./components/InfoView";
 import { Login } from "./components/Login";
 import { Join } from "./components/Join";
@@ -155,6 +156,11 @@ function Main() {
               : <span className="flight muted">去回航班待補</span>}
             {trip.notes.shared && <span className="flight">{trip.notes.shared}</span>}
           </div>
+          {fam.flights.length > 0 && (
+            <div className="flightlive">
+              {fam.flights.map((f) => <FlightStatus key={f} text={f} />)}
+            </div>
+          )}
           <div className="quick">
             <a className="btn" href="#todo" aria-current={view === "todo" ? "page" : undefined}>✓ 待辦・聯絡</a>
             <a className="btn" href="#upload" aria-current={view === "upload" ? "page" : undefined}>↑ 上傳行程</a>

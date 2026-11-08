@@ -21,3 +21,6 @@ enable_anonymous_sign_ins = false
 enabled = true
 client_id = "env(GOOGLE_CLIENT_ID)"
 secret = "env(GOOGLE_CLIENT_SECRET)"
+
+[functions.flight-status]
+verify_jwt = false
