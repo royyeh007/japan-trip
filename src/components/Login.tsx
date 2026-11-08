@@ -39,7 +39,7 @@ export function Login({ invite }: { invite: string | null }) {
         {invite && info === undefined && <p className="note">確認邀請中…</p>}
         {invite && info && <p className="note">你收到「<b>{info.name}</b>」（{dotDate(info.start_date)} — {dotDate(info.end_date)}）的邀請。用 Google 登入後選一下你是哪一家就加入了。</p>}
         {invite && info === null && <p className="note err">這個邀請連結不對或已經用完，跟邀請你的人再要一個。登入後也可以在下面重新輸入邀請碼。</p>}
-        {!invite && <p className="note">行程只給同行的人看。用 Google 登入後，可以建立新行程，或用家人傳的邀請碼加入他們的行程。</p>}
+        {!invite && <p className="note">只給被邀請的人用。第一次來需要家人傳的邀請碼（邀請連結會自動帶入）；已經加入過的人直接用 Google 登入。</p>}
       </header>
       <div className="joinform">
         <button type="button" className="btn primary big" onClick={google} disabled={busy}>
