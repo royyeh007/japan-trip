@@ -98,9 +98,14 @@ function TripMenu() {
     await refreshMemberships();
     leaveToPicker();
   };
+  const short = (member?.name ?? member?.email?.split("@")[0] ?? "我").split(/\s+/)[0];
   return (
     <details className="menu" ref={ref}>
-      <summary aria-label="更多" title="更多">⋯</summary>
+      <summary aria-label="帳號與行程選單" title="切換行程、管理、登出">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+        <span className="mname">{short}</span>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+      </summary>
       <div className="list">
         <small>{member?.name ?? member?.email}</small>
         <button type="button" onClick={() => { close(); leaveToPicker(); }}>切換行程</button>

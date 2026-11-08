@@ -485,7 +485,11 @@ ul.todo li.note{display:block;color:var(--muted);font-size:.86rem;padding:2px 0}
 
 /* hero "⋯" menu */
 .menu{position:relative;margin-left:auto}
-.menu summary{list-style:none;cursor:pointer;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;font-weight:900;font-size:1.1rem;line-height:1}
+.menu summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 12px;border-radius:999px;border:1.5px solid var(--ai);background:var(--ai-soft);color:var(--ai);font-weight:700;font-size:.86rem;line-height:1;white-space:nowrap}
+.menu summary:hover{background:var(--ai);color:var(--surface)}
+.menu[open] summary{background:var(--ai);color:var(--surface)}
+.menu .mname{max-width:8em;overflow:hidden;text-overflow:ellipsis}
+.menu summary svg{flex:none}
 .menu summary::-webkit-details-marker{display:none}
 .menu .list{position:absolute;right:0;top:40px;z-index:8;min-width:200px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:grid;padding:6px}
 .menu .list button,.menu .list a{all:unset;cursor:pointer;padding:9px 12px;border-radius:8px;font-size:.9rem;color:var(--ink)}
