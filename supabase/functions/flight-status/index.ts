@@ -3,7 +3,7 @@
 //   其他機場：只讀 flight-refresh 排程存進 flight_cache 的最新一筆（info → eve → live），這裡不花 aviationstack 額度。
 import { handle, json, HttpError } from "../_shared/http.ts";
 import { requireMember } from "../_shared/supa.ts";
-import { HND, TSA, avFetchAndStore, flightKey, getJson, matchHND, matchTSA, minutes, nowJST } from "../_shared/flights.ts";
+import { HND, LIVE_BUDGET_PER_FLIGHT, TSA, avFetchAndStore, flightKey, getJson, matchHND, matchTSA, minutes, nowJST } from "../_shared/flights.ts";
 import type { AvCache, Query, Row, Status } from "../_shared/flights.ts";
 
 Deno.serve(handle(async (req) => {
@@ -34,8 +34,9 @@ Deno.serve(handle(async (req) => {
         const ageMin = live ? (Date.now() - new Date(live.fetched_at).getTime()) / 60000 : Infinity;
         const depMin = d.schedDep ? minutes(d.schedDep) : null;
         const inWindow = depMin == null ? true : minutes(now.slice(11, 16)) >= depMin - 180 && minutes(now.slice(11, 16)) <= depMin + 180;
-        if (inWindow && !(live?.data as AvCache | undefined)?.final && ageMin >= 15) {
-          const r = await avFetchAndStore(admin, q, `${base}:live`, "live");
+        const used = (live?.data as AvCache | undefined)?.liveCount ?? 0;
+        if (inWindow && !(live?.data as AvCache | undefined)?.final && ageMin >= 15 && used < LIVE_BUDGET_PER_FLIGHT) {
+          const r = await avFetchAndStore(admin, q, `${base}:live`, "live", used);
           if (r.ok && r.data) pick = { key: `${base}:live`, data: r.data, fetched_at: new Date().toISOString() };
         }
       }

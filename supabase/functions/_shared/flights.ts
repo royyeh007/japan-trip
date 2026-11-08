@@ -126,10 +126,11 @@ export function avToStatuses(f: Row, updated: string): Status[] {
   return out;
 }
 
-export interface AvCache { statuses: Status[]; phase: "info" | "eve" | "live"; final?: boolean; schedDep?: string | null; flightDate?: string; note?: string }
+export interface AvCache { statuses: Status[]; phase: "info" | "eve" | "live"; final?: boolean; schedDep?: string | null; flightDate?: string; note?: string; liveCount?: number }
+export const LIVE_BUDGET_PER_FLIGHT = 12;
 
 /** Spend one aviationstack request (respecting the monthly cap) and store the result under `cacheKey`. */
-export async function avFetchAndStore(admin: SupabaseClient, q: Query, cacheKey: string, phase: AvCache["phase"]): Promise<{ ok: boolean; data?: AvCache; note: string }> {
+export async function avFetchAndStore(admin: SupabaseClient, q: Query, cacheKey: string, phase: AvCache["phase"], liveCount = 0): Promise<{ ok: boolean; data?: AvCache; note: string }> {
   const key = Deno.env.get("AVIATIONSTACK_KEY");
   if (!key) return { ok: false, note: "沒有設定 aviationstack key" };
   const now = nowJST();
@@ -145,8 +146,8 @@ export async function avFetchAndStore(admin: SupabaseClient, q: Query, cacheKey:
   const f = rows.find((r) => r.flight_date === q.date) ?? rows[0];
   const updated = now.replace("T", " ").slice(0, 16);
   const data: AvCache = f
-    ? { statuses: avToStatuses(f, updated), phase, final: ["landed", "cancelled", "diverted"].includes(f.flight_status), schedDep: localHHMM(f.departure?.scheduled), flightDate: f.flight_date }
-    : { statuses: [], phase, note: res?.error ? `aviationstack：${res.error.message ?? JSON.stringify(res.error)}` : "aviationstack 查不到這個航班號" };
+    ? { statuses: avToStatuses(f, updated), phase, final: ["landed", "cancelled", "diverted"].includes(f.flight_status), schedDep: localHHMM(f.departure?.scheduled), flightDate: f.flight_date, liveCount: phase === "live" ? liveCount + 1 : undefined }
+    : { statuses: [], phase, note: res?.error ? `aviationstack：${res.error.message ?? JSON.stringify(res.error)}` : "aviationstack 查不到這個航班號", liveCount: phase === "live" ? liveCount + 1 : undefined };
   await admin.from("flight_cache").upsert({ key: cacheKey, data, fetched_at: new Date().toISOString() });
   return { ok: true, data, note: `aviationstack 本月第 ${used + 1} 次` };
 }

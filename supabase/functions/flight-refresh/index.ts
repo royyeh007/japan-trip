@@ -3,10 +3,10 @@
 //   每個非羽田／松山的航班：
 //     info：第一次看到這個航班時查一次（確認航班號、拿正式時間和航廈）
 //     eve ：出發前一天查一次
-//     live：當天從起飛前 3 小時到起飛後 3 小時，每 25 分鐘一次（起飛前後一小時內每 12 分鐘），降落或取消就停
+//     live：當天從起飛前 3 小時到起飛後 3 小時，每 30 分鐘一次（起飛前後一小時內每 12 分鐘），降落或取消就停，每班最多 12 次
 import { handle, json, HttpError } from "../_shared/http.ts";
 import { clients, requireMember } from "../_shared/supa.ts";
-import { avFetchAndStore, flightKey, freeCovered, minutes, nowJST, parseFlightText } from "../_shared/flights.ts";
+import { LIVE_BUDGET_PER_FLIGHT, avFetchAndStore, flightKey, freeCovered, minutes, nowJST, parseFlightText } from "../_shared/flights.ts";
 import type { AvCache, Query, Row } from "../_shared/flights.ts";
 
 const addDays = (iso: string, n: number) => { const d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -58,13 +58,15 @@ Deno.serve(handle(async (req) => {
       const live = have.get(`${base}:live`);
       const liveData = live?.data as AvCache | undefined;
       if (liveData?.final) continue;
+      const used = liveData?.liveCount ?? 0;
+      if (used >= LIVE_BUDGET_PER_FLIGHT) continue; // 這班今天的額度用完了
       const schedDep = liveData?.schedDep ?? info?.schedDep ?? null;
       const depMin = schedDep ? minutes(schedDep) : null;
       const inWindow = depMin == null ? true : nowMin >= depMin - 180 && nowMin <= depMin + 180;
       const near = depMin != null && Math.abs(nowMin - depMin) <= 60;
       const ageMin = live ? (Date.now() - new Date(live.fetched_at).getTime()) / 60000 : Infinity;
-      if (inWindow && ageMin >= (near ? 12 : 25)) {
-        const r = await avFetchAndStore(admin, q, `${base}:live`, "live");
+      if (inWindow && ageMin >= (near ? 12 : 30)) {
+        const r = await avFetchAndStore(admin, q, `${base}:live`, "live", used);
         done.push({ flight: `${flightKey(q)} ${q.date}`, phase: "live", note: r.note });
       }
     }
