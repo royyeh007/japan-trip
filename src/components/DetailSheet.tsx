@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { FlightStatus } from "./FlightStatus";
 import { askClaude } from "./Chat";
-import { isLeg, isoOf } from "../data";
+import { isLeg } from "../data";
 import type { Day, Memo, Stop } from "../data";
 import { canEdit } from "../data";
 import { supabase } from "../supabase";
@@ -38,7 +38,7 @@ const List = ({ items }: { items: string[] }) => <ul>{items.map((x, i) => <li ke
 
 /** Notes on a stop: anyone who can edit this day (own family, or a shared day) can add one; you can delete your own. */
 function Memos({ day, stop }: { day: Day; stop: Stop }) {
-  const { member, reload } = useTrip();
+  const { member, current, reload } = useTrip();
   const [memos, setMemos] = useState<Memo[]>(stop.memo ?? []);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -48,7 +48,7 @@ function Memos({ day, stop }: { day: Day; stop: Stop }) {
     if (!supabase) return;
     setBusy(true);
     // Re-read the day first so a note never overwrites changes someone else made while this sheet was open
-    let sel = supabase.from("days").select("items").eq("date_id", day.id);
+    let sel = supabase.from("days").select("items").eq("trip_id", current!.id).eq("date_id", day.id);
     sel = day.fam ? sel.contains("fam", day.fam) : sel.is("fam", null);
     const { data: fresh, error: readErr } = await sel.maybeSingle();
     if (readErr || !fresh) { alert(readErr?.message ?? "這一天已經不存在了"); setBusy(false); return; }
@@ -57,7 +57,7 @@ function Memos({ day, stop }: { day: Day; stop: Stop }) {
     if (idx < 0) idx = items.findIndex((it) => !("leg" in it) && it.n === stop.n);
     if (idx < 0) { alert("這個地點已經被改掉了，重新打開再試"); setBusy(false); return; }
     const updated = items.map((it, i) => (i === idx ? { ...it, memo: next } : it));
-    let q = supabase.from("days").update({ items: updated, updated_at: new Date().toISOString() }).eq("date_id", day.id);
+    let q = supabase.from("days").update({ items: updated, updated_at: new Date().toISOString() }).eq("trip_id", current!.id).eq("date_id", day.id);
     q = day.fam ? q.contains("fam", day.fam) : q.is("fam", null);
     const { error } = await q;
     if (error) alert(error.message); else { setMemos(next); setText(""); reload(); }
@@ -143,7 +143,7 @@ export function DetailSheet({ day, stop, arrive, onClose }: { day: Day; stop: St
             <div className="sec">
               <h4>接下來</h4>
               {departLeg && <p><ModeIcon mode={departLeg.leg} /> {departLeg.txt}</p>}
-              {departLeg?.leg === "flight" && <FlightStatus text={departLeg.txt} date={isoOf(day.d)} />}
+              {departLeg?.leg === "flight" && <FlightStatus text={departLeg.txt} date={day.id} />}
               {nextStop && <p className="muted">下一站 {nextStop.t} {nextStop.n}</p>}
             </div>
           )}

@@ -1,4 +1,4 @@
-import { PLACES, describe, placesFor, roleOf } from "../weather";
+import { describe, placeByKey, placesFor, roleOf } from "../weather";
 import type { DayWeather, WIcon } from "../weather";
 import type { WeatherState } from "../useWeather";
 
@@ -53,7 +53,7 @@ function Line({ w }: { w: DayWeather }) {
 }
 
 export function DayWeatherPanel({ date, city, wx }: { date: string; city: string; wx: WeatherState }) {
-  const keys = placesFor(date, city);
+  const keys = placesFor(date, city, wx.dayPlaces);
   if (keys.length === 0) return null;
   const day = wx.data?.[date] ?? {};
   const anyForecast = keys.some((k) => day[k]?.kind === "forecast");
@@ -65,13 +65,14 @@ export function DayWeatherPanel({ date, city, wx }: { date: string; city: string
         <span className="wx-note">
           {anyForecast
             ? `每 30 分鐘自動更新${updated ? `・更新於 ${updated}` : ""}`
-            : "2016–2025 年同一天的平均；出發前約 16 天會自動換成正式預報"}
+            : "過去十年同一天的平均；出發前約 16 天會自動換成正式預報"}
         </span>
       </div>
       <div className="wx-rows">
         {keys.map((k, i) => {
-          const place = PLACES.find((p) => p.key === k)!;
+          const place = placeByKey(k);
           const w = day[k];
+          if (!place) return null;
           return (
             <div className="wx-row" key={k}>
               {w ? <WxIcon icon={describe(w.code).icon} /> : <span className="wx-i" />}
@@ -87,7 +88,7 @@ export function DayWeatherPanel({ date, city, wx }: { date: string; city: string
 
 /** Tiny summary for the date chips: first place's icon + high/low. */
 export function ChipWeather({ date, city, wx }: { date: string; city: string; wx: WeatherState }) {
-  const keys = placesFor(date, city);
+  const keys = placesFor(date, city, wx.dayPlaces);
   const k = keys[keys.length - 1];
   const w = k ? wx.data?.[date]?.[k] : undefined;
   if (!w) return null;

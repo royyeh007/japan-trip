@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { dateOf } from "../data";
 import type { Proposal } from "../data";
 import { invoke, supabase } from "../supabase";
 import { useTrip } from "../trip";
@@ -7,13 +8,18 @@ import { ProposalCard } from "./Proposals";
 interface Prop { id: string; proposal: Proposal }
 interface Msg { id: string; role: "user" | "assistant"; content: string; proposals: Prop[]; status: "pending" | "done" | "error"; created_at: string }
 
-const EXAMPLES = [
-  "12/29 晚餐幾點、訂位碼多少？",
-  "12/28 從東京怎麼去長野？",
-  "我們家 12/26 15:00 到羽田，晚上住 Conrad，幫我加進去",
-  "12/30 我們家想住草津別間飯店，其他照舊",
-  "這個網站怎麼加一天？",
-];
+/** Example questions, using this trip's real dates and places. */
+function examples(days: { id: string; city: string }[], start: string, end: string) {
+  const first = days[0], last = days[days.length - 1];
+  const d1 = dateOf(first?.id ?? start).d, d2 = dateOf(days[1]?.id ?? end).d, dl = dateOf(last?.id ?? end).d;
+  return [
+    `${d1} 的行程是什麼？晚餐有訂位嗎？`,
+    `${d2} 怎麼去${days[1]?.city ?? last?.city ?? "下一個城市"}？`,
+    `我們家 ${d1} 15:00 到機場，晚上住 ○○ 飯店，幫我加進去`,
+    `${dl} 我們家想住別間飯店，其他照舊`,
+    "這個網站怎麼加一天？",
+  ];
+}
 
 const SparkIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 2l1.8 5.7L19.5 9.5l-5.7 1.8L12 17l-1.8-5.7L4.5 9.5l5.7-1.8L12 2zM5 16l.9 2.6L8.5 19.5l-2.6.9L5 23l-.9-2.6L1.5 19.5l2.6-.9L5 16z" /></svg>
@@ -24,7 +30,8 @@ const SparkIcon = () => (
  * writes the reply into chat_messages, so switching apps or a page reload never loses a reply (or the tokens).
  */
 export function ChatWidget() {
-  const { member } = useTrip();
+  const { member, current, trip } = useTrip();
+  const EXAMPLES = examples(trip.days.filter((d) => !d.fam || d.fam.includes(member?.family_id ?? "")).sort((a, b) => a.id.localeCompare(b.id)), current?.start_date ?? "", current?.end_date ?? "");
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -40,8 +47,8 @@ export function ChatWidget() {
 
   // ---- server-side history ----
   const load = useCallback(async () => {
-    if (!supabase || !member) return;
-    const { data } = await supabase.from("chat_messages").select("id, role, content, proposals, status, created_at").eq("user_id", member.user_id).order("created_at").limit(60);
+    if (!supabase || !member || !current) return;
+    const { data } = await supabase.from("chat_messages").select("id, role, content, proposals, status, created_at").eq("trip_id", current.id).eq("user_id", member.user_id).order("created_at").limit(60);
     const rows = (data ?? []) as Msg[];
     setMsgs(rows);
     setLoaded(true);
@@ -50,8 +57,8 @@ export function ChatWidget() {
       const { data: ups } = await supabase.from("uploads").select("id, status").in("id", ids);
       setDecided(Object.fromEntries((ups ?? []).filter((u) => u.status !== "pending").map((u) => [u.id, u.status === "approved" ? "approved" : "rejected"])));
     }
-  }, [member]);
-  useEffect(() => { load(); }, [load]);
+  }, [member, current]);
+  useEffect(() => { setMsgs([]); setLoaded(false); load(); }, [load]);
 
   // ---- poll any pending reply (also after a reload) ----
   const pending = msgs.filter((m) => m.status === "pending").map((m) => m.id).join(",");
@@ -91,7 +98,7 @@ export function ChatWidget() {
     const tmpUser = `tmp-u-${Date.now()}`, tmpBot = `tmp-a-${Date.now()}`;
     setMsgs((ms) => [...ms, { id: tmpUser, role: "user", content, proposals: [], status: "done", created_at: now }, { id: tmpBot, role: "assistant", content: "", proposals: [], status: "pending", created_at: now }]);
     try {
-      const res = await invoke<{ id: string }>("chat", { text: content });
+      const res = await invoke<{ id: string }>("chat", { trip_id: current?.id, text: content });
       // the server has the real rows now; swap the placeholder id so polling picks it up
       setMsgs((ms) => ms.map((m) => (m.id === tmpBot ? { ...m, id: res.id } : m)));
     } catch (e) {
@@ -101,8 +108,8 @@ export function ChatWidget() {
   };
 
   const clear = async () => {
-    if (!supabase || !member || !confirm("清除你的對話紀錄？")) return;
-    await supabase.from("chat_messages").delete().eq("user_id", member.user_id);
+    if (!supabase || !member || !current || !confirm("清除你在這個行程的對話紀錄？")) return;
+    await supabase.from("chat_messages").delete().eq("trip_id", current.id).eq("user_id", member.user_id);
     setMsgs([]);
   };
 

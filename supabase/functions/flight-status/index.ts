@@ -1,14 +1,14 @@
-// 讀航班狀態（給網頁）。
+// 讀航班狀態（給網頁）。呼叫的人要是某個行程（trip_id）的成員；「今天」用那個行程的時區。
 //   主要來源：flight-refresh 排程存進 flight_cache 的 aviationstack 資料（info → eve → live），當天可補查一次（有上限）。
 //   備援：aviationstack 沒資料或額度用完時，羽田、松山改抓機場免費資料。
 import { handle, json, HttpError } from "../_shared/http.ts";
 import { requireMember } from "../_shared/supa.ts";
-import { HND, LIVE_BUDGET_PER_FLIGHT, TSA, avFetchAndStore, flightKey, getJson, matchHND, matchTSA, minutes, nowJST } from "../_shared/flights.ts";
+import { HND, LIVE_BUDGET_PER_FLIGHT, TSA, avFetchAndStore, flightKey, getJson, matchHND, matchTSA, minutes, nowIn } from "../_shared/flights.ts";
 import type { AvCache, Query, Row, Status } from "../_shared/flights.ts";
 
 Deno.serve(handle(async (req) => {
-  const { admin } = await requireMember(req);
-  const body = await req.json().catch(() => ({})) as { flights?: Query[] };
+  const body = await req.json().catch(() => ({})) as { flights?: Query[]; trip_id?: string };
+  const { admin, trip } = await requireMember(req, body);
   const flights = (body.flights ?? []).filter((f) => f && /^[A-Z0-9]{2}$/i.test(f.airline) && /^\d{1,4}$/.test(f.number) && /^\d{4}-\d{2}-\d{2}$/.test(f.date)).slice(0, 10);
   if (flights.length === 0) throw new HttpError(400, "沒有航班");
   let feeds: [Row | null, Row | null, Row[] | null, Row[] | null] | null = null; // 機場免費資料，只在需要備援時抓一次
@@ -22,7 +22,7 @@ Deno.serve(handle(async (req) => {
       const { data: rows } = await admin.from("flight_cache").select("key, data, fetched_at").like("key", `${base}%`);
       let pick = ["live", "eve", "info"].map((p) => (rows ?? []).find((r: Row) => r.key === `${base}:${p}`)).find(Boolean) as Row | undefined;
       // 當天補查：排程（GitHub 每 15 分）有時會慢，若 live 資料超過 15 分鐘沒更新就自己查一次（同樣受每月上限保護）
-      const now = nowJST();
+      const now = nowIn(trip.tz || "Asia/Tokyo");
       if (now.slice(0, 10) === q.date && pick) {
         const d = pick.data as AvCache;
         const live = (rows ?? []).find((r: Row) => r.key === `${base}:live`) as Row | undefined;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FAMILY_LABELS, canEdit, contactsFromDays, daysFor } from "../data";
+import { canEdit, contactsFromDays, daysFor } from "../data";
 import type { ContactRow, FamilyId, TodoRow } from "../data";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
@@ -10,20 +10,22 @@ const visible = <T extends { fam: FamilyId[] | null }>(rows: T[], fam: FamilyId)
 const famOf = (scope: Scope, mine: FamilyId) => (scope === "shared" ? null : [mine]);
 
 function Tag({ fam }: { fam: FamilyId[] | null }) {
-  return <span className={`tag ${fam ? "own" : "shared"}`}>{fam ? fam.map((f) => FAMILY_LABELS[f]).join("＋") : "大家一起"}</span>;
+  const { labelOf } = useTrip();
+  return <span className={`tag ${fam ? "own" : "shared"}`}>{fam ? fam.map((f) => labelOf(f)).join("＋") : "大家一起"}</span>;
 }
 
 function ScopePick({ value, onChange, mine }: { value: Scope; onChange: (s: Scope) => void; mine: FamilyId }) {
+  const { labelOf } = useTrip();
   return (
     <select value={value} onChange={(e) => onChange(e.target.value as Scope)} aria-label="給誰看">
-      <option value="mine">{FAMILY_LABELS[mine]}</option>
+      <option value="mine">{labelOf(mine)}</option>
       <option value="shared">大家一起</option>
     </select>
   );
 }
 
 function Todos({ fam, compact = false }: { fam: FamilyId; compact?: boolean }) {
-  const { trip, member, reload } = useTrip();
+  const { trip, member, reload, labelOf, current } = useTrip();
   const mine = member!.family_id;
   const viewFam = fam;
   const rows = visible(trip.todos, viewFam);
@@ -32,7 +34,7 @@ function Todos({ fam, compact = false }: { fam: FamilyId; compact?: boolean }) {
   const [busy, setBusy] = useState(false);
   const run = async (p: PromiseLike<{ error: { message: string } | null }>) => { setBusy(true); const { error } = await p; if (error) alert(error.message); else await reload(); setBusy(false); };
 
-  const add = () => { if (!supabase || !text.trim()) return; run(supabase.from("todos").insert({ fam: famOf(scope, mine), due: due.trim(), text: text.trim(), created_by: member!.user_id })).then(() => { setDue(""); setText(""); }); };
+  const add = () => { if (!supabase || !text.trim()) return; run(supabase.from("todos").insert({ trip_id: current!.id, fam: famOf(scope, mine), due: due.trim(), text: text.trim(), created_by: member!.user_id })).then(() => { setDue(""); setText(""); }); };
   const toggle = (r: TodoRow, done: boolean) => supabase && run(supabase.from("todos").update({ done }).eq("id", r.id));
   const save = (r: TodoRow) => supabase && run(supabase.from("todos").update({ due: eDue.trim(), text: eText.trim() }).eq("id", r.id)).then(() => setEditing(null));
   const del = (r: TodoRow) => supabase && confirm(`刪掉「${r.text}」？`) && run(supabase.from("todos").delete().eq("id", r.id));
@@ -69,7 +71,7 @@ function Todos({ fam, compact = false }: { fam: FamilyId; compact?: boolean }) {
   return (
     <div className="panel">
       <h3>要訂、要搶的</h3>
-      <p className="note">{viewFam === mine ? "大家一起的和你們家的都在這裡，勾選全家都看得到。" : `這是${FAMILY_LABELS[viewFam]}的清單；你新增的會加到自己家或大家一起。`}</p>
+      <p className="note">{viewFam === mine ? "大家一起的和你們家的都在這裡，勾選全家都看得到。" : `這是${labelOf(viewFam)}的清單；你新增的會加到自己家或大家一起。`}</p>
       {list}
       <div className="addrow">
         <input value={due} onChange={(e) => setDue(e.target.value)} placeholder="時間（例：11/20 前）" />
@@ -82,7 +84,7 @@ function Todos({ fam, compact = false }: { fam: FamilyId; compact?: boolean }) {
 }
 
 function Contacts({ fam, compact = false }: { fam: FamilyId; compact?: boolean }) {
-  const { trip, member, reload } = useTrip();
+  const { trip, member, reload, current } = useTrip();
   const mine = member!.family_id;
   const viewFam = fam;
   const rows = visible(trip.contacts, viewFam);
@@ -91,7 +93,7 @@ function Contacts({ fam, compact = false }: { fam: FamilyId; compact?: boolean }
   const [busy, setBusy] = useState(false);
   const run = async (p: PromiseLike<{ error: { message: string } | null }>) => { setBusy(true); const { error } = await p; if (error) alert(error.message); else await reload(); setBusy(false); };
 
-  const add = () => { if (!supabase || !name.trim() || !value.trim()) return; run(supabase.from("contacts").insert({ fam: famOf(scope, mine), name: name.trim(), value: value.trim(), created_by: member!.user_id })).then(() => { setName(""); setValue(""); }); };
+  const add = () => { if (!supabase || !name.trim() || !value.trim()) return; run(supabase.from("contacts").insert({ trip_id: current!.id, fam: famOf(scope, mine), name: name.trim(), value: value.trim(), created_by: member!.user_id })).then(() => { setName(""); setValue(""); }); };
   const save = (r: ContactRow) => supabase && run(supabase.from("contacts").update({ name: eName.trim(), value: eValue.trim() }).eq("id", r.id)).then(() => setEditing(null));
   const del = (r: ContactRow) => supabase && confirm(`刪掉「${r.name}」？`) && run(supabase.from("contacts").delete().eq("id", r.id));
   const href = (v: string) => (v.includes("@") ? `mailto:${v}` : /^[+\d][\d\s-]{6,}$/.test(v) ? `tel:${v.replace(/[\s-]/g, "")}` : null);
@@ -143,14 +145,14 @@ function Contacts({ fam, compact = false }: { fam: FamilyId; compact?: boolean }
 }
 
 export function TodoView() {
-  const { trip, viewFam } = useTrip();
+  const { trip, viewFam, labelOf } = useTrip();
   const [mode, setMode] = useState<"one" | "all">("one");
   return (
     <>
       <section className="dayhead"><h2>待辦與聯絡資料</h2></section>
       <div className="toolbar">
         <div className="modebar" role="group" aria-label="顯示方式">
-          <button type="button" className={mode === "one" ? "on" : ""} onClick={() => setMode("one")}>只看 {FAMILY_LABELS[viewFam]}</button>
+          <button type="button" className={mode === "one" ? "on" : ""} onClick={() => setMode("one")}>只看 {labelOf(viewFam)}</button>
           <button type="button" className={mode === "all" ? "on" : ""} onClick={() => setMode("all")}>看所有家</button>
         </div>
       </div>
@@ -162,7 +164,7 @@ export function TodoView() {
       ) : (
         <>
           <h3 className="allh">要訂、要搶的</h3>
-          <HScroll hint="← 左右滑動看四家 →" deps={trip.todos.length}>
+          <HScroll hint="← 左右滑動看每一家 →" deps={trip.todos.length}>
             {trip.families.map((f) => (
               <section className="famcol" key={f.id}>
                 <header><b>{f.label}</b></header>

@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState } from "react";
-import { isLeg, isoOf } from "../data";
+import { isLeg } from "../data";
 import { DayWeatherPanel } from "./Weather";
 import type { WeatherState } from "../useWeather";
 import type { Day, Family, Stop } from "../data";
@@ -74,7 +74,7 @@ function StopRow({ stop, done, onOpen }: { stop: Stop; done?: boolean; onOpen: (
 export function Timeline({ day, onOpen }: { day: Day; onOpen?: (s: Stop, arrive?: LinkedLeg) => void }) {
   const { legs, arrive } = useMemo(() => linkLegs(day), [day]);
   const now = useNow();
-  const isToday = useNowLine() && now.date === isoOf(day.d);
+  const isToday = useNowLine() && now.date === day.id;
   // index of the last stop whose time has passed; the line goes right after it (-1 = before everything)
   let lastDone = -1;
   if (isToday) day.items.forEach((it, i) => { if (!isLeg(it) && toMinutes(it.t) <= now.minutes) lastDone = i; });
@@ -85,7 +85,7 @@ export function Timeline({ day, onOpen }: { day: Day; onOpen?: (s: Stop, arrive?
       {day.items.map((it, i) => (
         <Fragment key={i}>
           {isLeg(it) ? (
-            <LegRow leg={legs.get(i)!} done={isToday && i <= lastDone} date={isoOf(day.d)} />
+            <LegRow leg={legs.get(i)!} done={isToday && i <= lastDone} date={day.id} />
           ) : (
             <StopRow stop={it} done={isToday && i <= lastDone} onOpen={() => onOpen?.(it, arrive.get(i))} />
           )}
@@ -97,18 +97,18 @@ export function Timeline({ day, onOpen }: { day: Day; onOpen?: (s: Stop, arrive?
 }
 
 /** Remove this family from a day: delete the row if it is theirs alone, otherwise just drop them from `fam`. */
-async function removeDay(day: Day, familyId: string) {
+async function removeDay(day: Day, familyId: string, tripId: string) {
   if (!supabase || !day.fam) return;
   const rest = day.fam.filter((f) => f !== familyId);
   const q = supabase.from("days");
   const { error } = rest.length === 0
-    ? await q.delete().eq("date_id", day.id).contains("fam", [familyId])
-    : await q.update({ fam: rest }).eq("date_id", day.id).contains("fam", [familyId]);
+    ? await q.delete().eq("trip_id", tripId).eq("date_id", day.id).contains("fam", [familyId])
+    : await q.update({ fam: rest }).eq("trip_id", tripId).eq("date_id", day.id).contains("fam", [familyId]);
   if (error) throw new Error(error.message);
 }
 
 export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; family: Family; onOpen: (s: Stop, arrive?: LinkedLeg) => void; onRemoved: () => void; wx: WeatherState }) {
-  const { trip, reload } = useTrip();
+  const { trip, current, reload } = useTrip();
   const [busy, setBusy] = useState(false);
   const own = !!day.fam && day.fam.includes(family.id);
   const shared = !day.fam;
@@ -119,7 +119,7 @@ export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; fami
   const fork = async () => {
     if (!supabase) return;
     setBusy(true);
-    const { error } = await supabase.from("days").insert({ date_id: day.id, fam: [family.id], d: day.d, w: day.w, city: day.city, title: day.title, hotel: day.hotel, items: day.items });
+    const { error } = await supabase.from("days").insert({ trip_id: current!.id, date_id: day.id, fam: [family.id], d: day.d, w: day.w, city: day.city, title: day.title, hotel: day.hotel, items: day.items });
     if (error) alert(error.message); else await reload();
     setBusy(false);
   };
@@ -128,7 +128,7 @@ export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; fami
     const msg = hasSharedVersion ? `要把 ${family.label}自己的 ${day.d} 版本刪掉，改回大家一起的版本嗎？` : `要把 ${day.d} 從${family.label}的行程拿掉嗎？`;
     if (!confirm(msg)) return;
     setBusy(true);
-    try { await removeDay(day, family.id); await reload(); onRemoved(); }
+    try { await removeDay(day, family.id, current!.id); await reload(); onRemoved(); }
     catch (e) { alert(e instanceof Error ? e.message : String(e)); }
     finally { setBusy(false); }
   };
@@ -151,7 +151,7 @@ export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; fami
             </a>
           </div>
         )}
-        <DayWeatherPanel date={isoOf(day.d)} city={day.city} wx={wx} />
+        <DayWeatherPanel date={day.id} city={day.city} wx={wx} />
       </section>
       {empty ? (
         <div className="pendingbox">
@@ -159,7 +159,7 @@ export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; fami
           <p>到「上傳行程」傳表單或截圖，或點右下角「問 Claude」直接說這天要做什麼，確認後就會出現在這裡。</p>
           <div className="actions">
             <a className="btn" href="#upload"><DownloadIcon />上傳行程</a>
-            <button type="button" className="btn" onClick={openForm}><DownloadIcon />下載填寫表單</button>
+            <button type="button" className="btn" onClick={() => openForm(current?.name)}><DownloadIcon />下載填寫表單</button>
           </div>
         </div>
       ) : (

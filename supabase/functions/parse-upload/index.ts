@@ -1,4 +1,4 @@
-// 收一個上傳的檔案（xlsx / csv / 照片 / PDF / 純文字）或一段文字，用 Claude 讀成行程提案，存進 uploads 等 admin 審核。
+// 收一個上傳的檔案（xlsx / csv / 照片 / PDF / 純文字）或一段文字，用 Claude 讀成某個行程（trip_id）的行程提案，存進 uploads 等使用者確認。
 import { encodeBase64 } from "jsr:@std/encoding@1/base64";
 import * as XLSX from "npm:xlsx@0.18.5";
 import type Anthropic from "npm:@anthropic-ai/sdk";
@@ -6,7 +6,8 @@ import { zodOutputFormat } from "npm:@anthropic-ai/sdk/helpers/zod";
 import { handle, json, HttpError } from "../_shared/http.ts";
 import { requireMember } from "../_shared/supa.ts";
 import { anthropic, MODEL } from "../_shared/claude.ts";
-import { FORMAT_GUIDE, ProposalZ, normalize } from "../_shared/proposal.ts";
+import { ProposalZ, formatGuide, normalize } from "../_shared/proposal.ts";
+import type { GuideCtx } from "../_shared/proposal.ts";
 
 type Block = Anthropic.ContentBlockParam;
 
@@ -19,11 +20,11 @@ function xlsxToText(bytes: Uint8Array) {
   return wb.SheetNames.map((name) => `## 工作表「${name}」\n${XLSX.utils.sheet_to_csv(wb.Sheets[name], { blankrows: false })}`).join("\n\n");
 }
 
-const SYSTEM = `你在幫一個台灣家庭整理 2026/12/26–2027/1/2 的日本跨年行程（東京、長野、輕井澤、草津）。
+const system = (ctx: GuideCtx) => `你在幫一群家庭整理「${ctx.trip.name}」的行程${ctx.trip.place ? `（${ctx.trip.place}）` : ""}，日期 ${ctx.trip.start_date} 到 ${ctx.trip.end_date}。
 使用者會給你一份填好的行程表單（Excel 轉成的 CSV）、一張行程截圖、PDF，或一段文字。
-把裡面的行程讀出來，整理成指定的 JSON 格式。
+把裡面的行程讀出來，整理成指定的 JSON 格式。表單裡的日期只有月／日，年份照這個行程的日期判斷。
 
-${FORMAT_GUIDE}
+${formatGuide(ctx)}
 
 表單的「基本資料」工作表有家庭、航班、每天晚上住哪、哪幾天是跟別家一起走的（寫進 joins）。
 「行程1」到「行程5」工作表每頁一天：最上面「這一頁是哪一天」那格是日期（例 12/24），沒填日期或整頁空白的工作表跳過。每頁一行一個地點，第一行灰色的是範例，忽略範例、空白列和「範例」那張工作表。
@@ -32,14 +33,17 @@ ${FORMAT_GUIDE}
 只整理資料裡真的有的東西，不要自己補行程；不確定的寫進 notes。`;
 
 Deno.serve(handle(async (req) => {
-  const { admin, member, uid, who } = await requireMember(req);
-  const body = await req.json().catch(() => ({})) as { path?: string; text?: string; family_id?: string };
-  const family_id = member.role === "admin" && body.family_id ? body.family_id : member.family_id;
+  const body = await req.json().catch(() => ({})) as { path?: string; text?: string; family_id?: string; trip_id?: string };
+  const { admin, member, trip, uid, who } = await requireMember(req, body);
+  const { data: famRows } = await admin.from("families").select("id, label").eq("trip_id", trip.id).order("sort");
+  const families = (famRows ?? []) as { id: string; label: string }[];
+  const family_id = member.role === "admin" && body.family_id && families.some((f) => f.id === body.family_id) ? body.family_id : member.family_id;
 
   const content: Block[] = [];
   let kind = "text";
   if (body.path) {
-    if (member.role !== "admin" && !body.path.startsWith(`${member.family_id}/`)) throw new HttpError(403, "不能讀別家的檔案");
+    const own = `${trip.id}/${member.family_id}/`;
+    if (!body.path.startsWith(member.role === "admin" ? `${trip.id}/` : own)) throw new HttpError(403, "不能讀別家的檔案");
     const { data: blob, error } = await admin.storage.from("uploads").download(body.path);
     if (error || !blob) throw new HttpError(400, `讀不到檔案：${error?.message ?? "unknown"}`);
     const bytes = new Uint8Array(await blob.arrayBuffer());
@@ -55,17 +59,19 @@ Deno.serve(handle(async (req) => {
   content.push({ type: "text", text: `上傳的人是 ${who}，屬於家庭 id「${family_id}」。表單裡沒寫家庭就用這個。` });
 
   const { data: row, error: insErr } = await admin.from("uploads")
-    .insert({ family_id, uploaded_by: uid, kind, path: body.path ?? null, text: body.text ?? null })
+    .insert({ trip_id: trip.id, family_id, uploaded_by: uid, kind, path: body.path ?? null, text: body.text ?? null })
     .select("id").single();
   if (insErr || !row) throw new HttpError(500, `存不進資料庫：${insErr?.message}`);
 
   try {
+    const { data: sharedRows } = await admin.from("days").select("date_id").eq("trip_id", trip.id).is("fam", null);
+    const ctx: GuideCtx = { trip, families, sharedDates: [...new Set((sharedRows ?? []).map((d) => d.date_id as string))].sort() };
     const client = anthropic();
     // 串流版：SDK 對非串流的大 max_tokens 會拒絕；Edge Function 本身有 150 秒上限，所以 effort 用 medium
     const res = await client.messages.stream({
       model: MODEL,
       max_tokens: 16000,
-      system: SYSTEM,
+      system: system(ctx),
       messages: [{ role: "user", content }],
       output_config: { format: zodOutputFormat(ProposalZ), effort: "medium" },
     }).finalMessage();
@@ -73,11 +79,15 @@ Deno.serve(handle(async (req) => {
     if (res.stop_reason === "max_tokens") throw new Error("輸出不完整，請把檔案拆小一點（例如一次一天）再試");
     const text = res.content.filter((b) => b.type === "text").map((b) => b.text).join("");
     const proposal = normalize(ProposalZ.parse(JSON.parse(text)));
-    await admin.from("uploads").update({ parsed: proposal }).eq("id", row.id);
-    return json({ id: row.id, proposal });
+    // 家庭 id 一定要是這個行程裡的；非管理員只能送自己家的
+    const famOk = families.some((f) => f.id === proposal.family_id);
+    const finalFam = member.role === "admin" && famOk ? proposal.family_id : family_id;
+    const fixed = { ...proposal, family_id: finalFam, joins: proposal.joins.filter((j) => families.some((f) => f.id === j.with)) };
+    await admin.from("uploads").update({ parsed: fixed, family_id: finalFam }).eq("id", row.id);
+    return json({ id: row.id, proposal: fixed });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     await admin.from("uploads").update({ status: "failed", error: msg }).eq("id", row.id);
-    throw new HttpError(502, `解析失敗：${msg}`);
+    throw new HttpError(500, `Claude 解析失敗：${msg}`);
   }
 }));

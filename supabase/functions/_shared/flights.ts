@@ -28,17 +28,34 @@ export const TSA = {
 export const hhmm = (s: string | undefined | null) => (s && s.length >= 16 ? s.slice(11, 16) : s && s.length === 4 ? `${s.slice(0, 2)}:${s.slice(2)}` : null);
 export const minutes = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
 export const delayOf = (sched: string, eff: string | null) => (eff ? minutes(eff) - minutes(sched) : null);
-/** "2026-12-26T11:05:00" in Japan time */
-export const nowJST = () => new Date().toLocaleString("sv-SE", { timeZone: "Asia/Tokyo" }).replace(" ", "T");
+/** "2026-12-26T11:05:00" in the given time zone (default Japan) */
+export const nowIn = (tz = "Asia/Tokyo") => new Date().toLocaleString("sv-SE", { timeZone: tz }).replace(" ", "T");
+export const nowJST = () => nowIn("Asia/Tokyo");
 export const flightKey = (q: Query) => `${q.airline.toUpperCase()}${Number(q.number)}`;
 
+export interface DateRange { start: string; end: string } // YYYY-MM-DD
+const pad2 = (n: number) => String(n).padStart(2, "0");
+const dayDiff = (a: string, b: string) => Math.abs(new Date(a + "T00:00:00Z").getTime() - new Date(b + "T00:00:00Z").getTime()) / 86400000;
+/** "12/26" has no year in the flight text: pick the year that lands closest to (ideally inside) the trip's dates. */
+export function resolveDate(month: number, day: number, range?: DateRange | null): string {
+  if (!range) { const y = new Date().getUTCFullYear(); return `${y}-${pad2(month)}-${pad2(day)}`; }
+  const y0 = Number(range.start.slice(0, 4)), y1 = Number(range.end.slice(0, 4));
+  let best = "", bestDist = Infinity;
+  for (let y = y0 - 1; y <= y1 + 1; y++) {
+    const iso = `${y}-${pad2(month)}-${pad2(day)}`;
+    const dist = iso < range.start ? dayDiff(iso, range.start) : iso > range.end ? dayDiff(iso, range.end) : 0;
+    if (dist < bestDist) { best = iso; bestDist = dist; }
+  }
+  return best;
+}
+
 /** "去 BR192 12/26 松山 07:15 → 羽田 T3 11:00" → Query + which airports the text mentions */
-export function parseFlightText(text: string): (Query & { airports: string[] }) | null {
+export function parseFlightText(text: string, range?: DateRange | null): (Query & { airports: string[] }) | null {
   const m = text.match(/\b([A-Z]{2}|[A-Z]\d|\d[A-Z])\s?(\d{2,4})\b/);
   const d = text.match(/(\d{1,2})\/(\d{1,2})/);
   if (!m || !d) return null;
   const month = Number(d[1]), day = Number(d[2]);
-  const date = `${month === 12 ? 2026 : 2027}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const date = resolveDate(month, day, range);
   const airports: string[] = [];
   if (/羽田|HND/i.test(text)) airports.push("HND");
   if (/成田|NRT/i.test(text)) airports.push("NRT");

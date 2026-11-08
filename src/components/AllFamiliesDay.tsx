@@ -35,13 +35,13 @@ export function AllFamiliesDay({ dateId, onOpen }: { dateId: string; onOpen: (da
     <>
       <section className="dayhead">
         <div className="meta"><span>{any ? `${any.d}（${any.w}）` : dateId}</span><span className="hotel">所有家的這一天</span></div>
-        <h2>四家同一天</h2>
+        <h2>{cols.length} 家同一天</h2>
       </section>
       <div className="famtabs" role="tablist" aria-label="跳到哪一家">
         {cols.map((c, i) => (
           <button key={c.family.id} type="button" role="tab" aria-selected={active === i} className={active === i ? "on" : ""} onClick={() => jump(i)}>{c.family.label}</button>
         ))}
-        <span className="hint">← 左右滑動看四家 →</span>
+        <span className="hint">← 左右滑動看每一家 →</span>
       </div>
       <div className={`allbar${edge.start ? " at-start" : ""}${edge.end ? " at-end" : ""}`}>
         <button type="button" className="scrollbtn left" onClick={() => scrollBy(-1, 0.5)} aria-label="往左" tabIndex={-1}>‹</button>

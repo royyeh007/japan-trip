@@ -463,3 +463,40 @@ ul.todo li.note{display:block;color:var(--muted);font-size:.86rem;padding:2px 0}
 .flightcard .fl-status{font-size:.76rem}
 .leg.flight.done .flightcard{opacity:.6}
 @media (max-width:480px){.fc-code{font-size:1.2rem}.fc-big{font-size:1.4rem}}
+
+/* trip picker */
+.pick h2{font-family:var(--f-display);font-size:1.15rem;margin:22px 0 4px}
+.pick .panel{margin-top:12px}
+.tripcards{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));margin-top:8px}
+.tripcard{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;text-align:left;position:relative}
+.tripcard:hover{border-color:var(--ai)}
+.tripcard:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+.tripcard .tn{font-family:var(--f-display);font-weight:900;font-size:1.25rem;line-height:1.3;padding-right:48px}
+.tripcard .td{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.tripcard .tp{font-size:.88rem}
+.tripcard .tm{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.8rem;margin-top:4px}
+.tripcard .go{position:absolute;right:16px;top:16px;font-family:var(--f-mono);font-size:.78rem;color:var(--ai)}
+.tag.admin{background:var(--shu-soft);color:var(--shu)}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-block:8px 12px}
+.formgrid label,.admin label{display:grid;gap:4px;font-size:.84rem;color:var(--muted)}
+.formgrid input,.formgrid select,.admin .row input,.admin .row select{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;min-width:0}
+.pick .fambar{justify-content:space-between}
+.pick .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+
+/* hero "⋯" menu */
+.menu{position:relative;margin-left:auto}
+.menu summary{list-style:none;cursor:pointer;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;font-weight:900;font-size:1.1rem;line-height:1}
+.menu summary::-webkit-details-marker{display:none}
+.menu .list{position:absolute;right:0;top:40px;z-index:8;min-width:200px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:grid;padding:6px}
+.menu .list button,.menu .list a{all:unset;cursor:pointer;padding:9px 12px;border-radius:8px;font-size:.9rem;color:var(--ink)}
+.menu .list button:hover,.menu .list a:hover,.menu .list button:focus-visible,.menu .list a:focus-visible{background:var(--paper)}
+.menu .list .danger{color:var(--shu)}
+.menu .list small{display:block;padding:6px 12px 2px;font-size:.72rem;color:var(--muted);border-bottom:1px dashed var(--line);margin-bottom:4px}
+
+/* admin */
+.admin .row{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);font-size:.9rem}
+.admin .row .person{min-width:0;overflow-wrap:anywhere}
+.admin .row select{width:auto}
+@media (max-width:600px){.admin .row{grid-template-columns:1fr 1fr auto}.admin .row .person{grid-column:1 / -1}}
+.dangerzone{border-color:var(--shu)}
+.btn.danger{border-color:var(--shu);color:var(--shu)}

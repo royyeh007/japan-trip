@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { invoke } from "../supabase";
 import { useNow } from "../now";
+import { resolveDate, tripRange } from "../data";
+import type { DateRange } from "../data";
+import { useTrip } from "../trip";
 
 /** "去 BR192 12/26 松山 07:15 → 羽田 T3 11:00（座位 42B）" → parsed pieces */
-export function parseFlight(text: string, fallbackDate?: string) {
+export function parseFlight(text: string, fallbackDate?: string, range?: DateRange | null) {
   const m = text.match(/\b([A-Z]{2}|[A-Z]\d|\d[A-Z])\s?(\d{2,4})\b/);
   const d = text.match(/(\d{1,2})\/(\d{1,2})/);
   if (!m || (!d && !fallbackDate)) return null;
   const month = d ? Number(d[1]) : 0, day = d ? Number(d[2]) : 0;
-  const date = d ? `${month === 12 ? 2026 : 2027}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}` : fallbackDate!;
+  const date = d ? resolveDate(month, day, range) : fallbackDate!;
   const viaHaneda = /羽田|HND/i.test(text), viaNarita = /成田|NRT/i.test(text), viaSongshan = /松山|TSA/i.test(text), viaTaoyuan = /桃園|TPE/i.test(text);
   // 松山、羽田兩端都有免費即時資料；其他機場靠排程存下來的 aviationstack 資料（新增時、前一天、當天）
   const freeOnly = (viaHaneda || viaSongshan) && !viaNarita && !viaTaoyuan;
@@ -23,7 +26,8 @@ export interface Result { statuses: Status[]; note?: string; phase?: "info" | "e
 
 /** Fetch status for one flight line: on the day every 3 min; before the day (non-free airports) every 30 min. */
 export function useFlightStatus(text: string, date?: string) {
-  const f = parseFlight(text, date);
+  const { current } = useTrip();
+  const f = parseFlight(text, date, current ? tripRange(current) : null);
   const now = useNow();
   const [res, setRes] = useState<Result | undefined>(undefined);
   const [err, setErr] = useState<string | null>(null);
@@ -34,7 +38,7 @@ export function useFlightStatus(text: string, date?: string) {
     let alive = true;
     const load = async () => {
       try {
-        const r = await invoke<{ results: Result[] }>("flight-status", { flights: [{ airline: f.airline, number: f.number, date: f.date }] });
+        const r = await invoke<{ results: Result[] }>("flight-status", { trip_id: current?.id, flights: [{ airline: f.airline, number: f.number, date: f.date }] });
         if (alive) { setRes(r.results[0]); setErr(null); }
       } catch (e) { if (alive) setErr(e instanceof Error ? e.message : String(e)); }
     };
@@ -42,7 +46,7 @@ export function useFlightStatus(text: string, date?: string) {
     const t = setInterval(load, today ? 180_000 : 1_800_000);
     return () => { alive = false; clearInterval(t); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldAsk, today, f?.airline, f?.number, f?.date]);
+  }, [shouldAsk, today, f?.airline, f?.number, f?.date, current?.id]);
   const isLive = today && (!res?.phase || res.phase === "live");
   return { f, res, err, today, shouldAsk, isLive };
 }

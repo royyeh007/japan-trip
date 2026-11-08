@@ -20,20 +20,24 @@ export async function invoke<T>(name: string, body: Record<string, unknown>): Pr
   return data as T;
 }
 
-const INVITE_KEY = "jp-invite";
+const store = {
+  get(k: string) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k: string, v: string | null) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch { /* storage blocked */ } },
+};
 
+const INVITE_KEY = "jp-invite";
 /** `#invite=CODE` in the URL: remember it for the join screen and take it out of the hash. Call before rendering. */
 export function captureInvite() {
   const m = location.hash.match(/^#invite=([A-Za-z0-9_-]+)/);
   if (!m) return;
-  try { localStorage.setItem(INVITE_KEY, m[1]); } catch { /* storage blocked */ }
+  store.set(INVITE_KEY, m[1]);
   history.replaceState(null, "", location.pathname + location.search);
 }
-export function storedInvite() { try { return localStorage.getItem(INVITE_KEY); } catch { return null; } }
-export function clearInvite() { try { localStorage.removeItem(INVITE_KEY); } catch { /* ignore */ } }
+export const storedInvite = () => store.get(INVITE_KEY);
+export const setStoredInvite = (code: string) => store.set(INVITE_KEY, code);
+export const clearInvite = () => store.set(INVITE_KEY, null);
 
-const INTENT_KEY = "jp-intent";
-/** "register" = clicked 用 Google 註冊 with a valid invite code; "login" = clicked 用 Google 登入. Survives the OAuth redirect. */
-export function setIntent(i: "register" | "login") { try { localStorage.setItem(INTENT_KEY, i); } catch { /* ignore */ } }
-export function getIntent(): "register" | "login" | null { try { return localStorage.getItem(INTENT_KEY) as "register" | "login" | null; } catch { return null; } }
-export function clearIntent() { try { localStorage.removeItem(INTENT_KEY); } catch { /* ignore */ } }
+const TRIP_KEY = "jp-trip";
+/** The trip this device was in last; the app opens straight into it on the next visit. */
+export const storedTrip = () => store.get(TRIP_KEY);
+export const setStoredTrip = (id: string | null) => store.set(TRIP_KEY, id);

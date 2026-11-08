@@ -8,14 +8,26 @@ export const toMinutes = (t: string) => {
   return m ? Number(m[1]) * 60 + Number(m[2]) : NaN;
 };
 
-/** Current time in Japan (the itinerary's times), or the `?now=YYYY-MM-DDTHH:MM` preview override. */
+// The itinerary's clock runs in the trip's time zone; the provider sets it when a trip opens.
+let TZ = "Asia/Tokyo";
+const nowListeners = new Set<() => void>();
+export function setTimezone(tz: string | undefined) {
+  const next = tz || "Asia/Tokyo";
+  if (next === TZ) return;
+  try { new Date().toLocaleString("sv-SE", { timeZone: next }); } catch { return; } // unknown zone name: keep the old one
+  TZ = next;
+  nowListeners.forEach((l) => l());
+}
+export const timezone = () => TZ;
+
+/** Current time in the trip's zone, or the `?now=YYYY-MM-DDTHH:MM` preview override. */
 function compute(): Now {
   const fake = new URLSearchParams(location.search).get("now");
   let date: string, h: number, mi: number;
   if (fake && /^\d{4}-\d{2}-\d{2}T\d{1,2}:\d{2}/.test(fake)) {
     date = fake.slice(0, 10); [h, mi] = fake.slice(11).split(":").map(Number);
   } else {
-    const s = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Tokyo" }); // "2026-12-29 14:32:10"
+    const s = new Date().toLocaleString("sv-SE", { timeZone: TZ }); // "2026-12-29 14:32:10"
     date = s.slice(0, 10); h = Number(s.slice(11, 13)); mi = Number(s.slice(14, 16));
   }
   return { date, minutes: h * 60 + mi, hhmm: `${h}:${String(mi).padStart(2, "0")}` };
@@ -24,10 +36,12 @@ function compute(): Now {
 export function useNow(): Now {
   const [now, setNow] = useState(compute);
   useEffect(() => {
-    const t = setInterval(() => setNow(compute()), 30_000);
-    const onVis = () => document.visibilityState === "visible" && setNow(compute());
+    const tick = () => setNow(compute());
+    nowListeners.add(tick);
+    const t = setInterval(tick, 30_000);
+    const onVis = () => document.visibilityState === "visible" && tick();
     document.addEventListener("visibilitychange", onVis);
-    return () => { clearInterval(t); document.removeEventListener("visibilitychange", onVis); };
+    return () => { nowListeners.delete(tick); clearInterval(t); document.removeEventListener("visibilitychange", onVis); };
   }, []);
   return now;
 }
@@ -49,7 +63,7 @@ export function fakeNow(): string | null {
   const v = new URLSearchParams(location.search).get("now");
   return v && /^\d{4}-\d{2}-\d{2}T\d{1,2}:\d{2}/.test(v) ? v : null;
 }
-/** Reload the page pretending it is `iso` (YYYY-MM-DD) at the current Japan clock time, on the given day page. */
+/** Reload the page pretending it is `iso` (YYYY-MM-DD) at the current local clock time, on the given day page. */
 export function startPreview(iso: string, hhmm: string, hash: string) {
   location.assign(`${location.pathname}?now=${iso}T${hhmm}${hash}`);
 }
