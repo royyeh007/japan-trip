@@ -78,9 +78,9 @@ function Line({ st, today }: { st: Status; today: boolean }) {
       {today && st.remark && <span className="fl-remark">{st.remark}</span>}
       <span className="muted">
         {st.terminal && `T${st.terminal} `}
-        {st.gate ? `登機門 ${st.gate}` : st.kind === "dep" && today ? "登機門未公布" : ""}
-        {st.counter && st.kind === "dep" && `・櫃台 ${st.counter}`}
-        {st.baggage && st.kind === "arr" && `・行李轉盤 ${st.baggage}`}
+        {today && st.gate ? `登機門 ${st.gate}` : st.kind === "dep" ? (today ? "登機門未公布" : "登機門當天公布") : ""}
+        {today && st.counter && st.kind === "dep" && `・櫃台 ${st.counter}`}
+        {today && st.baggage && st.kind === "arr" && `・行李轉盤 ${st.baggage}`}
       </span>
     </div>
   );
@@ -107,7 +107,7 @@ export function FlightCard({ text, date }: { text: string; date?: string }) {
   const status = isLive && main ? (main.actual && main.kind === "dep" ? (main.remark || "已起飛") : main.remark || delayText(main) || "") : "";
   const delay = isLive && main ? delayText(main) : "";
   const tone = isLive && main ? toneOf(main) : "";
-  const gate = dep?.gate || (arr && !dep ? arr.gate : "");
+  const gate = isLive ? (dep?.gate || (arr && !dep ? arr.gate : "")) : "";
   const gateLabel = gate ? `登機門 ${gate}` : today ? "登機門 未公布" : "登機門 當天公布";
   return (
     <div className={`flightcard ${tone}`}>
@@ -126,8 +126,8 @@ export function FlightCard({ text, date }: { text: string; date?: string }) {
       <div className="fc-gate">
         <span className="fc-big">{gateLabel}</span>
         {dep?.terminal && <span className="fc-mid">T{dep.terminal}</span>}
-        {dep?.counter && <span className="fc-mid">櫃台 {dep.counter}</span>}
-        {arr?.baggage && <span className="fc-mid">行李轉盤 {arr.baggage}</span>}
+        {isLive && dep?.counter && <span className="fc-mid">櫃台 {dep.counter}</span>}
+        {isLive && arr?.baggage && <span className="fc-mid">行李轉盤 {arr.baggage}</span>}
       </div>
       {f.extra && <div className="fc-extra muted">{f.extra}</div>}
       {shouldAsk ? (err ? <div className="fl-status muted">即時狀態抓不到：{err} <Links f={f} /></div> : res === undefined ? <div className="fl-status muted">載入中…</div> : <Meta res={res} f={f} today={today} />) : <div className="fl-status muted">當天自動顯示即時狀態與登機門 <Links f={f} /></div>}
