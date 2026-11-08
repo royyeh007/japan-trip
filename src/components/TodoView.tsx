@@ -48,7 +48,7 @@ function Todos({ fam, compact = false }: { fam: FamilyId; compact?: boolean }) {
               <div className="editrow">
                 <input value={eDue} onChange={(e) => setEDue(e.target.value)} placeholder="時間（例：11/20 前）" />
                 <input value={eText} onChange={(e) => setEText(e.target.value)} placeholder="要做什麼" />
-                <div className="actions"><button type="button" className="btn primary" onClick={() => save(r)} disabled={busy || !eText.trim()}>存</button><button type="button" className="btn" onClick={() => setEditing(null)}>取消</button></div>
+                <div className="actions"><button type="button" className="btn primary" onClick={() => save(r)} disabled={busy || !eText.trim()}>儲存</button><button type="button" className="btn" onClick={() => setEditing(null)}>取消</button></div>
               </div>
             ) : (
               <label htmlFor={`td-${r.id}`}>
@@ -111,7 +111,7 @@ function Contacts({ fam, compact = false }: { fam: FamilyId; compact?: boolean }
           <div className="editrow" key={r.id}>
             <input value={eName} onChange={(e) => setEName(e.target.value)} placeholder="名稱" />
             <input value={eValue} onChange={(e) => setEValue(e.target.value)} placeholder="電話或 email" />
-            <div className="actions"><button type="button" className="btn primary" onClick={() => save(r)} disabled={busy || !eName.trim() || !eValue.trim()}>存</button><button type="button" className="btn" onClick={() => setEditing(null)}>取消</button></div>
+            <div className="actions"><button type="button" className="btn primary" onClick={() => save(r)} disabled={busy || !eName.trim() || !eValue.trim()}>儲存</button><button type="button" className="btn" onClick={() => setEditing(null)}>取消</button></div>
           </div>
         ) : (
           <div key={r.id}>

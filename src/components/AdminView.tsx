@@ -145,12 +145,11 @@ function Families() {
       {trip.families.map((f) => (
         <div className="row" key={f.id}>
           {editing === f.id ? (
-            <>
-              <input value={eLabel} onChange={(e) => setELabel(e.target.value)} aria-label="名稱" />
-              <button type="button" className="btn primary" onClick={() => save(f.id)} disabled={busy || !eLabel.trim()}>存</button>
+            <div className="inline">
+              <input value={eLabel} onChange={(e) => setELabel(e.target.value)} aria-label="名稱" onKeyDown={(e) => { if (e.key === "Enter" && eLabel.trim()) save(f.id); if (e.key === "Escape") setEditing(null); }} autoFocus />
+              <button type="button" className="btn primary" onClick={() => save(f.id)} disabled={busy || !eLabel.trim()}>儲存</button>
               <button type="button" className="btn" onClick={() => setEditing(null)}>取消</button>
-              <span />
-            </>
+            </div>
           ) : (
             <>
               <span className="person"><b>{f.label}</b><span className="muted"> {members[f.id] ?? 0} 人・{f.flights.length ? f.flights.join("／") : "沒有航班"}</span></span>
