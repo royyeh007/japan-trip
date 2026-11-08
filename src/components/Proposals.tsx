@@ -53,7 +53,8 @@ export async function applyProposal(id: string, p: Proposal, tripId: string, day
       if (isLeg(it)) return it;
       const prev = existing?.items.find((e): e is Stop => !isLeg(e) && e.n === it.n);
       const q = it.q || prev?.q || it.n;
-      return prev?.memo?.length ? { ...it, q, memo: prev.memo } : { ...it, q };
+      const keep = { q, ...(prev?.ll ? { ll: prev.ll } : {}), ...(prev?.memo?.length ? { memo: prev.memo } : {}) };
+      return { ...it, ...keep };
     });
     const { d, w } = dateOf(day.id);
     const { error } = await supabase.from("days").upsert(

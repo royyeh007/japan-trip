@@ -517,3 +517,20 @@ ul.todo li.note{display:block;color:var(--muted);font-size:.86rem;padding:2px 0}
 .editor textarea{resize:vertical;line-height:1.45}
 .editor .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .editor .note{margin:8px 0 0}
+
+/* route optimisation */
+.optlist{list-style:none;margin:8px 0;padding:0;display:grid;gap:4px}
+.optlist li{display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-size:.9rem}
+.optlist li label{display:flex;align-items:center;gap:8px;flex:1;min-width:0;cursor:pointer}
+.optlist li.on{border-color:var(--ai)}
+.optlist li.locked{opacity:.7}
+.optlist li.moved{border-color:var(--ai);background:var(--ai-soft)}
+.optlist .t{font-family:var(--f-mono);font-size:.82rem;min-width:3.6em;display:grid;line-height:1.2;font-variant-numeric:tabular-nums}
+.optlist .t small{font-size:.66rem;color:var(--muted)}
+.optlist .n{flex:1;min-width:0}
+.optlist input{accent-color:var(--ai);width:16px;height:16px;flex:none}
+ol.optlist{counter-reset:o}
+ol.optlist li::before{counter-increment:o;content:counter(o);font-family:var(--f-mono);font-size:.78rem;color:var(--muted);min-width:1.2em}
+.optsum{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 4px;font-size:1rem}
+.optimize ul.notes{color:var(--amber);list-style:none;padding:0;margin:6px 0;font-size:.85rem}
+.optimize .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}

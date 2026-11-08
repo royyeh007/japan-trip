@@ -4,7 +4,8 @@ export type Status = "ok" | "todo" | "tbd";
 export type Mode = "taxi" | "walk" | "train" | "bus" | "charter" | "shuttle" | "flight";
 /** A note someone added to a stop from the detail sheet. */
 export interface Memo { by: string; name: string; text: string; at: string }
-export interface Stop { t: string; n: string; q: string; k: Kind; st?: Status; who?: string; s?: string; info?: string[]; book?: string[]; rec?: string[]; tips?: string[]; addr?: string; tel?: string; memo?: Memo[] }
+/** `ll` = [lat, lon], filled in once the place has been located (route optimisation). */
+export interface Stop { t: string; n: string; q: string; k: Kind; st?: Status; who?: string; s?: string; info?: string[]; book?: string[]; rec?: string[]; tips?: string[]; addr?: string; tel?: string; memo?: Memo[]; ll?: [number, number] }
 export interface Leg { leg: Mode; txt: string; st?: Status }
 export type Item = Stop | Leg;
 /** One date's itinerary. `id` is the date (YYYY-MM-DD). `fam` missing = everyone's shared day; otherwise only those families have this version. */

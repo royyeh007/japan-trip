@@ -134,7 +134,7 @@ Deno.serve(handle(async (req) => {
       // 看起來要上網查的問題，一開始就掛上網工具；沒猜到的，Claude 會用 lookup_online 要求換模式
       const needsLookup = /https?:\/\//i.test(text) || /(這家|這間|這個地方|哪裡|在哪|怎麼去|怎麼走|營業|幾點開|開到幾點|公休|推薦|好吃|值得|查一下|幫我查|上網|搜尋|評價|排隊|天氣|匯率|門票|價位|多少錢)/.test(text);
       // 省 token：地圖搜尋字 q 和空值不送（確認更新時會自動保留原本的 q）
-      const slim = (k: string, v: unknown) => (k === "q" || v == null || v === "" || (Array.isArray(v) && v.length === 0) ? undefined : v);
+      const slim = (k: string, v: unknown) => (k === "q" || k === "ll" || v == null || v === "" || (Array.isArray(v) && v.length === 0) ? undefined : v);
       const cache = cacheFor(trip);
 
       const proposals: { id: string; proposal: unknown }[] = [];

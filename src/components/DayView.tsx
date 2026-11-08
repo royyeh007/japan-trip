@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState } from "react";
-import { isLeg, isViewer } from "../data";
+import { canEdit, isLeg, isViewer } from "../data";
 import { DayWeatherPanel } from "./Weather";
 import type { WeatherState } from "../useWeather";
 import type { Day, Family, Stop } from "../data";
@@ -7,6 +7,7 @@ import { MODE, dayRouteURL, dirURL, linkLegs } from "../maps";
 import type { LinkedLeg } from "../maps";
 import { DownloadIcon, ModeIcon, RouteIcon } from "../icons";
 import { FlightCard } from "./FlightStatus";
+import { OptimizeDay } from "./OptimizeDay";
 import { KIND, SEAL } from "../labels";
 import { openForm } from "../form";
 import { supabase } from "../supabase";
@@ -111,6 +112,8 @@ export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; fami
   const { trip, current, member, reload } = useTrip();
   const [busy, setBusy] = useState(false);
   const viewer = isViewer(member);
+  const [optimizing, setOptimizing] = useState(false);
+  const canOptimize = canEdit(day.fam, member) && day.items.filter((it) => !isLeg(it)).length >= 3;
   const own = !!day.fam && day.fam.includes(family.id);
   const shared = !day.fam;
   const hasSharedVersion = trip.days.some((d) => d.id === day.id && !d.fam);
@@ -150,6 +153,7 @@ export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; fami
             <a className="btn primary" href={dayRouteURL(day)} target="_blank" rel="noopener">
               <RouteIcon />開啟今天的 Google 地圖路線
             </a>
+            {canOptimize && <button type="button" className="btn" onClick={() => setOptimizing((v) => !v)} aria-expanded={optimizing}>⇄ 優化順序</button>}
           </div>
         )}
         <DayWeatherPanel date={day.id} city={day.city} wx={wx} />
@@ -168,7 +172,10 @@ export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; fami
           )}
         </div>
       ) : (
-        <Timeline day={day} onOpen={onOpen} />
+        <>
+          {optimizing && <OptimizeDay key={day.id + (day.fam ?? []).join(",")} day={day} onClose={() => setOptimizing(false)} />}
+          <Timeline day={day} onOpen={onOpen} />
+        </>
       )}
     </>
   );

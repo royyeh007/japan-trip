@@ -27,3 +27,6 @@ verify_jwt = false
 
 [functions.flight-refresh]
 verify_jwt = false
+
+[functions.optimize-day]
+verify_jwt = false
