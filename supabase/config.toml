@@ -30,3 +30,6 @@ verify_jwt = false
 
 [functions.optimize-day]
 verify_jwt = false
+
+[functions.format-info]
+verify_jwt = false

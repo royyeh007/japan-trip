@@ -5,6 +5,8 @@ import { HttpError } from "./http.ts";
 export const MODEL = "claude-opus-5-5";
 // 聊天（量大，成本優先）
 export const CHAT_MODEL = "claude-sonnet-5-5";
+// 排版小工具（「幫我整理」：不用推理、不上網，最便宜的就夠）
+export const FORMAT_MODEL = "claude-haiku-5-5";
 
 export function anthropic() {
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");

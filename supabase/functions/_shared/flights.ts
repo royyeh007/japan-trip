@@ -8,6 +8,7 @@ export interface Status {
   remark: string; terminal: string; gate: string; counter: string; baggage?: string; updated: string; source: string;
 }
 // deno-lint-ignore no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Row = Record<string, any>;
 
 export const AV_MONTHLY_CAP = 90;

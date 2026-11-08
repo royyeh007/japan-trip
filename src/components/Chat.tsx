@@ -4,6 +4,7 @@ import type { Proposal } from "../data";
 import { invoke, supabase } from "../supabase";
 import { useTrip } from "../trip";
 import { ProposalCard } from "./Proposals";
+import { openInfoPage } from "./InfoView";
 
 interface Prop { id: string; proposal: Proposal }
 interface Msg { id: string; role: "user" | "assistant"; content: string; proposals: Prop[]; status: "pending" | "done" | "error"; created_at: string }
@@ -30,13 +31,14 @@ const SparkIcon = () => (
  * writes the reply into chat_messages, so switching apps or a page reload never loses a reply (or the tokens).
  */
 export function ChatWidget() {
-  const { member, current, trip } = useTrip();
+  const { member, current, trip, reload } = useTrip();
   const EXAMPLES = examples(trip.days.filter((d) => !d.fam || d.fam.includes(member?.family_id ?? "")).sort((a, b) => a.id.localeCompare(b.id)), current?.start_date ?? "", current?.end_date ?? "");
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [decided, setDecided] = useState<Record<string, "approved" | "rejected">>({});
+  const [saved, setSaved] = useState<Record<string, string>>({}); // message id → info page id (「存到其他資訊」)
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -107,6 +109,23 @@ export function ChatWidget() {
     } finally { setBusy(false); }
   };
 
+  // Keep a reply as a 其他資訊 page: no new AI call, the tokens were already spent on the answer.
+  const saveInfo = async (m: Msg) => {
+    if (!supabase || !member || !current) return;
+    const i = msgs.findIndex((x) => x.id === m.id);
+    const q = i > 0 && msgs[i - 1].role === "user" ? msgs[i - 1].content.trim() : "";
+    const firstLine = m.content.split("\n").find((l) => l.trim())?.replace(/^[#*\-\s]+/, "").trim() ?? "";
+    const title = (q || firstLine || "AI 助理的回答").slice(0, 40);
+    const id = (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID().slice(0, 8) : Math.random().toString(36).slice(2, 10));
+    const { error } = await supabase.from("info_pages").insert({
+      trip_id: current.id, id, title, body: (q ? `> ${q}\n\n` : "") + m.content, blocks: null,
+      sort: Math.max(-1, ...trip.info.map((p) => p.sort)) + 1, created_by: member.user_id, updated_by: member.user_id, updated_by_name: member.name,
+    });
+    if (error) { setErr(`存不進其他資訊：${error.message}`); return; }
+    setSaved((s) => ({ ...s, [m.id]: id }));
+    await reload();
+  };
+
   const clear = async () => {
     if (!supabase || !member || !current || !confirm("清除你在這個行程的對話紀錄？")) return;
     await supabase.from("chat_messages").delete().eq("trip_id", current.id).eq("user_id", member.user_id);
@@ -147,6 +166,11 @@ export function ChatWidget() {
           {msgs.map((m) => (
             <div key={m.id} className={`msg ${m.role === "user" ? "user" : "bot"}${m.status === "pending" ? " thinking" : ""}${m.status === "error" ? " err" : ""}`}>
               {m.status === "pending" ? "想一下…（切出去也沒關係，回來會有答案）" : m.content}
+              {m.role === "assistant" && m.status === "done" && m.content && !m.id.startsWith("tmp-") && (
+                saved[m.id]
+                  ? <div className="saverow"><span className="chip">已存到其他資訊</span><button type="button" className="link" onClick={() => { setOpen(false); openInfoPage(saved[m.id]); }}>打開 ›</button></div>
+                  : <div className="saverow"><button type="button" className="link" onClick={() => saveInfo(m)}>存到其他資訊</button></div>
+              )}
               {m.proposals.map((p) => decided[p.id]
                 ? <div key={p.id} className="chip">{decided[p.id] === "approved" ? "已更新到行程" : "已取消"}</div>
                 : <ProposalCard key={p.id} id={p.id} proposal={p.proposal} onDone={(s) => setDecided((d) => ({ ...d, [p.id]: s }))} />)}

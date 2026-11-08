@@ -66,7 +66,7 @@ help:
 	@echo "Supabase:"
 	@echo "  link REF=<ref>   link to your Supabase project"
 	@echo "  db-push          create tables, policies, buckets"
-	@echo "  fn-deploy        deploy Edge Functions (parse-upload, chat)"
+	@echo "  fn-deploy        deploy all Edge Functions"
 	@echo "  secrets ANTHROPIC_API_KEY=...  store the Claude key"
 	@echo "  seed             push seed/trip.ts into the database"
 	@echo "  usage [N=15]     what the AI chat cost, per day and for the last N replies"
@@ -92,10 +92,14 @@ link:
 db-push:
 	supabase db push
 
-## Deploy both Edge Functions
+## Deploy all Edge Functions
 fn-deploy:
 	supabase functions deploy parse-upload --no-verify-jwt
 	supabase functions deploy chat --no-verify-jwt
+	supabase functions deploy flight-status --no-verify-jwt
+	supabase functions deploy flight-refresh --no-verify-jwt
+	supabase functions deploy optimize-day --no-verify-jwt
+	supabase functions deploy format-info --no-verify-jwt
 
 ## Store the Claude API key for the Edge Functions: make secrets ANTHROPIC_API_KEY=sk-ant-...
 secrets:

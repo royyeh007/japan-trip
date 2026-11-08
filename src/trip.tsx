@@ -3,10 +3,10 @@ import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { clearInvite, setStoredInvite, setStoredTrip, storedInvite, storedTrip, supabase } from "./supabase";
 import { labelOf as labelIn } from "./data";
-import type { ContactRow, Day, Family, FamilyId, InfoTab, Member, Membership, TodoRow, Trip } from "./data";
+import type { ContactRow, Day, Family, FamilyId, InfoBlock, InfoPage, Member, Membership, TodoRow, Trip } from "./data";
 import { setTimezone } from "./now";
 
-export interface TripData { families: Family[]; days: Day[]; todos: TodoRow[]; contacts: ContactRow[]; notes: Record<string, string>; info: InfoTab[] }
+export interface TripData { families: Family[]; days: Day[]; todos: TodoRow[]; contacts: ContactRow[]; notes: Record<string, string>; info: InfoPage[] }
 /** signedout → (join: an invite code is waiting) → pick: choose/create/join a trip → ready: inside a trip */
 export type Phase = "noconfig" | "loading" | "signedout" | "join" | "pick" | "ready" | "error";
 
@@ -111,23 +111,29 @@ export function TripProvider({ children }: { children: ReactNode }) {
     if (!supabase || !current) return;
     setError(null);
     const id = current.id;
-    const [f, d, x, t, c] = await Promise.all([
+    const [f, d, x, t, c, ip] = await Promise.all([
       supabase.from("families").select("id, name, label, flights").eq("trip_id", id).order("sort"),
       supabase.from("days").select("date_id, fam, d, w, city, title, hotel, items").eq("trip_id", id),
       supabase.from("extras").select("key, data").eq("trip_id", id),
       supabase.from("todos").select("id, fam, due, text, done, sort, created_at").eq("trip_id", id).order("sort").order("created_at"),
       supabase.from("contacts").select("id, fam, name, value, sort, created_at").eq("trip_id", id).order("sort").order("created_at"),
+      supabase.from("info_pages").select("id, title, body, blocks, sort, updated_at, updated_by_name").eq("trip_id", id).order("sort").order("updated_at"),
     ]);
     const err = f.error ?? d.error ?? x.error ?? t.error ?? c.error;
     if (err) { setError(err.message); return; }
     const extras = Object.fromEntries((x.data ?? []).map((e) => [e.key, e.data]));
+    // 其他資訊：info_pages；資料庫還沒升級（沒有這張表）時退回舊的 extras.info
+    const legacy: { id: string; title: string; updated?: string; blocks: InfoBlock[] }[] = Array.isArray(extras.info) ? extras.info : [];
+    const info: InfoPage[] = ip.error
+      ? legacy.map((t, i) => ({ id: t.id, title: t.title, body: "", blocks: t.blocks, sort: i, updated_at: t.updated ?? "", updated_by_name: null }))
+      : (ip.data ?? []) as InfoPage[];
     setTrip({
       families: (f.data ?? []) as Family[],
       days: (d.data ?? []).map((r) => ({ id: r.date_id, fam: r.fam, d: r.d, w: r.w, city: r.city, title: r.title, hotel: r.hotel, items: r.items })),
       todos: (t.data ?? []) as TodoRow[],
       contacts: (c.data ?? []) as ContactRow[],
       notes: extras.notes ?? {},
-      info: Array.isArray(extras.info) ? extras.info : [],
+      info,
     });
     setTripLoaded(true);
   }, [current]);
@@ -139,13 +145,14 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const checkForChanges = useCallback(async () => {
     if (!supabase || !current || document.visibilityState !== "visible") return;
     const id = current.id;
-    const [d, t, c] = await Promise.all([
+    const [d, t, c, ip] = await Promise.all([
       supabase.from("days").select("date_id, fam, updated_at").eq("trip_id", id),
       supabase.from("todos").select("id, done, due, text").eq("trip_id", id),
       supabase.from("contacts").select("id, name, value").eq("trip_id", id),
+      supabase.from("info_pages").select("id, updated_at").eq("trip_id", id),
     ]);
     if (d.error || t.error || c.error) return;
-    const sig = JSON.stringify([d.data, t.data, c.data]);
+    const sig = JSON.stringify([d.data, t.data, c.data, ip.error ? null : ip.data]);
     if (sigRef.current && sig !== sigRef.current) await reload();
     sigRef.current = sig;
   }, [current, reload]);

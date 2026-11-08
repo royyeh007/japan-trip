@@ -647,3 +647,33 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none;bor
 .daymeta-edit{display:grid;gap:4px;margin-top:2px}
 .daymeta-edit .formgrid{margin-block:4px 6px}
 .daymeta-edit .actions{margin-top:0}
+
+/* ---- 其他資訊：大家寫的 Markdown 頁 + 編輯器 ---- */
+.infohead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
+.infometa{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px}
+.infometa .actions{display:flex;gap:14px;margin:0}
+.link.danger{color:var(--shu)}
+.md{display:grid;gap:10px}
+.md h3{font-size:1.05rem;margin:8px 0 0;letter-spacing:0}
+.md h4{font-size:.95rem;margin:4px 0 0;letter-spacing:0;color:var(--ink)}
+.md p{margin:0;line-height:1.7;font-size:.95rem}
+.md ul,.md ol{margin:0;padding-left:1.3em;display:grid;gap:6px;line-height:1.6;font-size:.93rem}
+.md li ul{margin-top:4px;gap:3px;font-size:.9rem;color:var(--muted)}
+.md blockquote{margin:0;padding:6px 12px;border-left:3px solid var(--ai);color:var(--muted);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.6;font-size:.9rem}
+.md hr{border:0;border-top:1px dashed var(--line);margin:4px 0}
+.md code{font-family:var(--f-mono);font-size:.86em;background:var(--paper);padding:1px 5px;border-radius:4px}
+.md a{color:var(--ai);text-underline-offset:3px}
+.md .infotable{min-width:0}
+.md .infotable td:first-child{white-space:normal}
+.infoedit{display:grid;gap:10px;margin-top:12px}
+.infoedit input,.infoedit textarea{width:100%;box-sizing:border-box;font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);color:var(--ink)}
+.infoedit input{font-weight:700;font-size:1rem}
+.infoedit textarea{min-height:300px;line-height:1.6;font-family:var(--f-mono);font-size:.88rem;resize:vertical}
+.infoedit-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.infoedit-bar .modebar{margin-top:0}
+.infoedit .preview{border:1px dashed var(--line);border-radius:10px;padding:12px 14px;min-height:140px;margin-top:0}
+.infoedit .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.infoedit .note{margin:0}
+.note.ok{color:var(--pine)}
+.msg .saverow{margin-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.msg .saverow .chip{margin-top:0}

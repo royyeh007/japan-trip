@@ -30,3 +30,12 @@ for (const r of (rows ?? []).slice(0, n)) {
 }
 const noUsage = (rows ?? []).filter((r) => !r.usage).length;
 if (noUsage) console.log(`\n（${noUsage} 則是加用量紀錄前的回覆，沒有數字）`);
+
+// 「幫我整理」（其他資訊）：Haiku，一次幾分之一美分；每個行程每天最多 10 次
+const { data: ai, error: aiErr } = await db.from("ai_calls").select("trip_id, kind, usage, created_at").order("created_at", { ascending: false }).limit(2000);
+if (!aiErr && ai?.length) {
+  const byDay = {};
+  for (const r of ai) { const d = tw(r.created_at).split(" ")[0]; const a = (byDay[d] ??= { n: 0, usd: 0 }); a.n++; a.usd += r.usage?.usd ?? 0; }
+  console.log("\n其他資訊「幫我整理」：");
+  for (const [d, a] of Object.entries(byDay)) console.log(`  ${d}  ${a.n} 次  ≈ US$${a.usd.toFixed(4)}`);
+}

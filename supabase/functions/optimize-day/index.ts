@@ -15,6 +15,7 @@ interface Leg { leg: string; txt: string; [k: string]: unknown }
 type Item = Stop | Leg;
 const isLeg = (i: Item): i is Leg => "leg" in i;
 // deno-lint-ignore no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Admin = any;
 
 const UA = "family-trip-planner/1.0 (+https://github.com/royyeh007/japan-trip)";

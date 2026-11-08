@@ -272,7 +272,7 @@ function Main() {
             <a className="btn" href="#overview" aria-current={view === "overview" ? "page" : undefined}>☷ 總覽</a>
             <a className="btn" href="#todo" aria-current={view === "todo" ? "page" : undefined}>✓ 待辦・聯絡</a>
             {!isViewer(member) && <a className="btn" href="#upload" aria-current={view === "upload" ? "page" : undefined}>↑ 上傳行程</a>}
-            {trip.info.length > 0 && <a className="btn" href="#info" aria-current={view === "info" ? "page" : undefined}>ⓘ 其他資訊</a>}
+            {(trip.info.length > 0 || !isViewer(member)) && <a className="btn" href="#info" aria-current={view === "info" ? "page" : undefined}>ⓘ 其他資訊</a>}
             {member?.role === "admin" && <a className="btn" href="#admin" aria-current={view === "admin" ? "page" : undefined}>⚙ 管理</a>}
           </div>
         </header>

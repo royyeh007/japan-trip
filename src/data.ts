@@ -125,11 +125,12 @@ export function contactsFromDays(days: Day[]): { name: string; value: string; d:
   return out;
 }
 
-/** "其他資訊" page content (extras.info). */
+/** Legacy "其他資訊" structured content (pages seeded before they became Markdown). */
 export type InfoBlock =
   | { type: "p"; text: string }
   | { type: "list"; h?: string; items: string[] }
   | { type: "table"; h?: string; cols: string[]; rows: string[][] }
   | { type: "flow"; h?: string; steps: { t: string; d: string }[]; branch?: { after: number; options: { tone: "ok" | "bad" | "neutral"; label: string; t: string; d: string }[] } }
   | { type: "sources"; items: { t: string; u: string }[] };
-export interface InfoTab { id: string; title: string; updated: string; blocks: InfoBlock[] }
+/** One 其他資訊 page (info_pages). `body` is Markdown written by members; `blocks` only on seeded pages nobody has edited yet. */
+export interface InfoPage { id: string; title: string; body: string; blocks: InfoBlock[] | null; sort: number; updated_at: string; updated_by_name: string | null }

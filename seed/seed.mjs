@@ -57,9 +57,14 @@ must(`days（${trip.DAYS.length} 列）`, await sb.from("days").upsert(
   trip.DAYS.map((d) => { const iso = toIso(d.id); const { d: dd, w } = dateOf(iso); return { trip_id: tripId, date_id: iso, fam: d.fam ?? null, d: dd, w, city: d.city, title: d.title, hotel: d.hotel, items: d.items, updated_at: new Date().toISOString() }; }),
   { onConflict: "trip_id,date_id,fam" },
 ));
-const extras = [{ trip_id: tripId, key: "notes", data: { shared: trip.SHARED_NOTE ?? "" } }];
-if (existsSync("seed/info.json")) extras.push({ trip_id: tripId, key: "info", data: JSON.parse(readFileSync("seed/info.json", "utf8")) });
-must("extras", await sb.from("extras").upsert(extras, { onConflict: "trip_id,key" }));
+must("extras", await sb.from("extras").upsert([{ trip_id: tripId, key: "notes", data: { shared: trip.SHARED_NOTE ?? "" } }], { onConflict: "trip_id,key" }));
+// 其他資訊：seed/info.json 的每一頁進 info_pages；已經存在的頁不動（大家可能已經在網站上改過）
+if (existsSync("seed/info.json")) {
+  const pages = JSON.parse(readFileSync("seed/info.json", "utf8"));
+  must(`info_pages（${pages.length} 頁，只補缺的）`, await sb.from("info_pages").upsert(
+    pages.map((p, i) => ({ trip_id: tripId, id: p.id, title: p.title, body: p.body ?? "", blocks: p.blocks ?? null, sort: i })),
+    { onConflict: "trip_id,id", ignoreDuplicates: true }));
+}
 must(`todos（${(trip.TODO ?? []).length} 筆，大家一起）`, await sb.from("todos").upsert(
   (trip.TODO ?? []).map(([key, due, text, done], i) => ({ trip_id: tripId, key, fam: null, due, text, done: !!done, sort: i })), { onConflict: "trip_id,key" }));
 // 聯絡資料不再 seed：網頁會從行程裡有電話、email 的地點自動帶出；contacts 表只放大家自己加的。

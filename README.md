@@ -11,6 +11,7 @@
 - 旅行當天打開會直接跳到今天，行程上有一條「現在」的線，過去的地點會變淡（行程當地時間，每 30 秒更新）。想先看效果：開關旁有「預覽」，或網址加 `?now=2026-12-29T14:30`（要放在 `#` 前面）。
 - **上傳行程**：傳填好的表單（xlsx）、截圖、PDF 或貼文字，AI 助理整理成行程，自己看過按「確認更新」就上線。
 - **AI 助理**：聊天機器人看得到這個行程每一家的行程，可以問細節，也可以直接說要改什麼，整理好按「確認更新」就生效。
+- **其他資訊**：大家自己寫的補充頁（Markdown，有預覽）。貼一段文字可按「✦ 幫我整理」（Haiku、不上網、每個行程每天 10 次）；AI 助理的回答可一鍵「存到其他資訊」，不用再花一次 token。
 
 ## 結構
 
@@ -20,6 +21,7 @@
 | `supabase/migrations/` | 資料表、RLS 權限、Storage bucket |
 | `supabase/functions/parse-upload` | 讀上傳的檔案 → Claude → 行程提案 |
 | `supabase/functions/chat` | 聊天機器人（可送出修改提案） |
+| `supabase/functions/format-info` | 「其他資訊」的「幫我整理」：貼的文字 → Haiku → Markdown，每個行程每天有次數上限 |
 | `seed/trip.ts` | 行程內容的本機來源（**不進 git**），`make seed` 推進資料庫。格式見 `seed/trip.example.ts` |
 | `seed/assets/trip-form.xlsx` | 給家人填的表單（不進 git），`make seed` 會上傳到私有 bucket |
 
