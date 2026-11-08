@@ -75,10 +75,59 @@ export default function App() {
   return <Main />;
 }
 
-/** The "⋯" menu in the hero: switch trip, admin, rename, leave, sign out. */
+/** Leaving a trip: explain the consequence and require typing "delete" before the button works. */
+function LeaveDialog({ onClose }: { onClose: () => void }) {
+  const { current, leaveToPicker, refreshMemberships } = useTrip();
+  const [text, setText] = useState("");
+  const [alone, setAlone] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => {
+    if (!supabase || !current) return;
+    supabase.from("members").select("user_id", { count: "exact", head: true }).eq("trip_id", current.id).then(({ count }) => setAlone(count === 1));
+  }, [current]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const ok = text.trim().toLowerCase() === "delete";
+  const go = async () => {
+    if (!supabase || !current || !ok) return;
+    setBusy(true); setErr(null);
+    const { error } = await supabase.rpc("leave_trip", { p_trip: current.id });
+    if (error) { setErr(error.message); setBusy(false); return; }
+    await refreshMemberships();
+    leaveToPicker();
+  };
+  return (
+    <>
+      <div className="scrim" onClick={onClose} />
+      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="leave-title">
+        <h3 id="leave-title">退出「{current?.name}」</h3>
+        <p className="note">
+          {alone === null ? "確認中…" : alone
+            ? "你是這個行程裡唯一的人，退出會把整個行程連同所有資料刪掉，無法復原。"
+            : "退出後就看不到這個行程了，之後要再用邀請連結才能回來。你的備註和已經確認的行程會留著。"}
+        </p>
+        <label>請輸入 <code>delete</code> 確認
+          <input value={text} onChange={(e) => setText(e.target.value)} placeholder="delete" autoCapitalize="none" autoCorrect="off" autoFocus onKeyDown={(e) => { if (e.key === "Enter" && ok) go(); }} />
+        </label>
+        <div className="actions">
+          <button type="button" className="btn danger" onClick={go} disabled={!ok || busy || alone === null}>{busy ? "處理中…" : alone ? "確認退出並刪除行程" : "確認退出"}</button>
+          <button type="button" className="btn" onClick={onClose} disabled={busy}>取消</button>
+        </div>
+        {err && <p className="err">{err}</p>}
+      </div>
+    </>
+  );
+}
+
+/** The account menu in the hero: switch trip, admin, rename, leave, sign out. */
 function TripMenu() {
-  const { current, member, leaveToPicker, refreshMemberships, signOut, memberships } = useTrip();
+  const { current, member, leaveToPicker, refreshMemberships, signOut } = useTrip();
   const ref = useRef<HTMLDetailsElement>(null);
+  const [leaving, setLeaving] = useState(false);
   const close = () => { if (ref.current) ref.current.open = false; };
   const rename = async () => {
     if (!supabase || !current) return;
@@ -88,18 +137,11 @@ function TripMenu() {
     if (error) alert(error.message); else await refreshMemberships();
     close();
   };
-  const leave = async () => {
-    if (!supabase || !current) return;
-    const alone = memberships.length > 0 && (await supabase.from("members").select("user_id", { count: "exact", head: true }).eq("trip_id", current.id)).count === 1;
-    const msg = alone ? `你是「${current.name}」裡唯一的人，退出會把整個行程刪掉。確定？` : `退出「${current.name}」？之後要再用邀請連結才能回來。`;
-    if (!confirm(msg)) return;
-    const { error } = await supabase.rpc("leave_trip", { p_trip: current.id });
-    if (error) { alert(error.message); return; }
-    await refreshMemberships();
-    leaveToPicker();
-  };
+  const leave = () => { close(); setLeaving(true); };
   const short = (member?.name ?? member?.email?.split("@")[0] ?? "我").split(/\s+/)[0];
   return (
+    <>
+    {leaving && <LeaveDialog onClose={() => setLeaving(false)} />}
     <details className="menu" ref={ref}>
       <summary aria-label="帳號與行程選單" title="切換行程、管理、登出">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
@@ -115,6 +157,7 @@ function TripMenu() {
         <button type="button" onClick={signOut}>登出</button>
       </div>
     </details>
+    </>
   );
 }
 
