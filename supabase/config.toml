@@ -1,5 +1,5 @@
 # Supabase CLI 設定。project_id 只是本機識別名，真正的專案用 `supabase link --project-ref <ref>` 連。
-project_id = "japan-trip"
+project_id = "trip-planner"
 
 # 兩個 Edge Function 自己用 getUser() 驗證登入與家庭，所以關掉 gateway 的 JWT 檢查。
 [functions.parse-upload]
@@ -10,8 +10,8 @@ verify_jwt = false
 
 # 登入後導回的網址：正式站和本機開發
 [auth]
-site_url = "https://royyeh007.github.io/japan-trip/"
-additional_redirect_urls = ["https://royyeh007.github.io/japan-trip/**", "http://localhost:5173/**"]
+site_url = "https://royyeh007.github.io/trip-planner/"
+additional_redirect_urls = ["https://royyeh007.github.io/trip-planner/**", "http://localhost:5173/**"]
 # 註冊一律走 Google（邀請碼先驗證），不用匿名登入
 enable_anonymous_sign_ins = false
 
