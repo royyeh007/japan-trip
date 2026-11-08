@@ -4,7 +4,7 @@ import { betaZodTool } from "npm:@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "npm:zod@4";
 import { handle, json, HttpError } from "../_shared/http.ts";
 import { requireMember } from "../_shared/supa.ts";
-import { anthropic, MODEL } from "../_shared/claude.ts";
+import { anthropic, CHAT_MODEL } from "../_shared/claude.ts";
 import { FORMAT_GUIDE, ProposalZ, normalize } from "../_shared/proposal.ts";
 
 interface Turn { role: "user" | "assistant"; content: string }
@@ -25,9 +25,14 @@ ${FORMAT_GUIDE}
 【其他資訊頁（退稅新制、入境流程、東京伴手禮、藥妝必買、超商零食、草莓）】
 - 這些內容不在下面的資料裡，被問到時先用 get_info 工具拿那一頁再回答，並提醒可以到頁首「其他資訊」看完整版和流程圖。不要憑記憶回答這些主題。
 
-【短影音或網頁連結】
-- 使用者貼 YouTube Shorts、TikTok、Instagram、小紅書或任何網頁連結時：用 web_fetch 讀那個連結（只讀使用者貼的連結），從標題、說明文字、hashtag、地點標籤判斷影片介紹的是哪個地方；需要時用 web_search 查那個地方的正式名稱、地址、營業時間、特色、價位，以及它離我們行程哪一天、哪個地點最近。
-- 回覆格式：地方名稱（日文＋中文）、在哪個城市、離行程最近的是哪一天、3～5 點重點資訊、建議怎麼排進去。使用者要的話用 propose_itinerary_change 加進那一天。
+【短影音、網頁連結、查地點】
+- 使用者貼 YouTube Shorts、TikTok、Instagram、小紅書或任何網頁連結時：用 web_fetch 讀那個連結（只讀使用者貼的連結），從標題、說明文字、hashtag、地點標籤判斷介紹的是哪個地方。
+- 判斷出地方後，一定用 web_search 核對（優先官方網站、Google Maps、Tabelog／食べログ、觀光局）：正式名稱、地址、最近車站、營業時間和公休、價位、必點或特色。查不到或來源互相矛盾的項目寫「未確認」，不要用猜的補上。
+- 回覆固定這個格式，不要多：
+  第一行：店名／景點（日文＋中文）＋一句話是什麼。
+  接著條列：地址｜最近車站和從我們行程最近的點怎麼去｜營業時間、公休｜價位｜必點或重點（最多 3 點）｜來源（1～2 個網址）。
+  最後一句：離我們行程最近是哪一天、建議排在哪個時段；問要不要加進去。
+- 整體控制在 200～300 字加上條列，不要寫歷史背景、不要重複連結裡已經講的話、不要列超過 3 個推薦。
 - 你看不到影片畫面，只能靠文字；Instagram、Facebook 通常抓不到內容。抓不到或看不出來就老實說，請使用者截圖或告訴你店名。
 - web_search 只用來查跟這趟旅行有關的地點和資訊。
 
@@ -65,6 +70,8 @@ Deno.serve(handle(async (req) => {
     info_tabs: info.map((t) => ({ id: t.id, title: t.title })),
   };
   const today = new Date().toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" });
+  const lastMsg = turns[turns.length - 1].content;
+  const needsLookup = /https?:\/\//i.test(lastMsg) || /(這家|這間|這個地方|哪裡|在哪|怎麼去|營業|幾點開|推薦|好吃|值得)/.test(lastMsg);
 
   const proposals: { id: string; proposal: unknown }[] = [];
   const propose = betaZodTool({
@@ -94,12 +101,13 @@ Deno.serve(handle(async (req) => {
 
   const client = anthropic();
   const runner = client.beta.messages.toolRunner({
-    model: MODEL,
+    model: CHAT_MODEL,
     max_tokens: 16000,
     max_iterations: 5,
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
-    output_config: { effort: "low" },
+    // 一般問答 low 就夠；貼連結或查地點要上網核對，用 medium
+    output_config: { effort: needsLookup ? "medium" : "low" },
     system: [
       { type: "text", text: RULES },
       // 行程資料：所有人相同，快取 1 小時（改行程會自動失效）
