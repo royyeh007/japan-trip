@@ -53,6 +53,7 @@ export function Overview({ onOpen }: { onOpen: (day: Day, stop: Stop, arrive?: L
                           <span className="t">{it.t}</span>
                           <span className="n">{it.n}</span>
                           {it.st && <span className={`seal ${it.st}`}>{SEAL[it.st]}</span>}
+                          {it.ref && <span className="tag trip">↗ {it.ref.name}</span>}
                         </button>
                       </li>
                     ))}

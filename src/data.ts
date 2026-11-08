@@ -5,7 +5,8 @@ export type Mode = "taxi" | "walk" | "train" | "bus" | "charter" | "shuttle" | "
 /** A note someone added to a stop from the detail sheet. */
 export interface Memo { by: string; name: string; text: string; at: string }
 /** `ll` = [lat, lon], filled in once the place has been located (route optimisation). */
-export interface Stop { t: string; n: string; q: string; k: Kind; st?: Status; who?: string; s?: string; info?: string[]; book?: string[]; rec?: string[]; tips?: string[]; addr?: string; tel?: string; memo?: Memo[]; ll?: [number, number] }
+/** `ref` = this stop points at another trip (e.g. 「出發前往日本」→ the Japan trip); people who are in both trips can see and open it. */
+export interface Stop { t: string; n: string; q: string; k: Kind; st?: Status; who?: string; s?: string; info?: string[]; book?: string[]; rec?: string[]; tips?: string[]; addr?: string; tel?: string; memo?: Memo[]; ll?: [number, number]; ref?: { trip: string; name: string } }
 export interface Leg { leg: Mode; txt: string; st?: Status }
 export type Item = Stop | Leg;
 /** One date's itinerary. `id` is the date (YYYY-MM-DD). `fam` missing = everyone's shared day; otherwise only those families have this version. */

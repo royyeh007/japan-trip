@@ -3,6 +3,7 @@ import { FlightStatus } from "./FlightStatus";
 import { askClaude } from "./Chat";
 import { isLeg, isViewer } from "../data";
 import type { Day, Item, Kind, Leg, Memo, Mode, Status, Stop } from "../data";
+import { supabase } from "../supabase";
 import { canEdit } from "../data";
 import { useTrip } from "../trip";
 import { MODE, dirURL, placeURL } from "../maps";
@@ -87,11 +88,12 @@ function Memos({ day, stop }: { day: Day; stop: Stop }) {
 const lines = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean);
 const STATUS_OPTS: { v: Status | ""; l: string }[] = [{ v: "", l: "不用訂" }, { v: "ok", l: "已訂" }, { v: "todo", l: "要訂" }, { v: "tbd", l: "待定" }];
 
-interface Draft { t: string; n: string; k: Kind; st: Status | ""; q: string; addr: string; tel: string; who: string; s: string; book: string; rec: string; info: string; tips: string; legMode: Mode | ""; legTxt: string }
+interface Draft { t: string; n: string; k: Kind; st: Status | ""; q: string; addr: string; tel: string; who: string; s: string; book: string; rec: string; info: string; tips: string; legMode: Mode | ""; legTxt: string; ref: string }
 const draftOf = (stop: Stop | null, arrive: Leg | undefined): Draft => ({
   t: stop?.t ?? "", n: stop?.n ?? "", k: stop?.k ?? "sight", st: stop?.st ?? "", q: stop?.q ?? "", addr: stop?.addr ?? "", tel: stop?.tel ?? "", who: stop?.who ?? "", s: stop?.s ?? "",
   book: (stop?.book ?? []).join("\n"), rec: (stop?.rec ?? []).join("\n"), info: (stop?.info ?? []).join("\n"), tips: (stop?.tips ?? []).join("\n"),
   legMode: arrive?.leg ?? "", legTxt: arrive?.txt ?? "",
+  ref: stop?.ref?.trip ?? "",
 });
 function stopOf(d: Draft, base?: Stop): Stop {
   const out: Stop = { ...(base ?? {}), t: d.t.trim(), n: d.n.trim(), k: d.k, q: d.q.trim() || d.n.trim() };
@@ -103,7 +105,8 @@ function stopOf(d: Draft, base?: Stop): Stop {
 
 /** Form for one stop (edit it, or add a new one after it) plus the leg that leads into it. */
 function StopEditor({ day, stop, arrive, mode, onDone, onCancel }: { day: Day; stop: Stop; arrive?: Leg; mode: "edit" | "add"; onDone: (key: { t: string; n: string }) => void; onCancel: () => void }) {
-  const { current, reload } = useTrip();
+  const { current, reload, memberships } = useTrip();
+  const otherTrips = memberships.filter((m) => m.trip_id !== current?.id);
   const [d, setD] = useState<Draft>(() => (mode === "edit" ? draftOf(stop, arrive) : { ...draftOf(null, undefined), t: stop.t }));
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -116,6 +119,8 @@ function StopEditor({ day, stop, arrive, mode, onDone, onCancel }: { day: Day; s
     if (d.t.trim() && !/^\d{1,2}:\d{2}$/.test(d.t.trim())) { setErr("時間請用 H:MM，例如 9:30、14:00"); return; }
     setBusy(true); setErr(null);
     const next = stopOf(d, mode === "edit" ? stop : undefined);
+    const refTrip = otherTrips.find((m) => m.trip_id === d.ref);
+    if (refTrip) next.ref = { trip: refTrip.trip_id, name: refTrip.trip.name }; else delete next.ref;
     const leg: Leg | null = d.legMode && d.legTxt.trim() ? { leg: d.legMode, txt: d.legTxt.trim() } : null;
     const timeChanged = mode === "add" || d.t.trim() !== stop.t;
     const e = await editDayItems(current.id, day, (items) => {
@@ -151,6 +156,14 @@ function StopEditor({ day, stop, arrive, mode, onDone, onCancel }: { day: Day; s
         <label>地址<input value={d.addr} onChange={up("addr")} /></label>
         <label>電話<input value={d.tel} onChange={up("tel")} inputMode="tel" /></label>
         <label>只有誰去（可空）<input value={d.who} onChange={up("who")} placeholder="例：4 位女生" /></label>
+        {otherTrips.length > 0 && (
+          <label>連到另一個行程（可空）
+            <select value={d.ref} onChange={up("ref")}>
+              <option value="">不連結</option>
+              {otherTrips.map((m) => <option key={m.trip_id} value={m.trip_id}>{m.trip.name}</option>)}
+            </select>
+          </label>
+        )}
       </div>
       <label className="full">一句話說明<input value={d.s} onChange={up("s")} /></label>
       <div className="formgrid">
@@ -176,6 +189,46 @@ function StopEditor({ day, stop, arrive, mode, onDone, onCancel }: { day: Day; s
       </div>
       {mode === "edit" && <p className="note">改了時間會自動照時間重新排序。</p>}
       {err && <p className="err">{err}</p>}
+    </div>
+  );
+}
+
+/** A stop that points at another trip: people who are in that trip too see its day and can jump over. */
+function RefPanel({ stop, day }: { stop: Stop; day: Day }) {
+  const { memberships, enterTrip } = useTrip();
+  const ref = stop.ref;
+  const m = ref ? memberships.find((x) => x.trip_id === ref.trip) : undefined;
+  const [items, setItems] = useState<Item[] | null>(null);
+  const refTrip = ref?.trip, famId = m?.family_id;
+  useEffect(() => {
+    if (!supabase || !refTrip || !famId) { setItems(null); return; }
+    let alive = true;
+    supabase.from("days").select("fam, items").eq("trip_id", refTrip).eq("date_id", day.id).then(({ data }) => {
+      if (!alive) return;
+      const rows = (data ?? []) as { fam: string[] | null; items: Item[] }[];
+      const pick = rows.find((r) => r.fam?.includes(famId)) ?? rows.find((r) => !r.fam) ?? rows[0];
+      setItems(pick ? pick.items : []);
+    });
+    return () => { alive = false; };
+  }, [refTrip, famId, day.id]);
+  if (!ref) return null;
+  const stops = (items ?? []).filter((i): i is Stop => !isLeg(i));
+  const go = () => { location.hash = `#${day.id}`; enterTrip(ref.trip); };
+  return (
+    <div className="sec refpanel">
+      <h4>連到另一個行程</h4>
+      {!m ? <p className="note">「{ref.name}」：你沒有加入那個行程，看不到內容。</p> : (
+        <>
+          <p><b>{m.trip.name}</b>{items === null ? "（載入中…）" : stops.length === 0 ? `：${day.d} 那邊還沒有地點` : `：${day.d} 有 ${stops.length} 個地點`}</p>
+          {stops.length > 0 && (
+            <ul className="refstops">
+              {stops.slice(0, 6).map((s, i) => <li key={i}><span className="t">{s.t}</span>{s.n}</li>)}
+              {stops.length > 6 && <li className="muted">…還有 {stops.length - 6} 個</li>}
+            </ul>
+          )}
+          <button type="button" className="btn primary" onClick={go}>前往「{m.trip.name}」的 {day.d} ›</button>
+        </>
+      )}
     </div>
   );
 }
@@ -262,6 +315,7 @@ export function DetailSheet({ day: day0, stop: stop0, arrive: arrive0, onClose }
                   <button type="button" className="btn danger" onClick={remove} disabled={busy}>{busy ? "刪除中…" : "刪除這一站"}</button>
                 </div>
               )}
+              <RefPanel stop={stop} day={day} />
               {arrive && <div className="sec"><h4>怎麼去</h4><p>{arrive.txt}</p></div>}
               {(departLeg || nextStop) && (
                 <div className="sec">
