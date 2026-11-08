@@ -13,6 +13,7 @@ import { AllFamiliesDay } from "./components/AllFamiliesDay";
 import { FlightStatus } from "./components/FlightStatus";
 import { InfoView } from "./components/InfoView";
 import { AdminView } from "./components/AdminView";
+import { Overview } from "./components/Overview";
 import { Login } from "./components/Login";
 import { JoinTrip } from "./components/JoinTrip";
 import { TripPicker } from "./components/TripPicker";
@@ -27,7 +28,7 @@ const store = {
   set(k: string, v: string) { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } },
 };
 
-const PAGES = ["todo", "upload", "info", "admin"];
+const PAGES = ["overview", "todo", "upload", "info", "admin"];
 function currentView(dayIds: string[], dayKey: string, todayId?: string) {
   const h = location.hash.slice(1);
   if (PAGES.includes(h) || dayIds.includes(h)) return h;
@@ -208,6 +209,7 @@ function Main() {
             </div>
           )}
           <div className="quick">
+            <a className="btn" href="#overview" aria-current={view === "overview" ? "page" : undefined}>☷ 總覽</a>
             <a className="btn" href="#todo" aria-current={view === "todo" ? "page" : undefined}>✓ 待辦・聯絡</a>
             {!isViewer(member) && <a className="btn" href="#upload" aria-current={view === "upload" ? "page" : undefined}>↑ 上傳行程</a>}
             {trip.info.length > 0 && <a className="btn" href="#info" aria-current={view === "info" ? "page" : undefined}>ⓘ 其他資訊</a>}
@@ -266,7 +268,8 @@ function Main() {
             </p>
           )}
           {adding && <AddDay family={fam} onDone={(id) => { setAdding(false); if (id) location.hash = `#${id}`; }} />}
-          {view === "todo" ? <TodoView />
+          {view === "overview" ? <Overview onOpen={(day, stop, arrive) => setSelected({ day, stop, arrive })} />
+            : view === "todo" ? <TodoView />
             : view === "upload" ? <UploadView />
             : view === "info" ? <InfoView />
             : view === "admin" ? <AdminView />
