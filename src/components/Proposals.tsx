@@ -45,12 +45,14 @@ export async function applyProposal(id: string, p: Proposal, days: Day[], review
         if (je) throw new Error(je.message);
       }
     }
-    // keep notes people wrote on stops that still exist (matched by name)
+    // keep notes people wrote on stops that still exist (matched by name), and the map search string:
+    // the chat doesn't see q (saves tokens) and leaves it empty for stops it kept, so take the old one
     const existing = days.find((d) => d.id === day.id && (fam ? d.fam?.includes(p.family_id) : !d.fam)) ?? days.find((d) => d.id === day.id);
     const items = day.items.map((it) => {
       if (isLeg(it)) return it;
       const prev = existing?.items.find((e): e is Stop => !isLeg(e) && e.n === it.n);
-      return prev?.memo?.length ? { ...it, memo: prev.memo } : it;
+      const q = it.q || prev?.q || it.n;
+      return prev?.memo?.length ? { ...it, q, memo: prev.memo } : { ...it, q };
     });
     const { error } = await supabase.from("days").upsert(
       { date_id: day.id, fam, d: day.d, w: day.w, city: day.city, title: day.title, hotel: day.hotel, items, updated_at: now },

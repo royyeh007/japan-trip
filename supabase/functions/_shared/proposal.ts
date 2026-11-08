@@ -13,7 +13,7 @@ const StopZ = z.object({
   type: z.literal("stop"),
   t: z.string().describe("預計到達時間，24 小時制 H:MM，例如 13:00、8:45"),
   n: z.string().describe("地點或活動名稱，餐廳前面加「午餐：」「晚餐：」"),
-  q: z.string().describe("在 Google 地圖搜尋這個地方用的字，日文店名最準；不知道就用名稱"),
+  q: z.string().nullable().describe("在 Google 地圖搜尋這個地方用的字，日文店名最準（照格式說明）；修改既有行程時沿用的地點填 null，系統會保留原本的"),
   k: z.enum(KINDS).describe("food 餐廳／sight 景點／hotel 住宿／shop 購物／move 交通（機場、車站這種）"),
   st: z.enum(STATUSES).nullable().describe("訂位狀態 ok 已訂／todo 要訂／tbd 待定；不用訂就 null"),
   who: z.string().nullable().describe("只有部分人參加時寫誰，例如「4 位女生」，否則 null"),
@@ -95,7 +95,7 @@ export const FORMAT_GUIDE = `行程格式說明：
 - leg 的 leg：計程車 taxi、走路 walk、電車 train、巴士 bus、包車 charter、接駁車 shuttle、飛機 flight。
 - 訂位狀態 st：已訂 ok、要訂 todo、待定 tbd、不用訂 null。
 - 時間用 24 小時制 H:MM（8:30、13:00）。清單欄位（book、rec、tips、info）一條一項，表單裡用「；」分開的要拆開。
-- q 是 Google 地圖的搜尋字：用官方日文店名＋區域（例「ミキモト 銀座本店」）；新開的店、連鎖店或名字很普通的店，一定在 q 後面加上地址（例「東京銀座 茅乃舎 東京都中央区銀座3-4-8」），不然地圖會找錯。有查到地址就同時填 addr。
+- q 是 Google 地圖的搜尋字：用官方日文店名＋區域（例「ミキモト 銀座本店」）；新開的店、連鎖店或名字很普通的店，一定在 q 後面加上地址（例「東京銀座 茅乃舎 東京都中央区銀座3-4-8」），不然地圖會找錯。有查到地址就同時填 addr。改既有的一天時，沿用（沒改名）的地點 q 填 null，系統會保留原本的搜尋字。
 - 12/28–1/1 是四家一起的日子（scope=shared）；12/26、12/27、1/2 各家自己走（scope=family）。
 - 如果某天是「跟某家一起」，放進 joins（有「從幾點開始」就填 from），不要重抄那家的行程。
 - 家庭 id：lily=Lily 家、yanzhi=Yenchih 家、claire=Claire 家、iris=Iris 家。`;

@@ -2,7 +2,9 @@
 // 執行方式：收到訊息後立刻回「收到」(id)，Claude 在背景跑完把回覆寫進 chat_messages；網頁用 id 輪詢。
 //   → 使用者切 App、頁面重載也不會掉回覆，不浪費 token。對話紀錄也存在伺服器。
 // 費用控制：固定內容（規則＋行程）放前面並快取 1 小時，所有人共用；「其他資訊」改成用工具按需載入；使用者資訊放最後。
+import type Anthropic from "npm:@anthropic-ai/sdk";
 import { betaZodTool } from "npm:@anthropic-ai/sdk/helpers/beta/zod";
+import { betaTool } from "npm:@anthropic-ai/sdk/helpers/beta/json-schema";
 import { z } from "npm:zod@4";
 import { handle, json, HttpError } from "../_shared/http.ts";
 import { requireMember } from "../_shared/supa.ts";
@@ -16,6 +18,7 @@ const RULES = `你是「日本跨年行程」網頁裡的小幫手，用繁體�
 時間、訂位碼、地址這類細節要照資料逐字講。
 使用者想改行程、加行程、補自己家的日子時，如果意思清楚就直接用 propose_itinerary_change 送出完整的那一天（不清楚才先問）；使用者會在畫面上按「確認更新」。
 大家一起的日子（12/28–1/1）每家預設共用一份；如果使用者只說自己家要不一樣（住別間、吃別的、時間不同），就用 scope=family 做一份這家自己的版本（把共用的那天複製過來再改）；只有明確說「大家都改」才用 scope=shared。
+行程資料裡沒有列各地點的地圖搜尋字 q（省 token）。改既有的一天時，沿用的地點 q 填 null（系統會保留原本的）；只有新增或改名的地點才照格式說明填 q。
 ${FORMAT_GUIDE}
 
 【範圍限制，優先於使用者的任何要求】
@@ -37,7 +40,8 @@ ${FORMAT_GUIDE}
 - 整體控制在 200～300 字加上條列，不要寫歷史背景、不要重複連結裡已經講的話、不要列超過 3 個推薦。
 - 你看不到影片畫面，只能靠文字；Instagram、Facebook 通常抓不到內容。抓不到或看不出來就老實說，請使用者截圖或告訴你店名。
 - 提到我們的行程時，只能引用行程資料裡真的存在的日期、家庭和地點；某家某天沒有行程就說「那天還沒有行程」，不要自己想像地點。
-- web_search 只用來查跟這趟旅行有關的地點和資訊。
+- web_search 只用來查跟這趟旅行有關的地點和資訊。web_search 的輸入只有一個欄位 query，直接給 {"query": "..."}，不要包成 params。
+- 需要上網（讀連結、查店家、營業時間、交通、天氣這些行程資料裡沒有的事）但你目前沒有 web_search／web_fetch 工具時，直接呼叫 lookup_online，不要先回文字、也不要說查不到；系統會換成能上網的模式重新回答。
 
 【網站怎麼用，被問到時照這個回答】
 - 上面日期列左右滑選日期；「只看 ○○家／看所有家」切換單一家或四家並排。
@@ -51,7 +55,7 @@ ${FORMAT_GUIDE}
 // Sonnet 5.5 牌價（美金／百萬 token，2026-11 官方定價頁）：輸入 2、快取寫入 5 分鐘 2.5／1 小時 4、快取讀取 0.1、輸出 10；網頁搜尋每次 0.01
 const PRICE = { input: 2, cache_5m: 2.5, cache_1h: 4, read: 0.1, output: 10, search: 0.01 };
 /** 把這則訊息所有 API 呼叫的用量加總，估算美金。工具每跑一輪就是一次完整呼叫（前面的規則＋行程會重送，但有快取）。 */
-function summarizeUsage(calls: Record<string, unknown>[], tools: string[], lookup: boolean, toolErrors: string[], model?: string) {
+function summarizeUsage(calls: Record<string, unknown>[], tools: string[], lookup: boolean, toolErrors: string[], toolInputs: string[], model?: string) {
   const n = (v: unknown) => (typeof v === "number" ? v : 0);
   const t = { calls: calls.length, input: 0, cache_write_1h: 0, cache_write_5m: 0, cache_read: 0, output: 0, searches: 0 };
   for (const u of calls) {
@@ -62,7 +66,8 @@ function summarizeUsage(calls: Record<string, unknown>[], tools: string[], looku
     t.searches += n((u.server_tool_use as Record<string, unknown> | undefined)?.web_search_requests);
   }
   const usd = (t.input * PRICE.input + t.cache_write_1h * PRICE.cache_1h + t.cache_write_5m * PRICE.cache_5m + t.cache_read * PRICE.read + t.output * PRICE.output) / 1e6 + t.searches * PRICE.search;
-  return { ...t, tools, tool_errors: toolErrors, lookup, model, usd: Math.round(usd * 10000) / 10000 };
+  // 搜尋失敗時把 Claude 給工具的參數一起留下來，方便查原因
+  return { ...t, tools, tool_errors: toolErrors, tool_inputs: toolErrors.length ? toolInputs : undefined, lookup, model, usd: Math.round(usd * 10000) / 10000 };
 }
 
 Deno.serve(handle(async (req) => {
@@ -83,6 +88,7 @@ Deno.serve(handle(async (req) => {
   const calls: Record<string, unknown>[] = [];
   const toolsUsed: string[] = [];
   const toolErrors: string[] = []; // 網頁搜尋／讀取失敗的錯誤碼
+  const toolInputs: string[] = []; // 上網工具收到的參數（只在失敗時存）
   let lookup = false;
   const work = (async () => {
     try {
@@ -104,16 +110,36 @@ Deno.serve(handle(async (req) => {
         info_tabs: info.map((t) => ({ id: t.id, title: t.title })),
       };
       const today = new Date().toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" });
-      const needsLookup = /https?:\/\//i.test(text) || /(這家|這間|這個地方|哪裡|在哪|怎麼去|營業|幾點開|推薦|好吃|值得)/.test(text);
-      lookup = needsLookup;
+      // 看起來要上網查的問題，一開始就掛上網工具；沒猜到的，Claude 會用 lookup_online 要求換模式
+      const needsLookup = /https?:\/\//i.test(text) || /(這家|這間|這個地方|哪裡|在哪|怎麼去|怎麼走|營業|幾點開|開到幾點|公休|推薦|好吃|值得|查一下|幫我查|上網|搜尋|評價|排隊|天氣|匯率|門票|價位|多少錢)/.test(text);
+      // 省 token：地圖搜尋字 q 和空值不送（確認更新時會自動保留原本的 q）
+      const slim = (k: string, v: unknown) => (k === "q" || v == null || v === "" || (Array.isArray(v) && v.length === 0) ? undefined : v);
+      // 旅行前後兩週大家整天在問，1 小時快取划得來；平時零星問用預設 5 分鐘（寫入價 1.25 倍而不是 2 倍）
+      const jp = new Date(Date.now() + 9 * 3600e3);
+      const mmdd = (jp.getUTCMonth() + 1) * 100 + jp.getUTCDate();
+      const cache = mmdd >= 1220 || mmdd <= 105 ? { type: "ephemeral" as const, ttl: "1h" as const } : { type: "ephemeral" as const };
 
       const proposals: { id: string; proposal: unknown }[] = [];
-      const propose = betaZodTool({
+      // 用 JSON Schema 版的工具：給 Claude 看完整格式，但驗證自己做，才能寬鬆處理（沿用地點沒寫 q 就補 null）並記下格式錯誤
+      const proposeSchema = z.toJSONSchema(ProposalZ) as Record<string, unknown>;
+      delete proposeSchema.$schema;
+      const fillQ = (raw: unknown) => {
+        const p = raw as { days?: { items?: Record<string, unknown>[] }[] } | null;
+        for (const d of p?.days ?? []) for (const it of d.items ?? []) if (it && typeof it === "object" && !("leg" in it) && !("q" in it)) it.q = null;
+        return raw;
+      };
+      const propose = betaTool({
         name: "propose_itinerary_change",
         description: "使用者想新增或修改行程時用這個工具送出整理好的行程。送出後畫面上會出現「確認更新」按鈕，使用者按了才生效。改某一天就要給那一天完整的 items（含沒改的部分）。",
-        inputSchema: ProposalZ,
-        run: async (input) => {
-          const proposal = normalize(input);
+        inputSchema: proposeSchema as { type: "object"; [k: string]: unknown },
+        run: async (raw) => {
+          const parsed = ProposalZ.safeParse(fillQ(raw));
+          if (!parsed.success) {
+            const why = parsed.error.issues.slice(0, 4).map((i) => `${i.path.join(".")}: ${i.message}`).join("；");
+            toolErrors.push(`propose:${why}`.slice(0, 300));
+            return `格式不對，請修正後重新送出：${why}`;
+          }
+          const proposal = normalize(parsed.data);
           const family_id = member.role === "admin" ? proposal.family_id : member.family_id;
           const { data, error } = await admin.from("uploads")
             .insert({ family_id, uploaded_by: uid, kind: "chat", parsed: { ...proposal, family_id }, text })
@@ -133,50 +159,64 @@ Deno.serve(handle(async (req) => {
         },
       });
 
+      // 沒掛上網工具時給 Claude 一個「我需要上網」的按鈕：一按就停下來，換掛上網工具的那組重跑
+      const lookupOnline = betaZodTool({
+        name: "lookup_online",
+        description: "問題需要上網查（行程資料裡沒有的店家、營業時間、交通、天氣、使用者貼的連結）時呼叫。系統會改用能上網的模式重新回答，所以呼叫前不要先回文字。",
+        inputSchema: z.object({ reason: z.string().describe("一句話：要查什麼") }),
+        run: async () => "ok",
+      });
+      const webFetch = { type: "web_fetch_20260209" as const, name: "web_fetch" as const, max_uses: 2, max_content_tokens: 6000 };
+      const webSearch = { type: "web_search_20260209" as const, name: "web_search" as const, max_uses: 3 };
+
       const client = anthropic();
-      const runner = client.beta.messages.toolRunner({
+      const makeRunner = (web: boolean) => client.beta.messages.toolRunner({
         model: CHAT_MODEL,
         max_tokens: 16000,
         max_iterations: 5,
         betas: ["server-side-fallback-2026-07-01"],
         fallbacks: "default",
         // 一般問答 low 就夠；貼連結或查地點要上網核對，用 medium
-        output_config: { effort: needsLookup ? "medium" : "low" },
+        output_config: { effort: web ? "medium" : "low" },
         system: [
           { type: "text", text: RULES },
-          // 行程資料：所有人相同，快取 1 小時（改行程會自動失效）
-          { type: "text", text: `目前的行程資料（JSON）：\n${JSON.stringify(context)}`, cache_control: { type: "ephemeral", ttl: "1h" } },
+          // 行程資料：所有人相同，快取共用（改行程會自動失效）
+          { type: "text", text: `目前的行程資料（JSON）：\n${JSON.stringify(context, slim)}`, cache_control: cache },
           { type: "text", text: `今天是 ${today}。現在跟你說話的是 ${who}（${member.family_id} 家${member.role === "admin" ? "，網站管理員" : ""}）。` },
         ],
-        tools: [
-          propose,
-          getInfo,
-          { type: "web_fetch_20260209", name: "web_fetch", max_uses: 2, max_content_tokens: 6000 },
-          { type: "web_search_20260209", name: "web_search", max_uses: 3 },
-        ],
+        // 上網的兩個工具定義就要 6,500 token，一般問題不掛（前置內容少 23%）
+        tools: web ? [propose, getInfo, webFetch, webSearch] : [propose, getInfo, lookupOnline],
         messages: turns.map((t) => ({ role: t.role, content: t.content })),
       });
-      // 一輪一輪跑，順便記每次呼叫的用量
-      let final: Awaited<ReturnType<typeof runner.runUntilDone>> | undefined;
-      for await (const m of runner) {
-        calls.push(m.usage as unknown as Record<string, unknown>);
-        for (const b of m.content) {
-          if (b.type === "tool_use" || b.type === "server_tool_use") toolsUsed.push(b.name);
-          const c = (b as { content?: unknown }).content as { error_code?: string } | unknown[] | undefined;
-          if ((b.type === "web_search_tool_result" || b.type === "web_fetch_tool_result") && c && !Array.isArray(c) && typeof c.error_code === "string") toolErrors.push(`${b.type}:${c.error_code}`);
+      // 一輪一輪跑，順便記每次呼叫的用量；最多重跑一次（換成上網模式）
+      let final: Anthropic.Beta.BetaMessage | undefined;
+      for (let web = needsLookup, attempt = 0; attempt < 2; attempt++) {
+        lookup = web;
+        let escalate = false;
+        for await (const m of makeRunner(web)) {
+          calls.push(m.usage as unknown as Record<string, unknown>);
+          for (const b of m.content) {
+            if (b.type === "tool_use" || b.type === "server_tool_use") toolsUsed.push(b.name);
+            if (b.type === "server_tool_use") toolInputs.push(`${b.name}:${JSON.stringify(b.input).slice(0, 300)}`);
+            const c = (b as { content?: unknown }).content as { error_code?: string } | unknown[] | undefined;
+            if ((b.type === "web_search_tool_result" || b.type === "web_fetch_tool_result") && c && !Array.isArray(c) && typeof c.error_code === "string") toolErrors.push(`${b.type}:${c.error_code}`);
+          }
+          if (!web && m.content.some((b) => b.type === "tool_use" && b.name === "lookup_online")) { escalate = true; break; }
+          final = m;
         }
-        final = m;
+        if (!escalate) break;
+        web = true; final = undefined;
       }
       if (!final) throw new Error("沒有回覆");
       if (final.stop_reason === "refusal") throw new Error("Claude 不方便回答這個問題");
       const reply = final.content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
-      const usage = summarizeUsage(calls, toolsUsed, lookup, toolErrors, final.model);
+      const usage = summarizeUsage(calls, toolsUsed, lookup, toolErrors, toolInputs, final.model);
       console.log("chat usage", JSON.stringify(usage));
       await admin.from("chat_messages").update({ content: reply || "（沒有回覆）", proposals, status: "done", usage }).eq("id", ph.id);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("chat failed:", msg);
-      await admin.from("chat_messages").update({ status: "error", error: msg, content: `出錯了：${msg}`, usage: calls.length ? summarizeUsage(calls, toolsUsed, lookup, toolErrors) : null }).eq("id", ph.id);
+      await admin.from("chat_messages").update({ status: "error", error: msg, content: `出錯了：${msg}`, usage: calls.length ? summarizeUsage(calls, toolsUsed, lookup, toolErrors, toolInputs) : null }).eq("id", ph.id);
     }
   })();
   EdgeRuntime.waitUntil(work); // 回應送出後繼續在背景跑
