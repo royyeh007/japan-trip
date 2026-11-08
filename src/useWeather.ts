@@ -22,14 +22,9 @@ export interface WeatherState { data: WeatherMap | null; updatedAt: number | nul
 /** Weather for every place this trip's days mention (plus the trip's own per-date place list), over the trip's date window. */
 export function useWeather(trip: Trip | null, days: Day[]): WeatherState {
   const dayPlaces = trip?.settings?.day_places;
-  const tripId = trip?.id ?? "";
   // the inputs that decide which places/dates to fetch, as one string so the effect re-runs only on real change
   const sig = trip ? JSON.stringify([trip.id, trip.start_date, trip.end_date, trip.tz, [...new Set(days.map((d) => `${d.id}|${d.city}`))].sort(), dayPlaces ?? null]) : "";
-  const [state, setState] = useState<WeatherState>(() => {
-    const n = tripId ? readCache<WeatherMap>(`wx-n:${tripId}`, NORMALS_TTL) : null;
-    const f = tripId ? readCache<WeatherMap>(`wx-f:${tripId}`, FORECAST_TTL) : null;
-    return { data: n && trip ? merge(n.data, f?.data ?? {}, tripDates(trip)) : null, updatedAt: f?.at ?? null, error: false, loading: true, dayPlaces };
-  });
+  const [state, setState] = useState<WeatherState>({ data: null, updatedAt: null, error: false, loading: true, dayPlaces });
 
   useEffect(() => {
     if (!trip) return;
@@ -44,11 +39,20 @@ export function useWeather(trip: Trip | null, days: Day[]): WeatherState {
         for (const d of days) for (const k of placesFor(d.id, d.city, dayPlaces)) keys.add(k);
         for (const ks of Object.values(dayPlaces ?? {})) for (const k of ks) keys.add(k);
         const places = [...keys].map(placeByKey).filter((p): p is Place => !!p);
-        const nc = readCache<WeatherMap>(`wx-n:${trip.id}`, NORMALS_TTL);
-        const normals = nc?.data ?? (await fetchNormals(places, dates, tz).then((d) => (writeCache(`wx-n:${trip.id}`, d), d)).catch(() => ({} as WeatherMap)));
-        const fc = force ? null : readCache<WeatherMap>(`wx-f:${trip.id}`, FORECAST_TTL);
+        if (places.length === 0) { if (alive) setState({ data: {}, updatedAt: null, error: false, loading: false, dayPlaces }); return; }
+        // cache per trip AND per set of places: a new city (or a trip that was empty when first opened) fetches again
+        const tag = `${trip.id}:${trip.start_date}:${trip.end_date}:${places.map((p) => p.key).sort().join(",")}`;
+        const keyN = `wx-n:${tag}`, keyF = `wx-f:${tag}`;
+        const hasAll = (m: WeatherMap | undefined) => !!m && places.every((p) => Object.values(m).some((byPlace) => p.key in byPlace));
+        const nc = readCache<WeatherMap>(keyN, NORMALS_TTL);
+        let normals = hasAll(nc?.data) ? nc!.data : undefined;
+        if (!normals) {
+          normals = await fetchNormals(places, dates, tz).catch(() => ({} as WeatherMap));
+          if (Object.keys(normals).length > 0) writeCache(keyN, normals);
+        }
+        const fc = force ? null : readCache<WeatherMap>(keyF, FORECAST_TTL);
         let forecast = fc?.data, at = fc?.at ?? Date.now();
-        if (!forecast) { forecast = await fetchForecast(places, dates, tz); writeCache(`wx-f:${trip.id}`, forecast); at = Date.now(); }
+        if (!forecast) { forecast = await fetchForecast(places, dates, tz); writeCache(keyF, forecast); at = Date.now(); }
         if (alive) setState({ data: merge(normals, forecast, dates), updatedAt: at, error: false, loading: false, dayPlaces });
       } catch {
         if (alive) setState((s) => ({ ...s, error: true, loading: false, dayPlaces }));
