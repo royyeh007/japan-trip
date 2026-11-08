@@ -90,7 +90,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     if (!supabase || !member || document.visibilityState !== "visible") return;
     const [d, t, c] = await Promise.all([
       supabase.from("days").select("date_id, fam, updated_at"),
-      supabase.from("todos").select("id, done, text"),
+      supabase.from("todos").select("id, done, due, text"),
       supabase.from("contacts").select("id, name, value"),
     ]);
     if (d.error || t.error || c.error) return;
