@@ -42,11 +42,19 @@ function Memos({ day, stop }: { day: Day; stop: Stop }) {
   const editable = canEdit(day.fam, member);
 
   const write = async (next: Memo[]) => {
-    const idx = day.items.indexOf(stop);
-    if (idx < 0 || !supabase) return;
+    if (!supabase) return;
     setBusy(true);
-    const items = day.items.map((it, i) => (i === idx ? { ...it, memo: next } : it));
-    let q = supabase.from("days").update({ items, updated_at: new Date().toISOString() }).eq("date_id", day.id);
+    // Re-read the day first so a note never overwrites changes someone else made while this sheet was open
+    let sel = supabase.from("days").select("items").eq("date_id", day.id);
+    sel = day.fam ? sel.contains("fam", day.fam) : sel.is("fam", null);
+    const { data: fresh, error: readErr } = await sel.maybeSingle();
+    if (readErr || !fresh) { alert(readErr?.message ?? "這一天已經不存在了"); setBusy(false); return; }
+    const items = fresh.items as Day["items"];
+    let idx = items.findIndex((it) => !("leg" in it) && it.t === stop.t && it.n === stop.n);
+    if (idx < 0) idx = items.findIndex((it) => !("leg" in it) && it.n === stop.n);
+    if (idx < 0) { alert("這個地點已經被改掉了，重新打開再試"); setBusy(false); return; }
+    const updated = items.map((it, i) => (i === idx ? { ...it, memo: next } : it));
+    let q = supabase.from("days").update({ items: updated, updated_at: new Date().toISOString() }).eq("date_id", day.id);
     q = day.fam ? q.contains("fam", day.fam) : q.is("fam", null);
     const { error } = await q;
     if (error) alert(error.message); else { setMemos(next); setText(""); reload(); }
