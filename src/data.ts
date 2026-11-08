@@ -35,10 +35,12 @@ export const hasDay = (d: Day, f: FamilyId) => !d.fam || d.fam.includes(f);
 /** The days this family sees, one per date, in trip order: its own version of a date wins over a shared one. */
 export function daysFor(days: Day[], f: FamilyId): Day[] {
   const byDate = new Map<string, Day>();
+  // preference: the family's own row > a joint row shared with other families > the everyone row
+  const rank = (d: Day) => (!d.fam ? 0 : d.fam.length === 1 ? 2 : 1);
   for (const d of days) {
     if (!hasDay(d, f)) continue;
     const cur = byDate.get(d.id);
-    if (!cur || (!cur.fam && d.fam)) byDate.set(d.id, d);
+    if (!cur || rank(d) > rank(cur)) byDate.set(d.id, d);
   }
   return [...byDate.values()].sort((a, b) => isoOf(a.d).localeCompare(isoOf(b.d)));
 }

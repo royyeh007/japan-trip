@@ -35,6 +35,16 @@ export async function applyProposal(id: string, p: Proposal, days: Day[], review
   const now = new Date().toISOString();
   for (const day of p.days) {
     const fam = day.scope === "shared" ? null : [p.family_id];
+    // If this family currently shares a joint version of the day with other families (e.g. fam ["lily","yanzhi"]),
+    // take the family out of that row first so the new version does not leave two competing rows behind.
+    if (fam) {
+      const joint = days.find((d) => d.id === day.id && d.fam && d.fam.length > 1 && d.fam.includes(p.family_id));
+      if (joint?.fam) {
+        const rest = joint.fam.filter((f) => f !== p.family_id);
+        const { error: je } = await supabase.from("days").update({ fam: rest, updated_at: now }).eq("date_id", day.id).contains("fam", joint.fam);
+        if (je) throw new Error(je.message);
+      }
+    }
     // keep notes people wrote on stops that still exist (matched by name)
     const existing = days.find((d) => d.id === day.id && (fam ? d.fam?.includes(p.family_id) : !d.fam)) ?? days.find((d) => d.id === day.id);
     const items = day.items.map((it) => {
