@@ -4,6 +4,7 @@ import { dateOf, isLeg, labelOf as labelIn } from "../data";
 import type { Day, Family, Proposal, Stop, Upload as UploadRow } from "../data";
 import { invoke, supabase } from "../supabase";
 import { useTrip } from "../trip";
+import { fillTripDays } from "../days";
 
 export const STATUS: Record<UploadRow["status"], string> = { pending: "等你確認", approved: "已更新", rejected: "已取消", failed: "解析失敗" };
 
@@ -98,15 +99,32 @@ export async function cancelProposal(id: string, reviewedBy: string) {
 
 /** A proposal with 確認更新 / 取消 buttons. `onDone` fires after either. */
 export function ProposalCard({ id, proposal, meta, onDone }: { id: string; proposal: Proposal; meta?: string; onDone?: (status: "approved" | "rejected") => void }) {
-  const { trip, current, member, reload } = useTrip();
+  const { trip, current, member, reload, refreshMemberships } = useTrip();
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<"approved" | "rejected" | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  // Days (or a requested extension) outside the trip's dates: admins can widen the trip while confirming
+  const outside = current ? proposal.days.filter((d) => d.id < current.start_date || d.id > current.end_date).map((d) => d.id) : [];
+  const wantStart = [proposal.extend_to?.start_date, ...outside].filter((x): x is string => !!x).sort()[0];
+  const wantEnd = [proposal.extend_to?.end_date, ...outside].filter((x): x is string => !!x).sort().reverse()[0];
+  const newStart = current && wantStart && wantStart < current.start_date ? wantStart : current?.start_date;
+  const newEnd = current && wantEnd && wantEnd > current.end_date ? wantEnd : current?.end_date;
+  const widens = !!current && (newStart !== current.start_date || newEnd !== current.end_date);
+  const [extend, setExtend] = useState(true);
   const act = async (ok: boolean) => {
     if (!member || !current) return;
     setBusy(true); setErr(null);
     try {
-      if (ok) { await applyProposal(id, proposal, current.id, trip.days, trip.families, member.user_id); await reload(); }
+      if (ok) {
+        await applyProposal(id, proposal, current.id, trip.days, trip.families, member.user_id);
+        if (widens && extend && member.role === "admin" && supabase && newStart && newEnd) {
+          const { error } = await supabase.from("trips").update({ start_date: newStart, end_date: newEnd }).eq("id", current.id);
+          if (error) throw new Error(`行程日期沒改成：${error.message}`);
+          try { await fillTripDays(current.id, newStart, newEnd, current.place, trip.days.filter((d) => !d.fam).map((d) => d.id)); } catch { /* days can be added later */ }
+          await refreshMemberships();
+        }
+        await reload();
+      }
       else await cancelProposal(id, member.user_id);
       setDone(ok ? "approved" : "rejected");
       onDone?.(ok ? "approved" : "rejected");
@@ -117,6 +135,16 @@ export function ProposalCard({ id, proposal, meta, onDone }: { id: string; propo
     <div className="review">
       {meta && <div className="meta"><span>{meta}</span></div>}
       <ProposalDays p={proposal} />
+      {widens && !done && current && (
+        member?.role === "admin" ? (
+          <label className="extendrow">
+            <input type="checkbox" checked={extend} onChange={(e) => setExtend(e.target.checked)} />
+            <span>同時把行程日期改成 <b>{dateOf(newStart!).d} – {dateOf(newEnd!).d}</b>（原本 {dateOf(current.start_date).d} – {dateOf(current.end_date).d}），多出來的日子會補上空白的「大家一起」版本</span>
+          </label>
+        ) : (
+          <p className="note extendrow">有日期在行程範圍（{dateOf(current.start_date).d} – {dateOf(current.end_date).d}）之外：確認後會加進你們家的行程；要延長整個行程的日期請找管理員。</p>
+        )
+      )}
       {done ? (
         <span className={`status ${done}`}>{STATUS[done]}</span>
       ) : (

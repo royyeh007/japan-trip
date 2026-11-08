@@ -635,3 +635,5 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none;bor
 .admin .row .inline input,.admin .row .inline .btn,.addrow.pair input,.addrow.pair .btn,.addrow.pair select{height:40px !important;min-height:0 !important;padding-top:0 !important;padding-bottom:0 !important;box-sizing:border-box;align-self:center;margin:0}
 .admin .row .inline input,.addrow.pair input{line-height:38px}
 .admin .row .inline .btn,.addrow.pair .btn{display:inline-flex;align-items:center;justify-content:center;line-height:1}
+.extendrow{display:flex;gap:8px;align-items:flex-start;font-size:.86rem;background:var(--amber-soft);color:var(--ink);border-radius:8px;padding:8px 10px;margin:0}
+.extendrow input{margin-top:3px;accent-color:var(--ai);flex:none}

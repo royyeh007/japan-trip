@@ -99,6 +99,8 @@ export interface Proposal {
   joins: { date_id: string; with: FamilyId; from: string | null }[];
   summary: string;
   notes: string[];
+  /** set when the proposal wants the trip's dates widened (admin confirms) */
+  extend_to?: { start_date: string | null; end_date: string | null } | null;
 }
 export interface Upload { id: string; family_id: FamilyId; uploaded_by: string; kind: string; path: string | null; status: "pending" | "approved" | "rejected" | "failed"; parsed: Proposal | null; error: string | null; created_at: string }
 export interface InviteRow { code: string; role: Role; family_id: string | null; uses: number; max_uses: number; note: string | null; expires_at: string | null; created_at: string }

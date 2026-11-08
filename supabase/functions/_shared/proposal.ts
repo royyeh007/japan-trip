@@ -49,6 +49,10 @@ export const ProposalZ = z.object({
   })).describe("某天是跟別家一起走的，列在這裡而不是重抄那家的行程"),
   summary: z.string().describe("一兩句話說明這份提案改了什麼，給確認的人看"),
   notes: z.array(z.string()).describe("看不懂、不確定、資料矛盾的地方，一條一項"),
+  extend_to: z.object({
+    start_date: DateIdZ.nullable().describe("要把行程的開始日期提早到哪天；不用就 null"),
+    end_date: DateIdZ.nullable().describe("要把行程的結束日期延後到哪天；不用就 null"),
+  }).describe("這份提案有日期超出行程範圍、而且使用者同意延長行程時才填；否則兩個都 null"),
 });
 export type Proposal = z.infer<typeof ProposalZ>;
 
@@ -84,6 +88,7 @@ export function normalize(p: Proposal) {
     joins: p.joins,
     summary: p.summary,
     notes: p.notes,
+    extend_to: p.extend_to && (p.extend_to.start_date || p.extend_to.end_date) ? p.extend_to : null,
   };
 }
 
@@ -109,5 +114,6 @@ export function formatGuide({ trip, families, sharedDates }: GuideCtx) {
 - q 是 Google 地圖的搜尋字：用當地語言的官方店名＋區域（例「ミキモト 銀座本店」）；新開的店、連鎖店或名字很普通的店，一定在 q 後面加上地址（例「東京銀座 茅乃舎 東京都中央区銀座3-4-8」），不然地圖會找錯。有查到地址就同時填 addr。改既有的一天時，沿用（沒改名）的地點 q 填 null，系統會保留原本的搜尋字。
 - 大家一起的日子（scope=shared）：${shared}；其他日子各家自己走（scope=family）。
 - 如果某天是「跟某家一起」，放進 joins（有「從幾點開始」就填 from），不要重抄那家的行程。
+- 日期超出行程範圍（${trip.start_date}–${trip.end_date}）的日子一樣可以放進 days；如果要順便把行程日期延長，填 extend_to（新的開始或結束日期）。
 - 家庭 id：${fams}。`;
 }
