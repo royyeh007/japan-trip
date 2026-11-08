@@ -34,7 +34,7 @@ ${formatGuide(ctx)}
 
 Deno.serve(handle(async (req) => {
   const body = await req.json().catch(() => ({})) as { path?: string; text?: string; family_id?: string; trip_id?: string };
-  const { admin, member, trip, uid, who } = await requireMember(req, body);
+  const { admin, member, trip, uid, who } = await requireMember(req, body, { editor: true });
   const { data: famRows } = await admin.from("families").select("id, label").eq("trip_id", trip.id).order("sort");
   const families = (famRows ?? []) as { id: string; label: string }[];
   const family_id = member.role === "admin" && body.family_id && families.some((f) => f.id === body.family_id) ? body.family_id : member.family_id;

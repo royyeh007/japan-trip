@@ -61,7 +61,10 @@ export function daysFor(days: Day[], f: FamilyId): Day[] {
 }
 
 // ---------- trips & people ----------
-export type Role = "member" | "admin";
+/** admin 管理員、member 成員（改自己家和大家一起的）、viewer 觀察員（只能看，不能用聊天機器人） */
+export type Role = "member" | "admin" | "viewer";
+export const ROLE_LABEL: Record<Role, string> = { admin: "管理員", member: "成員", viewer: "觀察員" };
+export const isViewer = (m: { role: Role } | null | undefined) => m?.role === "viewer";
 export interface TripSettings { day_places?: Record<string, string[]> }
 export interface Trip { id: string; name: string; start_date: string; end_date: string; place: string; tz: string; settings: TripSettings; created_by?: string | null; created_at?: string }
 /** One row of `members` (this person in one trip). */
@@ -85,7 +88,7 @@ export type Contact = [string, string];
 export interface TodoRow { id: string; fam: FamilyId[] | null; due: string; text: string; done: boolean; sort: number; created_at: string }
 export interface ContactRow { id: string; fam: FamilyId[] | null; name: string; value: string; sort: number; created_at: string }
 /** Can this member change the item (shared, their own family's, or admin)? */
-export const canEdit = (fam: FamilyId[] | null | undefined, m: Member | null) => !!m && (!fam || fam.includes(m.family_id) || m.role === "admin");
+export const canEdit = (fam: FamilyId[] | null | undefined, m: Member | null) => !!m && m.role !== "viewer" && (!fam || fam.includes(m.family_id) || m.role === "admin");
 
 /** What the AI produces from an upload or a chat, waiting for the person to confirm. */
 export interface Proposal {

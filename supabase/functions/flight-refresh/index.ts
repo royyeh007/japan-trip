@@ -29,7 +29,7 @@ Deno.serve(handle(async (req) => {
   } else {
     // a member adding flights: only the "info" pass, only for what they sent
     const body = await req.json().catch(() => ({})) as { flights?: string[]; trip_id?: string };
-    const { trip } = await requireMember(req, body);
+    const { trip } = await requireMember(req, body, { editor: true });
     const range = { start: trip.start_date, end: trip.end_date };
     targets = (body.flights ?? []).map((line) => parseFlightText(line, range)).filter((f): f is NonNullable<typeof f> => !!f).map((q) => ({ q, tz: trip.tz || "Asia/Tokyo" }));
     if (targets.length === 0) return json({ done: [], note: "沒有需要查的航班" });

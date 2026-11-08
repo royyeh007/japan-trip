@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
-import { COMMON_TZ } from "../data";
+import { COMMON_TZ, ROLE_LABEL } from "../data";
 import { fillTripDays } from "../days";
 import type { InviteRow, Member, Role } from "../data";
 
@@ -30,7 +30,7 @@ function Members() {
   return (
     <div className="panel admin">
       <h3>團員（{rows.length}）</h3>
-      <p className="note">管理員可以改所有人的行程、管理邀請和團員；一般成員只能改自己家和大家一起的日子。每個行程至少要有一位管理員。</p>
+      <p className="note">管理員可以改所有人的行程、管理邀請和團員；成員只能改自己家和大家一起的日子；觀察員只能看，不能改也不能用聊天機器人。每個行程至少要有一位管理員。</p>
       {rows.map((m) => (
         <div className="row" key={m.user_id}>
           <span className="person"><b>{m.name ?? "（沒有名字）"}</b><span className="muted"> {m.email}{m.user_id === me?.user_id ? "（你）" : ""}</span></span>
@@ -38,8 +38,7 @@ function Members() {
             {trip.families.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
           </select>
           <select value={m.role} onChange={(e) => setRole(m, e.target.value as Role)} disabled={busy} aria-label="角色">
-            <option value="member">成員</option>
-            <option value="admin">管理員</option>
+            {(["member", "admin", "viewer"] as Role[]).map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
           </select>
           <button type="button" className="link" onClick={() => remove(m)} disabled={busy || m.user_id === me?.user_id}>移除</button>
         </div>
@@ -83,7 +82,7 @@ function Invites() {
         <div className="invite" key={i.code}>
           <code>{linkOf(i.code)}</code>
           <span className="muted">
-            {i.role === "admin" ? "管理員邀請" : "成員邀請"}{i.family_id && `・${trip.families.find((f) => f.id === i.family_id)?.label ?? i.family_id}`}{i.note && `・${i.note}`}・用了 {i.uses}/{i.max_uses}
+            {ROLE_LABEL[i.role]}邀請{i.family_id && `・${trip.families.find((f) => f.id === i.family_id)?.label ?? i.family_id}`}{i.note && `・${i.note}`}・用了 {i.uses}/{i.max_uses}
           </span>
           <button type="button" className="btn" onClick={() => copy(i.code)}>{copied === i.code ? "已複製" : "複製"}</button>
           <button type="button" className="link" onClick={() => del(i.code)}>刪除</button>
@@ -91,7 +90,11 @@ function Invites() {
       ))}
       <div className="formgrid">
         <label>角色
-          <select value={role} onChange={(e) => setRole(e.target.value as Role)}><option value="member">成員</option><option value="admin">管理員</option></select>
+          <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
+            <option value="member">成員（可以改自己家和大家一起的）</option>
+            <option value="viewer">觀察員（只能看）</option>
+            <option value="admin">管理員</option>
+          </select>
         </label>
         <label>先選好是哪一家（可空）
           <select value={famPreset} onChange={(e) => setFamPreset(e.target.value)}>

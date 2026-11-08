@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState } from "react";
-import { isLeg } from "../data";
+import { isLeg, isViewer } from "../data";
 import { DayWeatherPanel } from "./Weather";
 import type { WeatherState } from "../useWeather";
 import type { Day, Family, Stop } from "../data";
@@ -108,8 +108,9 @@ async function removeDay(day: Day, familyId: string, tripId: string) {
 }
 
 export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; family: Family; onOpen: (s: Stop, arrive?: LinkedLeg) => void; onRemoved: () => void; wx: WeatherState }) {
-  const { trip, current, reload } = useTrip();
+  const { trip, current, member, reload } = useTrip();
   const [busy, setBusy] = useState(false);
+  const viewer = isViewer(member);
   const own = !!day.fam && day.fam.includes(family.id);
   const shared = !day.fam;
   const hasSharedVersion = trip.days.some((d) => d.id === day.id && !d.fam);
@@ -140,8 +141,8 @@ export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; fami
           <span>{day.d}（{day.w}）</span>
           <span className="hotel">{day.hotel ? `住 ${day.hotel}` : ""}</span>
           <span className={`tag ${shared ? "shared" : "own"}`}>{shared ? "大家一起的版本" : `${family.label}自己的版本`}</span>
-          {shared && <button type="button" className="link" onClick={fork} disabled={busy}>做一份我們家的版本</button>}
-          {own && <button type="button" className="link" onClick={remove} disabled={busy}>{hasSharedVersion ? "改回大家一起的版本" : "刪除這天"}</button>}
+          {shared && !viewer && <button type="button" className="link" onClick={fork} disabled={busy}>做一份我們家的版本</button>}
+          {own && !viewer && <button type="button" className="link" onClick={remove} disabled={busy}>{hasSharedVersion ? "改回大家一起的版本" : "刪除這天"}</button>}
         </div>
         <h2>{day.title}</h2>
         {!empty && (
@@ -156,11 +157,15 @@ export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; fami
       {empty ? (
         <div className="pendingbox">
           <p>這天還沒有行程。</p>
-          <p>到「上傳行程」傳表單或截圖，或點右下角「問 Claude」直接說這天要做什麼，確認後就會出現在這裡。</p>
-          <div className="actions">
-            <a className="btn" href="#upload"><DownloadIcon />上傳行程</a>
-            <button type="button" className="btn" onClick={() => openForm(current?.name)}><DownloadIcon />下載填寫表單</button>
-          </div>
+          {viewer ? <p>等成員把內容補上。</p> : (
+            <>
+              <p>到「上傳行程」傳表單或截圖，或點右下角「問 Claude」直接說這天要做什麼，確認後就會出現在這裡。</p>
+              <div className="actions">
+                <a className="btn" href="#upload"><DownloadIcon />上傳行程</a>
+                <button type="button" className="btn" onClick={() => openForm(current?.name)}><DownloadIcon />下載填寫表單</button>
+              </div>
+            </>
+          )}
         </div>
       ) : (
         <Timeline day={day} onOpen={onOpen} />

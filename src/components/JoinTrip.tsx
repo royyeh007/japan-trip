@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
-import { dotDate } from "../data";
+import { ROLE_LABEL, dotDate } from "../data";
 import type { InviteInfo } from "./Login";
 
 /**
@@ -49,7 +49,7 @@ export function JoinTrip({ code: initial, onDone, onCancel }: { code: string; on
       <header className="hero">
         <div className="eyebrow">{session?.user.email}</div>
         <h1>{info ? `加入「${info.name}」` : "用邀請碼加入"}</h1>
-        {info && <p className="note">{dotDate(info.start_date)} — {dotDate(info.end_date)}{info.place && ` ・ ${info.place}`}{info.role === "admin" && " ・ 這是管理員邀請"}</p>}
+        {info && <p className="note">{dotDate(info.start_date)} — {dotDate(info.end_date)}{info.place && ` ・ ${info.place}`}{info.role !== "member" && ` ・ 這是${ROLE_LABEL[info.role]}邀請`}{info.role === "viewer" && "：加入後只能看行程，不能修改或用聊天機器人"}</p>}
         {info === undefined && <p className="note">確認邀請碼中…</p>}
         {info === null && <p className="note">這個邀請碼不對或已經用完。檢查一下，或跟邀請你的人再要一個。</p>}
       </header>
@@ -77,7 +77,7 @@ export function JoinTrip({ code: initial, onDone, onCancel }: { code: string; on
             <p className="note">邀請你的人已經幫你選好：<b>{info.families.find((f) => f.id === info.family_id)?.label ?? info.family_id}</b></p>
           ) : (
             <>
-              <p className="note">你是哪一家？同一家的人共用一份行程；大家互相都看得到，但只能改自己家和大家一起的日子。</p>
+              <p className="note">{info.role === "viewer" ? "你想跟著看哪一家的行程？（之後隨時可以切換看別家）" : "你是哪一家？同一家的人共用一份行程；大家互相都看得到，但只能改自己家和大家一起的日子。"}</p>
               <div className="fams" role="group" aria-label="選擇家庭">
                 {info.families.map((f) => (
                   <button key={f.id} type="button" className="fam" aria-pressed={fam === f.id} onClick={() => setFam(f.id)}>

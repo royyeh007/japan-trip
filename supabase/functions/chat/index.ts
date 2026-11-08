@@ -88,7 +88,7 @@ function cacheFor(trip: Trip) {
 
 Deno.serve(handle(async (req) => {
   const body = await req.json().catch(() => ({})) as { text?: string; trip_id?: string };
-  const { user, admin, member, trip, uid, who } = await requireMember(req, body);
+  const { user, admin, member, trip, uid, who } = await requireMember(req, body, { editor: true });
   const text = (body.text ?? "").trim();
   if (!text) throw new HttpError(400, "沒有訊息");
 

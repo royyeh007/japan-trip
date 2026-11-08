@@ -8,7 +8,7 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export interface InviteInfo { trip_id: string; name: string; start_date: string; end_date: string; place: string; role: "member" | "admin"; family_id: string | null; families: { id: string; label: string }[] }
+export interface InviteInfo { trip_id: string; name: string; start_date: string; end_date: string; place: string; role: "member" | "admin" | "viewer"; family_id: string | null; families: { id: string; label: string }[] }
 
 /** Home page: Google sign-in. With an invite link the trip being joined is shown first. */
 export function Login({ invite }: { invite: string | null }) {

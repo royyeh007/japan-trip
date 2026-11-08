@@ -75,6 +75,7 @@ export function TripPicker() {
                 {m.trip.place && <span className="tp">{m.trip.place}</span>}
                 <span className="tm">
                   {m.role === "admin" && <span className="tag admin">管理員</span>}
+                  {m.role === "viewer" && <span className="tag none">觀察員</span>}
                   <span className="muted">{m.name ?? m.email ?? ""}</span>
                 </span>
                 <span className="go">進入 ›</span>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { canEdit, contactsFromDays, daysFor } from "../data";
+import { canEdit, contactsFromDays, daysFor, isViewer } from "../data";
 import type { ContactRow, FamilyId, TodoRow } from "../data";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
@@ -73,12 +73,12 @@ function Todos({ fam, compact = false }: { fam: FamilyId; compact?: boolean }) {
       <h3>要訂、要搶的</h3>
       <p className="note">{viewFam === mine ? "大家一起的和你們家的都在這裡，勾選全家都看得到。" : `這是${labelOf(viewFam)}的清單；你新增的會加到自己家或大家一起。`}</p>
       {list}
-      <div className="addrow">
+      {!isViewer(member) && <div className="addrow">
         <input value={due} onChange={(e) => setDue(e.target.value)} placeholder="時間（例：11/20 前）" />
         <input value={text} onChange={(e) => setText(e.target.value)} placeholder="要做什麼" onKeyDown={(e) => e.key === "Enter" && add()} />
         <ScopePick value={scope} onChange={setScope} mine={mine} />
         <button type="button" className="btn primary" onClick={add} disabled={busy || !text.trim()}>＋ 新增</button>
-      </div>
+      </div>}
     </div>
   );
 }
@@ -134,12 +134,12 @@ function Contacts({ fam, compact = false }: { fam: FamilyId; compact?: boolean }
       <h3>聯絡資料</h3>
       <p className="note">有「行程」標籤的是從行程裡的地點自動帶出來的（電話、email），行程改了會跟著變；下面可以再自己加。</p>
       {list}
-      <div className="addrow">
+      {!isViewer(member) && <div className="addrow">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="名稱（例：飯店訂房）" />
         <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="電話或 email" onKeyDown={(e) => e.key === "Enter" && add()} />
         <ScopePick value={scope} onChange={setScope} mine={mine} />
         <button type="button" className="btn primary" onClick={add} disabled={busy || !name.trim() || !value.trim()}>＋ 新增</button>
-      </div>
+      </div>}
     </div>
   );
 }

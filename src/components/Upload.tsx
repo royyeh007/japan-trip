@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { isViewer } from "../data";
 import type { Proposal, Upload as UploadRow } from "../data";
 import { invoke, supabase } from "../supabase";
 import { useTrip } from "../trip";
@@ -46,6 +47,7 @@ export function UploadView() {
   const pending = rows.filter((r) => r.status === "pending" && r.parsed && r.id !== result?.id);
   const history = rows.filter((r) => r.status !== "pending" && r.uploaded_by === member?.user_id);
 
+  if (isViewer(member)) return <section className="dayhead"><h2>上傳行程</h2><p className="note">觀察員只能看行程，不能上傳或修改。</p></section>;
   return (
     <>
       <section className="dayhead">

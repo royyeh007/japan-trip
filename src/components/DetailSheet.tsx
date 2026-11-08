@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { FlightStatus } from "./FlightStatus";
 import { askClaude } from "./Chat";
-import { isLeg } from "../data";
+import { isLeg, isViewer } from "../data";
 import type { Day, Memo, Stop } from "../data";
 import { canEdit } from "../data";
 import { supabase } from "../supabase";
@@ -85,7 +85,7 @@ function Memos({ day, stop }: { day: Day; stop: Stop }) {
           <button type="button" className="btn primary" onClick={add} disabled={busy || !text.trim()}>＋ 新增</button>
         </div>
       ) : (
-        <p className="note">這是別家的行程，只能看不能加備註。</p>
+        <p className="note">{isViewer(member) ? "觀察員只能看，不能加備註。" : "這是別家的行程，只能看不能加備註。"}</p>
       )}
     </div>
   );
@@ -93,6 +93,7 @@ function Memos({ day, stop }: { day: Day; stop: Stop }) {
 
 
 export function DetailSheet({ day, stop, arrive, onClose }: { day: Day; stop: Stop; arrive?: LinkedLeg; onClose: () => void }) {
+  const { member } = useTrip();
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -163,10 +164,12 @@ export function DetailSheet({ day, stop, arrive, onClose }: { day: Day; stop: St
           {info.length > 0 && <div className="sec"><h4>資訊</h4><List items={info} /></div>}
           {stop.tips && <div className="sec"><h4>提醒</h4><List items={stop.tips} /></div>}
           <Memos day={day} stop={stop} />
-          <div className="sec askrow">
-            <button type="button" className="btn" onClick={ask}>✦ 問 Claude 這個地點</button>
-            <span className="note">資料不夠的話，讓它上網查營業時間、怎麼去、推薦。</span>
-          </div>
+          {!isViewer(member) && (
+            <div className="sec askrow">
+              <button type="button" className="btn" onClick={ask}>✦ 問 Claude 這個地點</button>
+              <span className="note">資料不夠的話，讓它上網查營業時間、怎麼去、推薦。</span>
+            </div>
+          )}
         </div>
       </aside>
     </>

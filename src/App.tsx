@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { daysFor, dotDate } from "./data";
+import { daysFor, dotDate, isViewer } from "./data";
 import type { Day, FamilyId, Stop } from "./data";
 import { useWeather } from "./useWeather";
 import { ChipWeather } from "./components/Weather";
@@ -209,7 +209,7 @@ function Main() {
           )}
           <div className="quick">
             <a className="btn" href="#todo" aria-current={view === "todo" ? "page" : undefined}>✓ 待辦・聯絡</a>
-            <a className="btn" href="#upload" aria-current={view === "upload" ? "page" : undefined}>↑ 上傳行程</a>
+            {!isViewer(member) && <a className="btn" href="#upload" aria-current={view === "upload" ? "page" : undefined}>↑ 上傳行程</a>}
             {trip.info.length > 0 && <a className="btn" href="#info" aria-current={view === "info" ? "page" : undefined}>ⓘ 其他資訊</a>}
             {member?.role === "admin" && <a className="btn" href="#admin" aria-current={view === "admin" ? "page" : undefined}>⚙ 管理</a>}
           </div>
@@ -225,9 +225,11 @@ function Main() {
                 <ChipWeather date={d.id} city={d.city} wx={wx} />
               </a>
             ))}
-            <button type="button" className="add" onClick={() => { setAdding(true); }} aria-expanded={adding}>
-              <span className="dd">＋</span><span className="dc">加一天</span>
-            </button>
+            {!isViewer(member) && (
+              <button type="button" className="add" onClick={() => { setAdding(true); }} aria-expanded={adding}>
+                <span className="dd">＋</span><span className="dc">加一天</span>
+              </button>
+            )}
           </nav>
           <button type="button" className="scrollbtn right" onClick={() => scrollDays(1)} aria-label="往後幾天" tabIndex={-1}>›</button>
         </div>
@@ -273,12 +275,12 @@ function Main() {
             : !adding && (
               <section className="dayhead">
                 <h2>還沒有行程</h2>
-                <p className="note">按日期列的「＋ 加一天」先把日期加進來，再用「上傳行程」或右下角「問 Claude」把內容補上。</p>
+                <p className="note">{isViewer(member) ? "這個行程還沒有內容。" : "按日期列的「＋ 加一天」先把日期加進來，再用「上傳行程」或右下角「問 Claude」把內容補上。"}</p>
               </section>
             )}
         </main>
       </div>
-      <ChatWidget />
+      {!isViewer(member) && <ChatWidget />}
       {selected && <DetailSheet {...selected} onClose={close} />}
     </>
   );
