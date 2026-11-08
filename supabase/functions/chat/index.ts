@@ -51,7 +51,7 @@ ${formatGuide(ctx)}
 
 【網站怎麼用，被問到時照這個回答；依對方的角色（最後一段有寫）只講他用得到的】
 ${guideText()}
-- 網站裡也有「使用教學」頁（帳號按鈕 → 使用教學），會照角色顯示。右下角就是我（問 AI 小助手）。`;
+- 網站裡也有「使用教學」頁（帳號按鈕 → 使用教學），會照角色顯示。右下角就是我（AI 助理）。`;
 }
 
 // Sonnet 5.5 牌價（美金／百萬 token，2026-11 官方定價頁）：輸入 2、快取寫入 5 分鐘 2.5／1 小時 4、快取讀取 0.1、輸出 10；網頁搜尋每次 0.01
@@ -220,7 +220,7 @@ Deno.serve(handle(async (req) => {
         web = true; final = undefined;
       }
       if (!final) throw new Error("沒有回覆");
-      if (final.stop_reason === "refusal") throw new Error("AI 小助手不方便回答這個問題");
+      if (final.stop_reason === "refusal") throw new Error("AI 助理不方便回答這個問題");
       const reply = final.content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
       const usage = summarizeUsage(calls, toolsUsed, lookup, toolErrors, toolInputs, final.model);
       console.log("chat usage", JSON.stringify(usage));

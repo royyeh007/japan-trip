@@ -35,7 +35,7 @@ export function UploadView() {
         const { error } = await supabase.storage.from("uploads").upload(path, file);
         if (error) throw new Error(error.message);
       }
-      setBusy("AI 小助手讀取中，大約 20–60 秒…");
+      setBusy("AI 助理讀取中，大約 20–60 秒…");
       const res = await invoke<{ id: string; proposal: Proposal }>("parse-upload", { trip_id: current.id, path, text: text.trim() || undefined });
       setResult(res); setFile(null); setText("");
     } catch (e) {
@@ -64,13 +64,13 @@ export function UploadView() {
           </label>
           <textarea rows={4} value={text} onChange={(e) => setText(e.target.value)} placeholder="或直接貼行程文字，例如：12/26 15:00 到機場，17:00 飯店 check-in，18:30 晚餐 ○○…" />
           <div className="actions">
-            <button type="button" className="btn primary" onClick={submit} disabled={!!busy || (!file && !text.trim())}>{busy ?? "送出給 AI 小助手整理"}</button>
+            <button type="button" className="btn primary" onClick={submit} disabled={!!busy || (!file && !text.trim())}>{busy ?? "送出給 AI 助理整理"}</button>
             <button type="button" className="btn" onClick={() => openForm(current?.name)}><DownloadIcon />下載填寫表單</button>
           </div>
           {err && <p className="err">{err}</p>}
           {result && (
             <div className="resultbox">
-              <p><b>AI 小助手讀出來的內容，看一下沒問題就按確認：</b></p>
+              <p><b>AI 助理讀出來的內容，看一下沒問題就按確認：</b></p>
               <ProposalCard id={result.id} proposal={result.proposal} onDone={loadRows} />
             </div>
           )}

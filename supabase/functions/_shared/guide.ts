@@ -9,13 +9,13 @@ export interface GuideAction { target: string; label: string }
 export const ROLE_NAMES: Record<GuideRole, string> = { admin: "管理員", member: "成員", viewer: "觀察員" };
 export const ROLE_SUMMARY: Record<GuideRole, string> = {
   admin: "可以看、改所有家的行程，管理團員、邀請、家庭和行程設定。",
-  member: "可以看每一家的行程；能改自己家的日子和大家一起的日子，能用 AI 小助手。",
+  member: "可以看每一家的行程；能改自己家的日子和大家一起的日子，能用 AI 助理。",
   viewer: "只能看行程、待辦、聯絡資料和航班狀態，不能修改，也沒有聊天機器人。",
 };
 /** The handful of things each role will press most often, shown at the top of the guide. */
 export const QUICK_START: Record<GuideRole, GuideAction[]> = {
-  admin: [{ target: "admin", label: "⚙ 管理行程" }, { target: "upload", label: "↑ 上傳行程" }, { target: "chat", label: "✦ 問 AI 小助手" }, { target: "overview", label: "☷ 總覽" }],
-  member: [{ target: "overview", label: "☷ 總覽" }, { target: "upload", label: "↑ 上傳行程" }, { target: "chat", label: "✦ 問 AI 小助手" }, { target: "todo", label: "✓ 待辦・聯絡" }],
+  admin: [{ target: "admin", label: "⚙ 管理行程" }, { target: "upload", label: "↑ 上傳行程" }, { target: "chat", label: "✦ AI 助理" }, { target: "overview", label: "☷ 總覽" }],
+  member: [{ target: "overview", label: "☷ 總覽" }, { target: "upload", label: "↑ 上傳行程" }, { target: "chat", label: "✦ AI 助理" }, { target: "todo", label: "✓ 待辦・聯絡" }],
   viewer: [{ target: "overview", label: "☷ 總覽" }, { target: "todo", label: "✓ 待辦・聯絡" }],
 };
 
@@ -40,9 +40,9 @@ export const GUIDE: GuideSection[] = [
     { text: "別人改了行程，你的畫面最多 5 分鐘內會自動更新；切回網頁時也會立刻檢查。" },
   ] },
   { id: "edit", icon: "✎", title: "改行程", lead: "可以改自己家的日子和「大家一起」的日子；別家自己的版本只能看。管理員全部都能改。", roles: editors, items: [
-    { text: "[[upload|↑ 上傳行程]]：傳填好的表單（那頁可以下載）、行程截圖、PDF，或直接貼文字，AI 小助手整理成行程後你看一下，按「確認，更新行程」才會上線。" },
-    { text: "[[chat|✦ 問 AI 小助手]]：直接說想改什麼（例如「12/30 我們家想住別間飯店，其他照舊」），它會整理成提案，一樣要按確認才生效。" },
-    { text: "小改動不用麻煩 AI 小助手：點開地點，有「✎ 編輯」（時間、名稱、訂位狀態、地址、電話、推薦、怎麼去）、「＋ 之後加一站」、「刪除這一站」。改了時間會自動重新排序。" },
+    { text: "[[upload|↑ 上傳行程]]：傳填好的表單（那頁可以下載）、行程截圖、PDF，或直接貼文字，AI 助理整理成行程後你看一下，按「確認，更新行程」才會上線。" },
+    { text: "[[chat|✦ AI 助理]]：直接說想改什麼（例如「12/30 我們家想住別間飯店，其他照舊」），它會整理成提案，一樣要按確認才生效。" },
+    { text: "小改動不用麻煩 AI 助理：點開地點，有「✎ 編輯」（時間、名稱、訂位狀態、地址、電話、推薦、怎麼去）、「＋ 之後加一站」、「刪除這一站」。改了時間會自動重新排序。" },
     { text: "每個地點最下面可以加備註，大家都看得到；自己的備註可以刪。" },
     { text: "日期列最後的 [[addday|＋ 加一天]] 可以幫自己家加日期（行程前後兩週內）；自己加的日子可以刪掉。" },
     { text: "大家一起的日子想要自己家不一樣：按「做一份我們家的版本」，之後改的只影響自己家；按「改回大家一起的版本」就恢復。" },
@@ -54,8 +54,8 @@ export const GUIDE: GuideSection[] = [
     { text: "聯絡資料會自動列出行程裡出現的電話和 email（有「行程」標籤），也可以自己再加。" },
     { text: "觀察員只能看待辦和聯絡資料，不能新增或勾選。", roles: ["viewer"] },
   ] },
-  { id: "chat", icon: "✦", title: "問 AI 小助手（聊天機器人）", roles: editors, items: [
-    { text: "右下角 [[chat|✦ 問 AI 小助手]]。它看得到這個行程每一家的行程、待辦、聯絡資料，可以問細節（幾點、訂位碼、怎麼去），也可以改行程。" },
+  { id: "chat", icon: "✦", title: "AI 助理（聊天機器人）", roles: editors, items: [
+    { text: "右下角 [[chat|✦ AI 助理]]。它看得到這個行程每一家的行程、待辦、聯絡資料，可以問細節（幾點、訂位碼、怎麼去），也可以改行程。" },
     { text: "貼店家或影片連結，它會上網查地址、營業時間、推薦，並建議排在哪一天。" },
     { text: "它只處理跟這個行程和網站有關的事，看不到其他行程，也不能改網站程式；改行程一定要你按「確認」。" },
     { text: "送出問題後切去別的 App 沒關係，回覆會留在對話裡；「清除對話」只清自己在這個行程的紀錄。" },

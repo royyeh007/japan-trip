@@ -163,7 +163,7 @@ export function DayView({ day, family, onOpen, onRemoved, wx }: { day: Day; fami
           <p>這天還沒有行程。</p>
           {viewer ? <p>等成員把內容補上。</p> : (
             <>
-              <p>到「上傳行程」傳表單或截圖，或點右下角「問 AI 小助手」直接說這天要做什麼，確認後就會出現在這裡。</p>
+              <p>到「上傳行程」傳表單或截圖，或點右下角「AI 助理」直接說這天要做什麼，確認後就會出現在這裡。</p>
               <div className="actions">
                 <a className="btn" href="#upload"><DownloadIcon />上傳行程</a>
                 <button type="button" className="btn" onClick={() => openForm(current?.name)}><DownloadIcon />下載填寫表單</button>

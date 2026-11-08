@@ -35,7 +35,7 @@ export function AddDay({ family, onDone }: { family: Family; onDone: (dateId?: s
   return (
     <div className="panel addday">
       <h3>幫{family.label}加一天</h3>
-      <p className="note">加了之後可以上傳表單／截圖，或點右下角「問 AI 小助手」直接說那天要做什麼。</p>
+      <p className="note">加了之後可以上傳表單／截圖，或點右下角「AI 助理」直接說那天要做什麼。</p>
       <div className="grid">
         <label>日期<input type="date" value={date} min={min} max={max} onChange={(e) => setDate(e.target.value)} /></label>
         <label>城市

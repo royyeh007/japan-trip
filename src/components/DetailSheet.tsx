@@ -289,7 +289,7 @@ export function DetailSheet({ day: day0, stop: stop0, arrive: arrive0, onClose }
               <Memos day={day} stop={stop} />
               {!isViewer(member) && (
                 <div className="sec askrow">
-                  <button type="button" className="btn" onClick={ask}>✦ 問 AI 小助手這個地點</button>
+                  <button type="button" className="btn" onClick={ask}>✦ AI 助理：查這個地點</button>
                   <span className="note">資料不夠的話，讓它上網查營業時間、怎麼去、推薦。</span>
                 </div>
               )}
