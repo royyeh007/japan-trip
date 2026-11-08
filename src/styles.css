@@ -508,3 +508,12 @@ ul.todo li.note{display:block;color:var(--muted);font-size:.86rem;padding:2px 0}
   background-repeat:no-repeat;background-position:right 11px center;background-size:14px}
 .famselect{padding-right:28px;background-position:right 9px center;background-size:12px}
 .admin .row select{min-width:7.5em}
+
+/* quick edit in the detail sheet */
+.editacts{padding-top:2px}
+.editor .formgrid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-block:6px 8px}
+.editor label.full{display:grid;gap:4px;font-size:.84rem;color:var(--muted);margin-bottom:8px}
+.editor label.full input,.editor textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;min-width:0}
+.editor textarea{resize:vertical;line-height:1.45}
+.editor .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.editor .note{margin:8px 0 0}
