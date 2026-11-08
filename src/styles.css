@@ -617,3 +617,9 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none;bor
 .gask{flex-direction:row;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;font-size:.95rem}
 .guide.compact .gsec summary{padding:10px 12px}
 .guide.compact .gsteps li{font-size:.88rem}
+
+/* inline edit row: let the input and both buttons stretch to one identical height instead of trusting fixed pixel heights */
+.admin .row .inline{align-items:stretch}
+.admin .row .inline input,.admin .row .inline .btn{height:auto;min-height:36px;box-sizing:border-box;align-self:stretch}
+.admin .row .inline .btn{padding-block:0;display:inline-flex;align-items:center}
+.admin .row .inline input{line-height:1.2}
