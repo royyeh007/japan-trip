@@ -86,6 +86,15 @@ function Main() {
     return [...byDate.values()].sort((a, b) => isoOf(a.d).localeCompare(isoOf(b.d)));
   }, [trip.days]);
   const days = mode === "all" ? allDays : famDays;
+  // In "one" mode, other families' own versions are not shown; say so
+  const othersOwn = useMemo(() => {
+    const m = new Map<string, string[]>();
+    for (const d of trip.days) {
+      if (!d.fam || d.fam.includes(viewFam)) continue;
+      for (const f of d.fam) { const arr = m.get(f) ?? []; if (!arr.includes(d.d)) arr.push(d.d); m.set(f, arr); }
+    }
+    return [...m.entries()].map(([f, ds]) => ({ f, ds: ds.sort((a, b) => isoOf(a).localeCompare(isoOf(b))) }));
+  }, [trip.days, viewFam]);
   const dayIds = useMemo(() => days.map((d) => d.id), [days]);
   const route = useMemo(() => { const r: string[] = []; for (const d of famDays) if (r[r.length - 1] !== d.city) r.push(d.city); return r; }, [famDays]);
   const idsRef = useRef(dayIds);
@@ -194,6 +203,12 @@ function Main() {
                 )}
               </div>
             </div>
+          )}
+          {!PAGES.includes(view) && mode === "one" && othersOwn.length > 0 && (
+            <p className="note othersown">
+              {othersOwn.map(({ f, ds }) => `${trip.families.find((x) => x.id === f)?.label ?? f}在 ${ds.join("、")} 有自己的版本`).join("；")}。
+              <button type="button" className="link" onClick={() => setMode("all")}>看所有家</button>
+            </p>
           )}
           {adding && <AddDay family={fam} onDone={(id) => { setAdding(false); if (id) location.hash = `#${id}`; }} />}
           {view === "todo" ? <TodoView />

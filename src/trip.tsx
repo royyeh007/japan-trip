@@ -83,6 +83,15 @@ export function TripProvider({ children }: { children: ReactNode }) {
     setTripLoaded(true);
   }, [member]);
   useEffect(() => { if (member) { setTripLoaded(false); reload(); } }, [member, reload]);
+  // Other people's changes: refresh when the page comes back into view, and every 2 minutes while open
+  useEffect(() => {
+    if (!member) return;
+    const onVis = () => { if (document.visibilityState === "visible") reload(); };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", onVis);
+    const t = setInterval(() => { if (document.visibilityState === "visible") reload(); }, 120_000);
+    return () => { document.removeEventListener("visibilitychange", onVis); window.removeEventListener("focus", onVis); clearInterval(t); };
+  }, [member, reload]);
 
   const signOut = async () => {
     clearIntent();
