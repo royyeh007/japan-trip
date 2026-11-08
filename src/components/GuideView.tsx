@@ -75,7 +75,7 @@ export function GuideView({ role, compact = false }: { role: GuideRole; compact?
         {role !== "viewer" && !compact && (
           <div className="gcard gask">
             <span>還有問題？</span>
-            <button type="button" className="btn primary" onClick={() => go("chat")}>✦ 直接問 Claude 怎麼用</button>
+            <button type="button" className="btn primary" onClick={() => go("chat")}>✦ 直接問 AI 小助手 怎麼用</button>
           </div>
         )}
       </div>

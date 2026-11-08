@@ -75,7 +75,7 @@ Deno.serve(handle(async (req) => {
       messages: [{ role: "user", content }],
       output_config: { format: zodOutputFormat(ProposalZ), effort: "medium" },
     }).finalMessage();
-    if (res.stop_reason === "refusal") throw new Error("Claude 拒絕處理這個內容");
+    if (res.stop_reason === "refusal") throw new Error("AI 小助手拒絕處理這個內容");
     if (res.stop_reason === "max_tokens") throw new Error("輸出不完整，請把檔案拆小一點（例如一次一天）再試");
     const text = res.content.filter((b) => b.type === "text").map((b) => b.text).join("");
     const proposal = normalize(ProposalZ.parse(JSON.parse(text)));
@@ -88,6 +88,6 @@ Deno.serve(handle(async (req) => {
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     await admin.from("uploads").update({ status: "failed", error: msg }).eq("id", row.id);
-    throw new HttpError(500, `Claude 解析失敗：${msg}`);
+    throw new HttpError(500, `AI 小助手解析失敗：${msg}`);
   }
 }));

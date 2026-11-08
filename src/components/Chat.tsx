@@ -116,14 +116,14 @@ export function ChatWidget() {
   return (
     <>
       <button type="button" className="chatfab" aria-expanded={open} aria-controls="chatpanel" onClick={() => setOpen((o) => !o)}>
-        <SparkIcon />問 Claude
+        <SparkIcon />問 AI 小助手
         {unread && <span className="dot" aria-label="有新回覆" />}
       </button>
       {open && <div className="chatscrim" onClick={() => setOpen(false)} />}
-      <section id="chatpanel" className="chatpanel" hidden={!open} role="dialog" aria-label="問 Claude">
+      <section id="chatpanel" className="chatpanel" hidden={!open} role="dialog" aria-label="問 AI 小助手">
         <header>
           <div>
-            <b>問 Claude</b>
+            <b>問 AI 小助手</b>
             <small>問行程細節，或直接說要改什麼。切出去也沒關係，回覆會留著。</small>
           </div>
           <button type="button" className="x" aria-label="關閉" onClick={() => setOpen(false)}>×</button>
