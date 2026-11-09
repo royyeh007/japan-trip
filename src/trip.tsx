@@ -63,8 +63,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // 2. which trips this person is in
+  const uid = session?.user.id;
   const refreshMemberships = useCallback(async () => {
-    const uid = session?.user.id;
     if (!supabase || !uid) { setMemberships([]); setMembershipsLoaded(true); return; }
     const { data, error } = await supabase.from("members")
       .select("trip_id, user_id, email, family_id, role, name, last_opened_at, trips(id, name, start_date, end_date, place, tz, settings, created_by, created_at)")
@@ -74,9 +74,10 @@ export function TripProvider({ children }: { children: ReactNode }) {
       .map(({ trips, ...m }) => ({ ...m, trip: (Array.isArray(trips) ? trips[0] : trips) as Trip }))
       .filter((m) => !!m.trip)
       .sort((a, b) => (b.last_opened_at ?? "").localeCompare(a.last_opened_at ?? ""));
-    setMemberships(rows);
+    // keep the same array when nothing changed, so `current`/`member` keep their identity and nothing downstream re-runs
+    setMemberships((prev) => (JSON.stringify(prev) === JSON.stringify(rows) ? prev : rows));
     setMembershipsLoaded(true);
-  }, [session]);
+  }, [uid]);
   useEffect(() => { if (authReady) { setMembershipsLoaded(false); refreshMemberships(); } }, [authReady, refreshMemberships]);
 
   // 3. which trip to open: the one this device was in last, else the most recently opened anywhere; none → picker
@@ -108,9 +109,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
   // 4. the open trip's content (RLS limits it to trips this person is in)
   const reload = useCallback(async () => {
-    if (!supabase || !current) return;
+    const id = currentId;
+    if (!supabase || !id) return;
     setError(null);
-    const id = current.id;
     const [f, d, x, t, c, ip] = await Promise.all([
       supabase.from("families").select("id, name, label, flights").eq("trip_id", id).order("sort"),
       supabase.from("days").select("date_id, fam, d, w, city, title, hotel, items").eq("trip_id", id),
@@ -136,15 +137,15 @@ export function TripProvider({ children }: { children: ReactNode }) {
       info,
     });
     setTripLoaded(true);
-  }, [current]);
-  useEffect(() => { if (current) { setTripLoaded(false); reload(); } }, [current, reload]);
+  }, [currentId]);
+  useEffect(() => { if (currentId) { setTripLoaded(false); reload(); } }, [currentId, reload]);
 
   // Other people's changes: every 5 minutes (and when the page comes back into view) ask only "did anything change?"
   // with three tiny queries; do the full reload only when the answer is yes.
   const sigRef = useRef<string>("");
   const checkForChanges = useCallback(async () => {
-    if (!supabase || !current || document.visibilityState !== "visible") return;
-    const id = current.id;
+    const id = currentId;
+    if (!supabase || !id || document.visibilityState !== "visible") return;
     const [d, t, c, ip] = await Promise.all([
       supabase.from("days").select("date_id, fam, updated_at").eq("trip_id", id),
       supabase.from("todos").select("id, done, due, text").eq("trip_id", id),
@@ -155,9 +156,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
     const sig = JSON.stringify([d.data, t.data, c.data, ip.error ? null : ip.data]);
     if (sigRef.current && sig !== sigRef.current) await reload();
     sigRef.current = sig;
-  }, [current, reload]);
+  }, [currentId, reload]);
   useEffect(() => {
-    if (!current) return;
+    if (!currentId) return;
     sigRef.current = "";
     checkForChanges();
     const onVis = () => { if (document.visibilityState === "visible") checkForChanges(); };
@@ -165,7 +166,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     window.addEventListener("focus", onVis);
     const timer = setInterval(checkForChanges, 300_000);
     return () => { document.removeEventListener("visibilitychange", onVis); window.removeEventListener("focus", onVis); clearInterval(timer); };
-  }, [current, checkForChanges]);
+  }, [currentId, checkForChanges]);
 
   const signOut = async () => {
     await supabase?.auth.signOut();

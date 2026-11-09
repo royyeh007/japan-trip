@@ -48,9 +48,10 @@ export function ChatWidget() {
   openRef.current = open;
 
   // ---- server-side history ----
+  const uid = member?.user_id, tripId = current?.id;
   const load = useCallback(async () => {
-    if (!supabase || !member || !current) return;
-    const { data } = await supabase.from("chat_messages").select("id, role, content, proposals, status, created_at").eq("trip_id", current.id).eq("user_id", member.user_id).order("created_at").limit(60);
+    if (!supabase || !uid || !tripId) return;
+    const { data } = await supabase.from("chat_messages").select("id, role, content, proposals, status, created_at").eq("trip_id", tripId).eq("user_id", uid).order("created_at").limit(60);
     const rows = (data ?? []) as Msg[];
     setMsgs(rows);
     setLoaded(true);
@@ -59,7 +60,7 @@ export function ChatWidget() {
       const { data: ups } = await supabase.from("uploads").select("id, status").in("id", ids);
       setDecided(Object.fromEntries((ups ?? []).filter((u) => u.status !== "pending").map((u) => [u.id, u.status === "approved" ? "approved" : "rejected"])));
     }
-  }, [member, current]);
+  }, [uid, tripId]);
   useEffect(() => { setMsgs([]); setLoaded(false); load(); }, [load]);
 
   // ---- poll any pending reply (also after a reload) ----
