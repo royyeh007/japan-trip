@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ClipboardEvent, DragEvent, FormEvent } from "react";
 import type { InfoBlock, InfoPage } from "../data";
 import { Markdown, blocksToMd } from "../md";
 import { invoke, supabase } from "../supabase";
@@ -70,6 +70,27 @@ const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? c
 
 interface Draft { id: string | null; title: string; body: string }
 
+const IMAGE_BUCKET = "info-images";
+/** Shrink a picture before upload (longest side ≤ 1280, JPEG) so phone photos don't eat the storage quota. Transparent areas become white. */
+async function shrink(file: File, max = 1280): Promise<Blob> {
+  if (typeof createImageBitmap !== "function") return file;
+  try {
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    const w = Math.max(1, Math.round(bmp.width * scale)), h = Math.max(1, Math.round(bmp.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(bmp, 0, 0, w, h);
+    bmp.close();
+    const jpeg = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.85));
+    return jpeg && (scale < 1 || jpeg.size < file.size) ? jpeg : file;
+  } catch { return file; }
+}
+const extOf = (type: string) => ({ "image/png": "png", "image/webp": "webp", "image/gif": "gif" } as Record<string, string>)[type] ?? "jpg";
+
 /** Write or edit one page. 「✦ 幫我整理」 sends the text to the cheap formatting function (no web, no itinerary, daily cap). */
 function Editor({ draft, onDone }: { draft: Draft; onDone: (id: string | null) => void }) {
   const { current, member, trip, reload } = useTrip();
@@ -77,8 +98,53 @@ function Editor({ draft, onDone }: { draft: Draft; onDone: (id: string | null) =
   const [body, setBody] = useState(draft.body);
   const [mode, setMode] = useState<"write" | "preview">("write");
   const [busy, setBusy] = useState<"save" | "tidy" | null>(null);
+  const [uploading, setUploading] = useState(0);
   const [err, setErr] = useState<string | null>(null);
   const [tidied, setTidied] = useState<string | null>(null);
+  const taRef = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  /** Put a snippet where the cursor is (or at the end when previewing). */
+  const insert = (snippet: string) => {
+    const ta = taRef.current;
+    setBody((b) => {
+      const start = ta ? ta.selectionStart : b.length, end = ta ? ta.selectionEnd : b.length;
+      const before = b.slice(0, start), after = b.slice(end);
+      const pad = before && !/[\s|]$/.test(before) ? " " : "";
+      return before + pad + snippet + (after && !/^[\s|]/.test(after) ? " " : "") + after;
+    });
+    setMode("write");
+  };
+
+  /** Upload pictures to this trip's folder and drop ![說明](網址) into the text; they show as thumbnails that open big. */
+  const addImages = async (files: File[]) => {
+    if (!supabase || !current) return;
+    const imgs = files.filter((f) => f.type.startsWith("image/"));
+    if (!imgs.length) return;
+    setErr(null);
+    setUploading((n) => n + imgs.length);
+    for (const f of imgs) {
+      try {
+        const blob = await shrink(f);
+        const path = `${current.id}/${newId()}${Date.now().toString(36)}.${extOf(blob.type)}`;
+        const { error } = await supabase.storage.from(IMAGE_BUCKET).upload(path, blob, { contentType: blob.type || "image/jpeg", cacheControl: "31536000" });
+        if (error) throw new Error(/mime|type/i.test(error.message) ? "這種圖片格式不支援，請用 JPG 或 PNG" : error.message);
+        const url = supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl;
+        const base = f.name.replace(/\.[^.]+$/, "").replace(/[[\]()]/g, "").trim();
+        const alt = !base || /^(img|image|photo|dsc|pxl|screenshot|螢幕|截圖|unnamed|blob)/i.test(base) ? "圖片" : base;
+        insert(`![${alt}](${url})`);
+      } catch (e) { setErr(`圖片上傳失敗：${e instanceof Error ? e.message : String(e)}`); }
+      finally { setUploading((n) => n - 1); }
+    }
+  };
+  const onPaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
+    const fs = Array.from(e.clipboardData?.files ?? []).filter((f) => f.type.startsWith("image/"));
+    if (fs.length) { e.preventDefault(); addImages(fs); }
+  };
+  const onDrop = (e: DragEvent<HTMLTextAreaElement>) => {
+    const fs = Array.from(e.dataTransfer?.files ?? []).filter((f) => f.type.startsWith("image/"));
+    if (fs.length) { e.preventDefault(); addImages(fs); }
+  };
 
   const save = async (e: FormEvent) => {
     e.preventDefault();
@@ -118,17 +184,24 @@ function Editor({ draft, onDone }: { draft: Draft; onDone: (id: string | null) =
           <button type="button" className={mode === "write" ? "on" : ""} onClick={() => setMode("write")}>寫</button>
           <button type="button" className={mode === "preview" ? "on" : ""} onClick={() => setMode("preview")}>預覽</button>
         </div>
-        <button type="button" className="btn" onClick={tidy} disabled={!!busy || body.trim().length < 20} title="把貼進來的文字整理成條列或表格">
-          {busy === "tidy" ? "整理中…" : "✦ 幫我整理"}
-        </button>
+        <span className="actions">
+          <button type="button" className="btn" onClick={() => fileRef.current?.click()} disabled={uploading > 0} title="上傳圖片，會變成文字旁的縮圖；也可以直接把圖貼進內容">
+            {uploading > 0 ? `上傳中…（${uploading}）` : "🖼 加圖片"}
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => { addImages(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
+          <button type="button" className="btn" onClick={tidy} disabled={!!busy || body.trim().length < 20} title="把貼進來的文字整理成條列或表格">
+            {busy === "tidy" ? "整理中…" : "✦ 幫我整理"}
+          </button>
+        </span>
       </div>
       {mode === "write"
-        ? <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={14} aria-label="內容"
-            placeholder={"直接打字就好，一段一段寫。\n\n想要格式可以用：\n# 小標\n- 項目\n1. 步驟\n| 欄 | 欄 |\n[文字](網址)"} />
+        ? <textarea ref={taRef} value={body} onChange={(e) => setBody(e.target.value)} rows={14} aria-label="內容" onPaste={onPaste} onDrop={onDrop}
+            onDragOver={(e) => { if (Array.from(e.dataTransfer?.types ?? []).includes("Files")) e.preventDefault(); }}
+            placeholder={"直接打字就好，一段一段寫。\n\n想要格式可以用：\n# 小標\n- 項目\n1. 步驟\n| 欄 | 欄 |\n[文字](網址)\n![說明](圖片網址)　← 按「加圖片」或直接貼圖"} />
         : <article className="info preview">{body.trim() ? <Markdown text={body} /> : <p className="note">還沒有內容。</p>}</article>}
       {tidied && <p className="note ok">{tidied}</p>}
       {err && <p className="err">{err}</p>}
-      <p className="note">「✦ 幫我整理」會把從網站、LINE 複製來的一大段文字整理成條列或表格；它不會上網查，也不會加原文沒有的內容。每個行程每天最多 10 次，用完就自己手寫。</p>
+      <p className="note">「🖼 加圖片」或直接把圖貼進內容，會變成文字旁的小縮圖（例如商品照），點了放大。「✦ 幫我整理」會把從網站、LINE 複製來的一大段文字整理成條列或表格；它不會上網查，也不會加原文沒有的內容。每個行程每天最多 10 次，用完就自己手寫。</p>
       <div className="actions">
         <button type="submit" className="btn primary" disabled={!!busy}>{busy === "save" ? "儲存中…" : "儲存"}</button>
         <button type="button" className="btn" onClick={() => onDone(null)} disabled={!!busy}>取消</button>

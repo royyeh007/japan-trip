@@ -12,6 +12,7 @@ import { AddDay } from "./components/AddDay";
 import { AllFamiliesDay } from "./components/AllFamiliesDay";
 import { FlightStatus } from "./components/FlightStatus";
 import { InfoView } from "./components/InfoView";
+import { Lightbox } from "./md";
 import { AdminView } from "./components/AdminView";
 import { Overview } from "./components/Overview";
 import { GuideView } from "./components/GuideView";
@@ -346,6 +347,7 @@ function Main() {
       </div>
       {!isViewer(member) && <ChatWidget />}
       {selected && <DetailSheet {...selected} onClose={close} />}
+      <Lightbox />
     </>
   );
 }

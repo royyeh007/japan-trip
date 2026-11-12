@@ -173,7 +173,9 @@ Deno.serve(handle(async (req) => {
         run: async (input) => {
           const t = info.find((x) => x.id === input.tab);
           if (!t) return `沒有這個分頁，可用：${info.map((x) => x.id).join("、") || "（沒有）"}`;
-          const txt = t.body && t.body.trim() ? `# ${t.title}\n${t.body}` : JSON.stringify(t);
+          // 圖片語法拿掉：網址很長又沒資訊，留一個〔圖〕讓它知道頁面上有圖可以看
+          const noImg = (md: string) => md.replace(/!\[[^\]\n]*\]\(https?:\/\/[^\s)]+\)/g, "〔圖〕").replace(/(〔圖〕\s*){2,}/g, "〔圖〕");
+          const txt = t.body && t.body.trim() ? `# ${t.title}\n${noImg(t.body)}` : JSON.stringify(t);
           return txt.length > 12000 ? txt.slice(0, 12000) + "\n…（太長，後面省略）" : txt;
         },
       });

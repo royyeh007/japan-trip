@@ -1,7 +1,8 @@
 // A small Markdown subset rendered as React elements (no innerHTML, so nothing a page author types can run as code).
 // Supports: # headings, paragraphs (single line breaks kept), - / 1. lists with one level of indented sub-items,
-// | tables |, > quotes, --- rules; inline **bold**, `code`, [text](https://…) and bare https:// links.
-import { Fragment } from "react";
+// | tables |, > quotes, --- rules; inline **bold**, `code`, [text](https://…), bare https:// links and
+// ![caption](https://…) images, which render as thumbnails that open in a lightbox.
+import { Fragment, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { InfoBlock } from "./data";
 
@@ -66,8 +67,9 @@ export function parseMd(src: string): Block[] {
   return out;
 }
 
-const INLINE_RE = /(\*\*[^*\n]+\*\*|`[^`\n]+`|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\)|https?:\/\/[^\s<>()\]]+)/g;
-/** Inline Markdown → React nodes. Only http(s) links become anchors. */
+const INLINE_RE = /(\*\*[^*\n]+\*\*|`[^`\n]+`|!\[[^\]\n]*\]\(https?:\/\/[^\s)]+\)|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\)|https?:\/\/[^\s<>()\]]+)/g;
+export const IMG_RE = /!\[([^\]\n]*)\]\((https?:\/\/[^\s)]+)\)/g;
+/** Inline Markdown → React nodes. Only http(s) links become anchors, only http(s) images become thumbnails. */
 export function inline(text: string): ReactNode[] {
   const out: ReactNode[] = [];
   let last = 0, k = 0;
@@ -76,7 +78,10 @@ export function inline(text: string): ReactNode[] {
     if (i > last) out.push(text.slice(last, i));
     if (tok.startsWith("**")) out.push(<b key={k++}>{tok.slice(2, -2)}</b>);
     else if (tok.startsWith("`")) out.push(<code key={k++}>{tok.slice(1, -1)}</code>);
-    else if (tok.startsWith("[")) {
+    else if (tok.startsWith("![")) {
+      const mm = tok.match(/^!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)$/)!;
+      out.push(<Thumb key={k++} src={mm[2]} alt={mm[1].trim()} />);
+    } else if (tok.startsWith("[")) {
       const mm = tok.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/)!;
       out.push(<a key={k++} href={mm[2]} target="_blank" rel="noopener noreferrer">{mm[1]}</a>);
     } else out.push(<a key={k++} href={tok} target="_blank" rel="noopener noreferrer">{tok}</a>);
@@ -84,6 +89,47 @@ export function inline(text: string): ReactNode[] {
   }
   if (last < text.length) out.push(text.slice(last));
   return out;
+}
+
+/** A small picture next to the text; tap to see it big. The one Lightbox lives in App and listens for this event. */
+function Thumb({ src, alt }: { src: string; alt: string }) {
+  return (
+    <button type="button" className="thumb" onClick={() => openImage(src, alt)} title={alt ? `${alt}（點一下放大）` : "點一下放大"}>
+      <img src={src} alt={alt} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+    </button>
+  );
+}
+export function openImage(src: string, alt = "") {
+  window.dispatchEvent(new CustomEvent("jp-lightbox", { detail: { src, alt } }));
+}
+
+/** Full-size view of a thumbnail. Closes on ×, Esc, or a tap outside the picture. Mount once (App). */
+export function Lightbox() {
+  const [img, setImg] = useState<{ src: string; alt: string } | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const on = (e: Event) => setImg((e as CustomEvent<{ src: string; alt: string }>).detail);
+    window.addEventListener("jp-lightbox", on);
+    return () => window.removeEventListener("jp-lightbox", on);
+  }, []);
+  useEffect(() => {
+    if (!img) return;
+    // capture phase + stopPropagation so Esc closes only the picture, not the chat panel or sheet behind it
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setImg(null); } };
+    document.addEventListener("keydown", onKey, true);
+    closeRef.current?.focus();
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [img]);
+  if (!img) return null;
+  return (
+    <div className="lightbox" role="dialog" aria-modal="true" aria-label={img.alt || "放大的圖片"} onClick={() => setImg(null)}>
+      <button ref={closeRef} type="button" className="x" aria-label="關閉" onClick={() => setImg(null)}>×</button>
+      <figure onClick={(e) => e.stopPropagation()}>
+        <img src={img.src} alt={img.alt} referrerPolicy="no-referrer" />
+        {img.alt && <figcaption>{img.alt}</figcaption>}
+      </figure>
+    </div>
+  );
 }
 
 const Lines = ({ lines }: { lines: string[] }) => <>{lines.map((l, j) => <Fragment key={j}>{j > 0 && <br />}{inline(l)}</Fragment>)}</>;
