@@ -417,6 +417,55 @@
   "checked_at": "2026-11-13"
  },
  {
+  "id": "hilton-honors-amex-aspire",
+  "name": "Hilton Honors Amex Aspire",
+  "short": "Aspire",
+  "bank": "American Express",
+  "country": "us",
+  "network": [
+   "amex"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "3x Hilton 點，以 0.5¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 7,
+    "note": "14x Hilton 點，以 0.5¢/點計",
+    "cond": "只有 Hilton 旗下飯店；別家飯店 3x（1.5%）"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "3x Hilton 點，以 0.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 3.5,
+    "note": "7x 美國餐廳，以 0.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 7,
+    "note": "14x Hilton 點，以 0.5¢/點計",
+    "cond": "只有 Hilton 旗下飯店"
+   }
+  ],
+  "cap": "未見上限",
+  "conditions": "年費 $550；無海外手續費。7x 餐廳只限美國，日本吃飯是 3x；7x 機票要直接向航空公司或 Amex Travel 訂。附 Diamond 會籍、每年 1 晚免費住宿、$400 度假村額度。日本小店常不收 AmEx。",
+  "source": "https://www.americanexpress.com/us/credit-cards/card/hilton-honors-aspire/",
+  "checked_at": "2026-11-13"
+ },
+ {
   "id": "chase-united-explorer",
   "name": "Chase United Explorer Card",
   "short": "United",
