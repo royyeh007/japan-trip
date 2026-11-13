@@ -17,6 +17,7 @@ import { AdminView } from "./components/AdminView";
 import { Overview } from "./components/Overview";
 import { GuideView } from "./components/GuideView";
 import { CardsView } from "./components/CardsView";
+import { QuickPickFab } from "./components/QuickPick";
 import { Login } from "./components/Login";
 import { JoinTrip } from "./components/JoinTrip";
 import { TripPicker } from "./components/TripPicker";
@@ -350,6 +351,7 @@ function Main() {
         </main>
       </div>
       {!isViewer(member) && <ChatWidget />}
+      <QuickPickFab />
       {selected && <DetailSheet {...selected} onClose={close} />}
       <Lightbox />
     </>

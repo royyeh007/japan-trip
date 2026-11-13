@@ -760,3 +760,30 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none;bor
 .tag.cc.tw{color:var(--pine);background:var(--pine-soft);border-color:transparent}
 .catalog .catbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
 .catalog .catbar .modebar{margin-top:0}
+/* 「現在刷哪張」口袋卡 */
+.cardfab{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:15;display:inline-flex;align-items:center;gap:6px;background:var(--surface);color:var(--ink);border:1.5px solid var(--pine);border-radius:999px;padding:11px 16px;font-weight:700;font-size:.92rem;box-shadow:var(--shadow);cursor:pointer}
+.cardfab:hover{transform:translateY(-1px);background:var(--pine-soft)}
+.quickpick{width:min(480px,calc(100vw - 24px));max-height:calc(100dvh - 32px);overflow:auto;padding:16px 16px 14px;gap:12px}
+.quickpick header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.quickpick header small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
+.quickpick .x{all:unset;cursor:pointer;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:1.3rem;color:var(--muted);flex:none}
+.quickpick .x:hover,.quickpick .x:focus-visible{background:var(--paper);color:var(--ink)}
+.qprows{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.qprows li{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:4px 10px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.qprows li.stale{border-color:var(--amber)}
+.qprows .qpk{font-size:1.4rem;line-height:1;text-align:center}
+.qprows .qpmain{display:grid;gap:1px;min-width:0}
+.qprows .qpl{font-size:.74rem;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.qprows .qpcard{font-family:var(--f-display);font-weight:800;font-size:1.08rem;line-height:1.25}
+.qprows .qpwhy{font-size:.8rem;color:var(--muted)}
+.qprows .qpcond{font-size:.78rem;color:var(--amber)}
+.qprows .qpfb{font-size:.8rem;color:var(--ai);margin-top:2px}
+.qprows .qpnet{font-family:var(--f-display);font-size:1.25rem;color:var(--pine);white-space:nowrap;align-self:start}
+.qprows .qpnet.neg{color:var(--shu)}
+.quickpick .qptip{margin:0}
+.quickpick .actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+@media (max-width:640px){
+  .quickpick{top:auto;bottom:0;left:0;transform:none;width:100%;max-height:92dvh;border-radius:16px 16px 0 0;padding-bottom:max(14px,env(safe-area-inset-bottom,0px))}
+  .cardfab{padding:11px 14px}
+}
+@media print{.cardfab{display:none}}
