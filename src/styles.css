@@ -696,3 +696,67 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none;bor
 .lightbox .x{position:fixed;top:max(10px,env(safe-area-inset-top,0px));right:max(10px,env(safe-area-inset-right,0px));width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:32px;line-height:1;cursor:pointer;display:grid;place-items:center;font-family:inherit}
 .lightbox .x:hover,.lightbox .x:focus-visible{background:rgba(255,255,255,.3);outline:none}
 @media print{.lightbox{display:none}}
+
+/* ---------- 信用卡推薦 ---------- */
+.cardpick{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;color:var(--pine);background:var(--pine-soft);border-radius:4px;padding:1px 6px;white-space:nowrap}
+.cardpick small{font-weight:700;font-size:.68rem;opacity:.85}
+.cardpick.stale{color:var(--amber);background:var(--amber-soft)}
+.cardpick.big{font-size:.92rem;padding:4px 10px;border-radius:8px}
+.ovstops .cardpick{font-size:.64rem;padding:0 5px}
+.cardsec .cardtop{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:6px}
+.cardsec .net{color:var(--pine);font-size:.95rem}
+.cardsec .net.neg,.plantable .neg{color:var(--shu)}
+.cardsec .why{margin:0 0 6px;font-size:.9rem}
+.cardsec .note{margin:0 0 4px}
+.cardsec .note.warn{color:var(--amber)}
+.cardsec .note.tip{margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.cardsec .link{display:inline-block;margin-top:4px}
+.mycards,.plan,.tips,.cardedit{margin-top:14px}
+.mycards h3,.plan h3,.tips h3,.cardedit h3{font-family:var(--f-display);font-size:1.05rem;margin:0}
+.mycards h3 small{font-size:.8rem;margin-left:6px}
+.tips ul{margin:0;padding-left:1.2em;display:grid;gap:6px;font-size:.9rem;line-height:1.6}
+.cardlist{list-style:none;margin:0;padding:0;display:grid}
+.cardlist li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.cardlist li:last-child{border-bottom:0}
+.cardlist .cmain{display:grid;gap:2px;min-width:0;flex:1 1 240px}
+.cardlist .cmain b{font-size:.98rem}
+.cardlist .cmain .tag{margin-left:6px;vertical-align:2px}
+.cardlist .cmeta{font-size:.76rem;color:var(--muted)}
+.cardlist .cwhy{font-size:.84rem;line-height:1.5}
+.cardlist .cacts{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;padding-top:2px}
+.cardlist .link.danger{color:var(--shu)}
+.addcard{position:relative;margin-top:8px}
+.addcard input{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box}
+.addcard .hits{list-style:none;margin:6px 0 0;padding:4px;display:grid;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.addcard .hits button{all:unset;cursor:pointer;display:grid;gap:1px;padding:8px 10px;border-radius:8px;width:100%;box-sizing:border-box}
+.addcard .hits button:hover,.addcard .hits button:focus-visible{background:var(--paper)}
+.addcard .hits button small{color:var(--muted);font-size:.76rem}
+.addcard .hits button.new{color:var(--ai);font-weight:700;font-size:.88rem}
+.plantable{min-width:560px}
+.plantable td:nth-child(2){white-space:nowrap}
+.cardedit .netpick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.84rem}
+.cardedit .netpick .lbl{color:var(--muted);margin-right:4px}
+.cardedit .pill{display:inline-flex;align-items:center;gap:4px;cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--paper)}
+.cardedit .pill.on{border-color:var(--ai);background:var(--ai-soft);color:var(--ai);font-weight:700}
+.cardedit .pill input{position:absolute;opacity:0;width:0;height:0}
+.cardedit .rates{display:grid;gap:6px;font-size:.84rem}
+.cardedit .rhead,.cardedit .rrow{display:grid;grid-template-columns:6.5em 7em 4.5em minmax(0,1.4fr) 7.5em minmax(0,1.6fr) 2em;gap:6px;align-items:center}
+.cardedit .rhead{color:var(--muted);font-size:.74rem}
+.cardedit .rrow input,.cardedit .rrow select{font:inherit;font-size:.84rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 8px;width:100%;min-width:0;box-sizing:border-box}
+.cardedit .rates .link{justify-self:start}
+@media (max-width:720px){
+  .cardedit .rhead{display:none}
+  .cardedit .rrow{grid-template-columns:1fr 1fr 1fr;border:1px dashed var(--line);border-radius:10px;padding:8px}
+  .cardedit .rrow input:nth-child(4),.cardedit .rrow input:nth-child(6){grid-column:span 3}
+  .cardedit .rrow input:nth-child(5){grid-column:span 2}
+}
+.catalog{margin-top:14px}
+.catalog .catbody{padding:0 16px 12px}
+.catalog .catbody .actions{margin-bottom:4px}
+@media print{.cardpick{display:none}}
+.tag.cc{margin-left:6px;vertical-align:2px;background:var(--paper);color:var(--muted);border:1px solid var(--line)}
+.tag.cc.us{color:var(--ai);background:var(--ai-soft);border-color:transparent}
+.tag.cc.uk{color:var(--shu);background:var(--shu-soft);border-color:transparent}
+.tag.cc.tw{color:var(--pine);background:var(--pine-soft);border-color:transparent}
+.catalog .catbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.catalog .catbar .modebar{margin-top:0}

@@ -1,0 +1,2581 @@
+[
+ {
+  "id": "chase-sapphire-preferred",
+  "name": "Chase Sapphire Preferred",
+  "short": "CSP",
+  "bank": "Chase",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.25,
+    "note": "1x UR，以 1.25¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 3.75,
+    "note": "3x 餐廳（含外帶），以 1.25¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 2.5,
+    "note": "2x 旅遊（直接向飯店刷），以 1.25¢/點計",
+    "cond": "經 Chase Travel 訂房 5x（約 6.25%）"
+   },
+   {
+    "where": "overseas",
+    "kind": "move",
+    "rate": 2.5,
+    "note": "2x 旅遊（計程車、火車、巴士），以 1.25¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.25,
+    "note": "1x UR，以 1.25¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 3.75,
+    "note": "3x 餐廳（含外帶），以 1.25¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 2.5,
+    "note": "2x 旅遊（直接向飯店刷），以 1.25¢/點計",
+    "cond": "經 Chase Travel 訂房 5x（約 6.25%）"
+   },
+   {
+    "where": "home",
+    "kind": "move",
+    "rate": 2.5,
+    "note": "2x 旅遊（計程車、火車、巴士），以 1.25¢/點計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $95；無海外手續費；餐廳 3x 全球適用。Suica 加值是否算旅遊未確認。",
+  "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "chase-sapphire-reserve",
+  "name": "Chase Sapphire Reserve",
+  "short": "CSR",
+  "bank": "Chase",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x UR，以 1.5¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 4.5,
+    "note": "3x 餐廳（全球），以 1.5¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 6,
+    "note": "4x 直接向飯店付款，以 1.5¢/點計",
+    "cond": "經 Chase Travel 訂房 8x；要直接付飯店才算 4x"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x UR，以 1.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 4.5,
+    "note": "3x 餐廳（全球），以 1.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 6,
+    "note": "4x 直接向飯店付款，以 1.5¢/點計",
+    "cond": "經 Chase Travel 訂房 8x；要直接付飯店才算 4x"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $795（2025/10 改版）；無海外手續費。計程車、火車等其他旅遊已降為 1x。",
+  "source": "https://thepointsguy.com/credit-cards/chase-sapphire-reserve-new-benefits-october-2025",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "chase-freedom-unlimited",
+  "name": "Chase Freedom Unlimited",
+  "short": "CFU",
+  "bank": "Chase",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 3,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1.5% 現金回饋"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 3,
+    "note": "3% 餐廳（全球）"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1.5% 現金回饋"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 3,
+    "note": "3% 餐廳（全球）"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $0；海外手續費 3%，在日本淨回饋是負的，不建議用。",
+  "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "chase-freedom-flex",
+  "name": "Chase Freedom Flex",
+  "short": "CFF",
+  "bank": "Chase",
+  "country": "us",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 3,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% 現金回饋"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 3,
+    "note": "3% 餐廳（全球）"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% 現金回饋"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 3,
+    "note": "3% 餐廳（全球）"
+   }
+  ],
+  "cap": "5% 輪替類別每季 $1,500（多限美國商家）",
+  "conditions": "年費 $0；海外手續費 3%，在日本淨回饋是負的，不建議用。",
+  "source": "https://www.nerdwallet.com/credit-cards/reviews/chase-freedom-flex",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "amex-gold",
+  "name": "American Express Gold Card",
+  "short": "Amex Gold",
+  "bank": "American Express",
+  "country": "us",
+  "network": [
+   "amex"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x MR，以 1.5¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 6,
+    "note": "4x MR 餐廳（全球），以 1.5¢/點計",
+    "cond": "每年前 $50,000"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x MR，以 1.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 6,
+    "note": "4x MR 餐廳（全球），以 1.5¢/點計",
+    "cond": "每年前 $50,000"
+   }
+  ],
+  "cap": "餐廳 4x 每年 $50,000；美國超市 4x 只限美國",
+  "conditions": "年費約 $325；無海外手續費。經 Amex Travel 預付飯店 5x，現場刷飯店只有 1x。日本小店常不收 AmEx。",
+  "source": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "amex-platinum",
+  "name": "American Express Platinum Card",
+  "short": "Amex Plat",
+  "bank": "American Express",
+  "country": "us",
+  "network": [
+   "amex"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x MR，以 1.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x MR，以 1.5¢/點計"
+   }
+  ],
+  "cap": "機票 5x 每年 $500,000",
+  "conditions": "年費 $895；無海外手續費。5x 只有直訂機票和 Amex Travel 預付飯店；餐廳沒有加碼。日本小店常不收 AmEx。",
+  "source": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "amex-green",
+  "name": "American Express Green Card",
+  "short": "Amex Green",
+  "bank": "American Express",
+  "country": "us",
+  "network": [
+   "amex"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x MR，以 1.5¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 4.5,
+    "note": "3x 餐廳（全球），以 1.5¢/點計",
+    "cond": "酒吧、便利商店不算"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 4.5,
+    "note": "3x 旅遊（含住宿），以 1.5¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "move",
+    "rate": 4.5,
+    "note": "3x 交通（火車、計程車、巴士），以 1.5¢/點計",
+    "cond": "Suica 加值是否算交通未驗證"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x MR，以 1.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 4.5,
+    "note": "3x 餐廳（全球），以 1.5¢/點計",
+    "cond": "酒吧、便利商店不算"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 4.5,
+    "note": "3x 旅遊（含住宿），以 1.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "move",
+    "rate": 4.5,
+    "note": "3x 交通（火車、計程車、巴士），以 1.5¢/點計",
+    "cond": "Suica 加值是否算交通未驗證"
+   }
+  ],
+  "cap": "未見公開上限",
+  "conditions": "年費 $150；無海外手續費。日本小店常不收 AmEx。",
+  "source": "https://www.nerdwallet.com/credit-cards/reviews/american-express-green",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "amex-blue-cash-preferred",
+  "name": "Amex Blue Cash Preferred",
+  "short": "BCP",
+  "bank": "American Express",
+  "country": "us",
+  "network": [
+   "amex"
+  ],
+  "fx_fee": 2.7,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% 現金回饋"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% 現金回饋"
+   }
+  ],
+  "cap": "6% 超市每年 $6,000（只限美國超市）",
+  "conditions": "年費 $95（首年 $0）；海外手續費 2.7%，在日本淨回饋是負的。6% 超市、3% 交通是否適用海外未確認。",
+  "source": "https://www.americanexpress.com/us/credit-cards/card/blue-cash-preferred/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "hilton-honors-amex-surpass",
+  "name": "Hilton Honors Amex Surpass",
+  "short": "Surpass",
+  "bank": "American Express",
+  "country": "us",
+  "network": [
+   "amex"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "3x Hilton 點，以 0.5¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 6,
+    "note": "12x Hilton 點，以 0.5¢/點計",
+    "cond": "只有 Hilton 旗下飯店；別家飯店 3x"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "3x Hilton 點，以 0.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 6,
+    "note": "12x Hilton 點，以 0.5¢/點計",
+    "cond": "只有 Hilton 旗下飯店；別家飯店 3x"
+   }
+  ],
+  "cap": "未見上限",
+  "conditions": "年費 $150；無海外手續費。6x 餐廳只限美國，日本吃飯沒有加碼。",
+  "source": "https://onemileatatime.com/amex-hilton-surpass-card-review/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "chase-united-explorer",
+  "name": "Chase United Explorer Card",
+  "short": "United",
+  "bank": "Chase",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.3,
+    "note": "1x 哩，以 1.3¢/哩計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 2.6,
+    "note": "2x 餐廳（全球），以 1.3¢/哩計"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 2.6,
+    "note": "2x 直接向飯店訂，以 1.3¢/哩計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.3,
+    "note": "1x 哩，以 1.3¢/哩計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 2.6,
+    "note": "2x 餐廳（全球），以 1.3¢/哩計"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 2.6,
+    "note": "2x 直接向飯店訂，以 1.3¢/哩計"
+   }
+  ],
+  "cap": "未見上限",
+  "conditions": "年費 $150（首年 $0）；無海外手續費。來源為比較文章，倍率略有不一致。",
+  "source": "https://www.chase.com/personal/credit-cards/united/united-explorer-card",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "chase-marriott-bonvoy-boundless",
+  "name": "Chase Marriott Bonvoy Boundless",
+  "short": "Boundless",
+  "bank": "Chase",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.6,
+    "note": "2x Bonvoy 點，以 0.8¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 2.4,
+    "note": "3x 餐廳，以 0.8¢/點計",
+    "cond": "第三方來源，官網未確認；可能有年度上限"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 4.8,
+    "note": "6x Marriott 飯店，以 0.8¢/點計",
+    "cond": "只有 Marriott 旗下；別家飯店 2x"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.6,
+    "note": "2x Bonvoy 點，以 0.8¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 2.4,
+    "note": "3x 餐廳，以 0.8¢/點計",
+    "cond": "第三方來源，官網未確認；可能有年度上限"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 4.8,
+    "note": "6x Marriott 飯店，以 0.8¢/點計",
+    "cond": "只有 Marriott 旗下；別家飯店 2x"
+   }
+  ],
+  "cap": "未確認",
+  "conditions": "年費 $95；無海外手續費。",
+  "source": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/boundless",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "chase-world-of-hyatt",
+  "name": "Chase World of Hyatt Credit Card",
+  "short": "Hyatt",
+  "bank": "Chase",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.7,
+    "note": "1x Hyatt 點，以 1.7¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 3.4,
+    "note": "2x 餐廳（全球），以 1.7¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "move",
+    "rate": 3.4,
+    "note": "2x 當地交通，以 1.7¢/點計",
+    "cond": "Suica 加值是否算未驗證"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 6.8,
+    "note": "4x Hyatt 飯店，以 1.7¢/點計",
+    "cond": "只有 Hyatt 旗下；別家飯店 1x"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.7,
+    "note": "1x Hyatt 點，以 1.7¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 3.4,
+    "note": "2x 餐廳（全球），以 1.7¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "move",
+    "rate": 3.4,
+    "note": "2x 當地交通，以 1.7¢/點計",
+    "cond": "Suica 加值是否算未驗證"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 6.8,
+    "note": "4x Hyatt 飯店，以 1.7¢/點計",
+    "cond": "只有 Hyatt 旗下；別家飯店 1x"
+   }
+  ],
+  "cap": "未見上限",
+  "conditions": "年費 $95；無海外手續費；每年 1 晚免費住宿。",
+  "source": "https://creditcards.chase.com/travel-credit-cards/world-of-hyatt",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "capital-one-venture-x",
+  "name": "Capital One Venture X",
+  "short": "Venture X",
+  "bank": "Capital One",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 3,
+    "note": "2x 哩程，以 1.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 3,
+    "note": "2x 哩程，以 1.5¢/點計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $395；無海外手續費。10x 飯店、5x 機票只限 Capital One Travel 入口網站訂，直接向飯店刷是 2x。",
+  "source": "https://www.capitalone.com/credit-cards/venture-x/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "capital-one-venture",
+  "name": "Capital One Venture Rewards",
+  "short": "Venture",
+  "bank": "Capital One",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 3,
+    "note": "2x 哩程，以 1.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 3,
+    "note": "2x 哩程，以 1.5¢/點計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $95；無海外手續費。5x 飯店只限 Capital One Travel 訂。",
+  "source": "https://www.capitalone.com/credit-cards/venture/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "capital-one-savor",
+  "name": "Capital One Savor",
+  "short": "Savor",
+  "bank": "Capital One",
+  "country": "us",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% 現金回饋"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 3,
+    "note": "3% 現金回饋（餐廳，全球）"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% 現金回饋"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 3,
+    "note": "3% 現金回饋（餐廳，全球）"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $0；無海外手續費。3% 含餐飲、超市、娛樂；「娛樂」是否含日本景點門票未確認。",
+  "source": "https://www.capitalone.com/credit-cards/savor/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "capital-one-quicksilver",
+  "name": "Capital One Quicksilver",
+  "short": "Quicksilver",
+  "bank": "Capital One",
+  "country": "us",
+  "network": [
+   "visa",
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1.5% 現金回饋"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1.5% 現金回饋"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $0；無海外手續費。",
+  "source": "https://www.capitalone.com/credit-cards/quicksilver/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "citi-strata-premier",
+  "name": "Citi Strata Premier",
+  "short": "Strata",
+  "bank": "Citi",
+  "country": "us",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x ThankYou，以 1.5¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 4.5,
+    "note": "3x 餐廳，以 1.5¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 4.5,
+    "note": "3x 飯店（直接刷），以 1.5¢/點計",
+    "cond": "經 Citi Travel 訂房 10x"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x ThankYou，以 1.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 4.5,
+    "note": "3x 餐廳，以 1.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 4.5,
+    "note": "3x 飯店（直接刷），以 1.5¢/點計",
+    "cond": "經 Citi Travel 訂房 10x"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $95；無海外手續費。1.5¢ 要轉點到合作夥伴才有；電車、計程車是否算 3x 未列。",
+  "source": "https://www.citi.com/credit-cards/citi-strata-premier-credit-card",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "citi-double-cash",
+  "name": "Citi Double Cash",
+  "short": "DoubleCash",
+  "bank": "Citi",
+  "country": "us",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 3,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2,
+    "note": "2% 現金回饋（1% 刷＋1% 還款）"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 2,
+    "note": "2% 現金回饋（1% 刷＋1% 還款）"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $0；海外手續費 3%，出國淨回饋是負的，日本不建議用。",
+  "source": "https://www.citi.com/credit-cards/citi-double-cash-credit-card",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "citi-costco-anywhere",
+  "name": "Citi Costco Anywhere Visa",
+  "short": "Costco",
+  "bank": "Citi",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% 現金回饋"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 3,
+    "note": "3% 現金回饋（餐廳，全球）"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 3,
+    "note": "3% 現金回饋（合格旅遊含飯店）"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% 現金回饋"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 3,
+    "note": "3% 現金回饋（餐廳，全球）"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 3,
+    "note": "3% 現金回饋（合格旅遊含飯店）"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $0（要 Costco 會員）；無海外手續費。火車、通勤交通、民宿只算 1%；回饋每年 2 月以憑證發放。",
+  "source": "https://www.citi.com/usc/lpaca/costco/cards/consumer/legal/index.html",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "wells-fargo-autograph",
+  "name": "Wells Fargo Autograph",
+  "short": "Autograph",
+  "bank": "Wells Fargo",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "1x 點數，以 1¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 3,
+    "note": "3x 餐廳，以 1¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 3,
+    "note": "3x 旅遊，以 1¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "move",
+    "rate": 3,
+    "note": "3x 交通，以 1¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1,
+    "note": "1x 點數，以 1¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 3,
+    "note": "3x 餐廳，以 1¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 3,
+    "note": "3x 旅遊，以 1¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "move",
+    "rate": 3,
+    "note": "3x 交通，以 1¢/點計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $0；無海外手續費（第三方來源，官網未確認）。3x 含餐廳、旅遊、加油、大眾運輸、串流、電信。",
+  "source": "https://www.nerdwallet.com/reviews/credit-cards/wells-fargo-autograph",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "wells-fargo-active-cash",
+  "name": "Wells Fargo Active Cash",
+  "short": "ActiveCash",
+  "bank": "Wells Fargo",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 3,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2,
+    "note": "2% 現金回饋"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 2,
+    "note": "2% 現金回饋"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $0；海外手續費 3%，出國淨回饋是負的，日本不建議用。",
+  "source": "https://www.wellsfargo.com/credit-cards/active-cash/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "bilt-mastercard",
+  "name": "Bilt Mastercard",
+  "short": "Bilt",
+  "bank": "Bilt",
+  "country": "us",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x Bilt 點數，以 1.5¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 4.5,
+    "note": "3x 餐廳（舊版 Bilt Mastercard），以 1.5¢/點計",
+    "cond": "新版 Bilt 2.0 的 Blue 沒有餐飲加碼，Obsidian 以上才有"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1x Bilt 點數，以 1.5¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 4.5,
+    "note": "3x 餐廳（舊版 Bilt Mastercard），以 1.5¢/點計",
+    "cond": "新版 Bilt 2.0 的 Blue 沒有餐飲加碼，Obsidian 以上才有"
+   }
+  ],
+  "cap": "要看版本",
+  "conditions": "無海外手續費。舊版 Bilt Mastercard 2026/2 停發，新版分 Blue（$0）／Obsidian（$95）／Palladium（$495），倍率依版本不同，請自己改。",
+  "source": "https://www.nerdwallet.com/credit-cards/reviews/bilt-blue-card",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "discover-it",
+  "name": "Discover it Cash Back",
+  "short": "Discover",
+  "bank": "Discover",
+  "country": "us",
+  "network": [
+   "discover"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% 現金回饋（5% 輪替類別只限美國商家）"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% 現金回饋（5% 輪替類別只限美國商家）"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $0；無海外手續費。Discover 在日本走 JCB 網路，大店可以、小店常不收，當備用卡。",
+  "source": "https://www.discover.com/credit-cards/cash-back/it-card.html",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "apple-card",
+  "name": "Apple Card",
+  "short": "Apple",
+  "bank": "Apple (Goldman Sachs)",
+  "country": "us",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2,
+    "note": "2% Daily Cash，用 Apple Pay 付款",
+    "cond": "實體鈦金卡只有 1%"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 2,
+    "note": "2% Daily Cash，用 Apple Pay 付款",
+    "cond": "實體鈦金卡只有 1%"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $0；無海外手續費。日本便利商店、車站、連鎖店多可感應，用 Apple Pay 才有 2%。",
+  "source": "https://www.apple.com/apple-card/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "bofa-travel-rewards",
+  "name": "Bank of America Travel Rewards",
+  "short": "BofA Travel",
+  "bank": "Bank of America",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1.5x 點數，以 1¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1.5x 點數，以 1¢/點計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $0；無海外手續費。Preferred Rewards 會員加成 25～75%（最高約 2.62%），有的自己改。",
+  "source": "https://www.bankofamerica.com/credit-cards/products/travel-rewards-credit-card/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "bofa-premium-rewards",
+  "name": "Bank of America Premium Rewards",
+  "short": "BofA Prem",
+  "bank": "Bank of America",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1.5x 點數，以 1¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 2,
+    "note": "2x 餐廳，以 1¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "hotel",
+    "rate": 2,
+    "note": "2x 旅遊，以 1¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "move",
+    "rate": 2,
+    "note": "2x 旅遊（交通為推定），以 1¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1.5x 點數，以 1¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 2,
+    "note": "2x 餐廳，以 1¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "hotel",
+    "rate": 2,
+    "note": "2x 旅遊，以 1¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "move",
+    "rate": 2,
+    "note": "2x 旅遊（交通為推定），以 1¢/點計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $95；無海外手續費。Preferred Rewards 會員加成最高 75%。",
+  "source": "https://www.bankofamerica.com/credit-cards/products/premium-rewards-credit-card/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "us-bank-altitude-go",
+  "name": "U.S. Bank Altitude Go",
+  "short": "Altitude Go",
+  "bank": "U.S. Bank",
+  "country": "us",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 3,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "1x 點數，以 1¢/點計"
+   },
+   {
+    "where": "overseas",
+    "kind": "food",
+    "rate": 4,
+    "note": "4x 餐廳，以 1¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1,
+    "note": "1x 點數，以 1¢/點計"
+   },
+   {
+    "where": "home",
+    "kind": "food",
+    "rate": 4,
+    "note": "4x 餐廳，以 1¢/點計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 $0；2025/8 起所有卡友都收 3% 海外手續費，出國只有餐廳勉強划算。",
+  "source": "https://www.nerdwallet.com/credit-cards/reviews/us-bank-altitude-go",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "barclaycard-rewards",
+  "name": "Barclaycard Rewards",
+  "short": "Barclaycard",
+  "bank": "Barclaycard",
+  "country": "uk",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0.25,
+    "note": "0.25% 現金回饋，海外一樣算"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.25,
+    "note": "0.25% 現金回饋，海外一樣算"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 £0；購物免海外手續費（ATM 提款另收費）。英國人出國最常用的免手續費卡之一。",
+  "source": "https://www.barclaycard.co.uk/personal/credit-cards/summary-box/barclaycard-rewards/primary",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "halifax-clarity",
+  "name": "Halifax Clarity",
+  "short": "Clarity",
+  "bank": "Halifax",
+  "country": "uk",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋，只是免海外手續費"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋，只是免海外手續費"
+   }
+  ],
+  "cap": "沒有回饋",
+  "conditions": "年費 £0；海外購物、提款都免 Halifax 手續費（提款會立刻計息）。",
+  "source": "https://www.halifax.co.uk/travel/using-debit-credit-cards-abroad.html",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "chase-uk-debit",
+  "name": "Chase UK（debit 卡）",
+  "short": "Chase UK",
+  "bank": "Chase UK",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0,
+    "note": "海外消費不算 cashback"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1,
+    "note": "英國境內 cashback"
+   }
+  ],
+  "cap": "英國境內 cashback 每月上限（海外不適用）",
+  "conditions": "debit 卡；海外免手續費、Mastercard 匯率，但海外消費沒有 cashback。",
+  "source": "https://www.chase.co.uk/gb/en/support/travel-with-chase/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "amex-uk-cashback-everyday",
+  "name": "Amex Platinum Cashback Everyday（UK）",
+  "short": "Amex CB",
+  "bank": "American Express",
+  "country": "uk",
+  "network": [
+   "amex"
+  ],
+  "fx_fee": 2.99,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0,
+    "note": "外幣交易不算 cashback"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.5,
+    "note": "在英國國內"
+   }
+  ],
+  "cap": "海外沒有回饋",
+  "conditions": "年費 £0；外幣交易收 2.99% 又不給 cashback，日本不要用。AmEx 小店常不收。",
+  "source": "https://www.americanexpress.com/en-gb/benefits/platinum-cashback-everyday-credit-card/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "amex-uk-gold",
+  "name": "Amex Preferred Rewards Gold（UK）",
+  "short": "Amex Gold",
+  "bank": "American Express",
+  "country": "uk",
+  "network": [
+   "amex"
+  ],
+  "fx_fee": 2.99,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "外幣消費 2 MR 點/£，以 0.5p/點計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.5,
+    "note": "在英國國內"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 £195（首年免）；外幣 2.99% 手續費，淨回饋是負的。AmEx 小店常不收。",
+  "source": "https://www.headforpoints.com/2025/06/13/amex-preferred-rewards-gold-cuts-spend-bonuses",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "ba-amex-premium-plus",
+  "name": "British Airways Amex Premium Plus",
+  "short": "BA Prem+",
+  "bank": "American Express",
+  "country": "uk",
+  "network": [
+   "amex"
+  ],
+  "fx_fee": 2.99,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.25,
+    "note": "1.25 Avios/£（2026/10 起），以 1p/Avios 計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.25,
+    "note": "1.25 Avios/£（2026/10 起），以 1p/Avios 計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 £300；外幣 2.99% 手續費，淨回饋是負的。",
+  "source": "https://www.americanexpress.com/uk/credit-cards/ba-premium-plus-credit-card/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "ba-amex",
+  "name": "British Airways Amex（免年費）",
+  "short": "BA Amex",
+  "bank": "American Express",
+  "country": "uk",
+  "network": [
+   "amex"
+  ],
+  "fx_fee": 2.99,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "1 Avios/£，以 1p/Avios 計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1,
+    "note": "1 Avios/£，以 1p/Avios 計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 £0；外幣 2.99% 手續費，淨回饋是負的。",
+  "source": "https://www.americanexpress.com/uk/credit-cards/british-airways-credit-card/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "amex-uk-platinum",
+  "name": "The Platinum Card（UK Amex）",
+  "short": "Amex Plat",
+  "bank": "American Express",
+  "country": "uk",
+  "network": [
+   "amex"
+  ],
+  "fx_fee": 2.99,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0.5,
+    "note": "1 MR 點/£，以 0.5p/點計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.5,
+    "note": "1 MR 點/£，以 0.5p/點計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 £650；外幣 2.99% 手續費。價值在機場貴賓室、保險等福利，不在回饋。",
+  "source": "https://www.americanexpress.com/uk/credit-cards/platinum-card/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "virgin-atlantic-reward-plus",
+  "name": "Virgin Atlantic Reward+",
+  "short": "Virgin+",
+  "bank": "Virgin Money",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 2.99,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1.5 Virgin Points/£，以 1p/點計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "1.5 Virgin Points/£，以 1p/點計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 £160；外幣 2.99% 手續費，淨回饋是負的。",
+  "source": "https://uk.virginmoney.com/cards/products/virgin-atlantic-reward-plus/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "santander-edge-credit",
+  "name": "Santander Edge credit card",
+  "short": "Edge",
+  "bank": "Santander",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% cashback（2025/7 後新客）",
+    "cond": "每月 cashback 上限 £10"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1,
+    "note": "1% cashback（2025/7 後新客）",
+    "cond": "每月 cashback 上限 £10"
+   }
+  ],
+  "cap": "每月 £10",
+  "conditions": "年費 £48；當地幣別付款免手續費。舊客可能還是舊條款（首年 2%、上限 £15）。",
+  "source": "https://www.santander.co.uk/personal/credit-cards/santander-edge-credit-card",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "santander-all-in-one",
+  "name": "Santander All in One",
+  "short": "All in One",
+  "bank": "Santander",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0.5,
+    "note": "0.5% cashback",
+    "cond": "每月 cashback 上限約 £10"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.5,
+    "note": "0.5% cashback",
+    "cond": "每月 cashback 上限約 £10"
+   }
+  ],
+  "cap": "每月約 £10",
+  "conditions": "年費 £36；當地幣別付款免手續費；提款 3%。",
+  "source": "https://www.santander.co.uk/personal/credit-cards/all-in-one-credit-card",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "hsbc-premier-world-elite",
+  "name": "HSBC Premier World Elite",
+  "short": "HSBC PWE",
+  "bank": "HSBC UK",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 2.99,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2,
+    "note": "非英鎊 4 點/£ ＝ 2 哩程/£，以 1p/哩計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "在英國國內"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 £290；要 HSBC Premier 帳戶；外幣 2.99% 手續費，淨回饋是負的。",
+  "source": "https://www.hsbc.co.uk/credit-cards/products/premier-world-elite",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "natwest-reward",
+  "name": "NatWest Reward credit card",
+  "short": "NatWest",
+  "bank": "NatWest",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 2.75,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0.25,
+    "note": "一般消費 0.25% Rewards"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.25,
+    "note": "一般消費 0.25% Rewards"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "年費 £24（有 Reward 帳戶免）；外幣手續費約 2.75%，淨回饋是負的。超市 1% 只限英國。",
+  "source": "https://www.natwest.com/credit-cards/reward-credit-card.html",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "nationwide-member-credit",
+  "name": "Nationwide Member Credit Card",
+  "short": "Nationwide",
+  "bank": "Nationwide",
+  "country": "uk",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋"
+   }
+  ],
+  "cap": "沒有回饋",
+  "conditions": "年費 £0；購物免海外手續費（提款 2.5%、最低 £3）。",
+  "source": "https://www.nationwide.co.uk/support/travel/fees-charges",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "zopa-credit-card",
+  "name": "Zopa Credit Card",
+  "short": "Zopa",
+  "bank": "Zopa",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋"
+   }
+  ],
+  "cap": "沒有回饋",
+  "conditions": "年費 £0；海外購物免手續費（ATM 提款 £3）。",
+  "source": "https://zopa.com/credit-card",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "virgin-money-travel",
+  "name": "Virgin Money Travel Credit Card",
+  "short": "VM Travel",
+  "bank": "Virgin Money",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋"
+   }
+  ],
+  "cap": "沒有回饋",
+  "conditions": "年費 £0；全球購物免手續費（提款 3% 且立刻計息）。",
+  "source": "https://uk.virginmoney.com/cards/products/travel-cards/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "monzo-debit",
+  "name": "Monzo（debit 卡）",
+  "short": "Monzo",
+  "bank": "Monzo",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋"
+   }
+  ],
+  "cap": "沒有回饋",
+  "conditions": "debit 卡；購物免手續費；日本 ATM 免費額度每 30 天 £200，超過 3%。",
+  "source": "https://monzo.com/features/travel/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "starling-debit",
+  "name": "Starling（debit 卡）",
+  "short": "Starling",
+  "bank": "Starling",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0,
+    "note": "沒有回饋"
+   }
+  ],
+  "cap": "沒有回饋",
+  "conditions": "debit 卡；購物、提款都免 Starling 手續費。",
+  "source": "https://www.starlingbank.com/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "curve-pay-pro",
+  "name": "Curve Pay Pro",
+  "short": "Curve",
+  "bank": "Curve",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "付費方案在英國／EEA 以外 1% cashback",
+    "cond": "要 Pay Pro（約 £9.99/月）；免費方案沒有"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0,
+    "note": "在英國國內"
+   }
+  ],
+  "cap": "第三方說每月上限 £25（未驗證）",
+  "conditions": "底層綁的卡自己的手續費另算；免費 FX 額度依方案。",
+  "source": "https://www.curve.com/legal/fee-information",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "lloyds-ultra",
+  "name": "Lloyds Ultra credit card",
+  "short": "Lloyds",
+  "bank": "Lloyds Bank",
+  "country": "uk",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 0,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0.25,
+    "note": "首年 1%，之後 0.25%（保守用 0.25）"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.25,
+    "note": "首年 1%，之後 0.25%（保守用 0.25）"
+   }
+  ],
+  "cap": "未見公布",
+  "conditions": "購物免外幣手續費；World Elite 版另收 2.95%。",
+  "source": "https://www.lloydsbank.com/credit-cards/ultra",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "tesco-clubcard-credit",
+  "name": "Tesco Clubcard Credit Card",
+  "short": "Tesco",
+  "bank": "Tesco Bank",
+  "country": "uk",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 2.75,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0.125,
+    "note": "約 1 點/£8，Clubcard 點以 1p 計"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.125,
+    "note": "約 1 點/£8，Clubcard 點以 1p 計"
+   }
+  ],
+  "cap": "無上限",
+  "conditions": "標準卡外幣 2.75% 手續費（Clubcard Plus 訂閱版免）；淨回饋是負的。",
+  "source": "https://www.tescobank.com/guides/using-cards-abroad/",
+  "checked_at": "2026-11-13"
+ },
+ {
+  "id": "cathay-cube",
+  "name": "國泰世華 CUBE 卡",
+  "short": "CUBE",
+  "bank": "國泰世華",
+  "network": [
+   "visa",
+   "mastercard",
+   "jcb"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 3,
+    "note": "切成「趣旅行」方案",
+    "until": "2026-12-31",
+    "cond": "出門前在 CUBE App 切成「趣旅行」；國泰帳戶自扣或 App 繳卡費才有 3%（否則 2%）；限海外實體店刷卡／感應"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.3
+   }
+  ],
+  "cap": "小樹點，一般消費沒有上限。",
+  "conditions": "要在 CUBE App 切換「趣旅行」；Level 2（國泰帳戶自扣）才有 3%。2027 上半年方案尚未公告，出發前再看一次 App。",
+  "source": "https://www.cathay-cube.com.tw/cathaybk/personal/product/credit-card/cards/cube-list",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "taishin-richart",
+  "name": "台新 Richart 卡",
+  "short": "Richart",
+  "bank": "台新",
+  "network": [
+   "visa",
+   "mastercard"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 3.3,
+    "note": "切成「玩旅刷」",
+    "until": "2026-12-31",
+    "cond": "消費當天 23:59 前在 App 切成「玩旅刷」；Level 2（台新／Richart 帳戶自扣）；回饋是台新 Point"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.3
+   }
+  ],
+  "cap": "玩旅刷 3.3% 無上限（部落格整理）；外幣活動加碼另有每月 200 點上限。",
+  "conditions": "要切「玩旅刷」且 Level 2。@GoGo、FlyGo 多半已整併進這張。另有換匯到 Richart 外幣帳戶的加碼活動（要領券）。",
+  "source": "https://www.money101.com.tw/blog/%E5%8F%B0%E6%96%B0richart%E5%8D%A1",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "taishin-flygo",
+  "name": "台新 FlyGo 卡",
+  "short": "FlyGo",
+  "bank": "台新",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 3,
+    "note": "海外 0.3%＋任務加碼 2.7%（舊制）",
+    "until": "2026-12-31",
+    "cond": "數位帳單＋Richart 帳戶自扣；已停發、條款可能已改，請在台新 App 確認"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.3
+   }
+  ],
+  "cap": "海外加碼無上限（舊制）。",
+  "conditions": "已停發；2025 年起回饋改成台新 Point、可能整併為 Richart「玩旅刷」。數字不確定，刷之前看一下 App。",
+  "source": "https://www.cardu.com.tw/card/card_info.php?cc_pk=3548&cc_group_id=1380",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "fubon-j",
+  "name": "台北富邦 J 卡",
+  "short": "J卡",
+  "bank": "台北富邦",
+  "network": [
+   "jcb"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "jp",
+    "kind": "all",
+    "rate": 3,
+    "note": "日韓泰 3%（含網購）",
+    "until": "2026-12-31",
+    "cond": "要電子帳單或富邦帳戶自扣"
+   },
+   {
+    "where": "jp",
+    "kind": "shop",
+    "rate": 6,
+    "note": "實體店單筆滿 NT$1,000 再加 3%",
+    "until": "2026-12-31",
+    "cond": "每月要登錄（名額有限，每月 20 日 16:00 開放）；加碼每季上限 NT$1,000"
+   },
+   {
+    "where": "jp",
+    "kind": "move",
+    "rate": 10,
+    "note": "Apple Pay 綁 J 卡儲值 Suica／PASMO／ICOCA 單筆滿 NT$2,000",
+    "until": "2026-12-31",
+    "cond": "要登錄（每月限 1 萬名）；加碼每季上限 NT$200"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1
+   }
+  ],
+  "cap": "基本 3% 無上限；實體加碼每季 NT$1,000；交通卡加碼每季 NT$200。",
+  "conditions": "要電子帳單或富邦帳戶自扣；加碼要搶登錄名額（12 月在 12/18、12/20 16:00 開放）。只有 JCB。",
+  "source": "https://www.money101.com.tw/blog/%E5%AF%8C%E9%82%A6j%E5%8D%A1",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "fubon-op",
+  "name": "台北富邦 OpenPossible 卡",
+  "short": "OP卡",
+  "bank": "台北富邦",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2,
+    "note": "1%＋當月新增消費滿 NT$5,000 加碼 1%",
+    "until": "2027-01-31",
+    "cond": "加碼每期上限 NT$600；不含歐洲經濟區實體店"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1
+   }
+  ],
+  "cap": "海外加碼每期帳單最高 NT$600。",
+  "conditions": "當月新增消費滿 NT$5,000 才有加碼 1%。另有大丸／松坂屋 Visa Select 10%（要先到 Visa Select 報名並上傳憑證）、藥妝電器滿 20,000 日圓送 2,000 日圓券。",
+  "source": "https://www.fubon.com/banking/Personal/credit_card/all_card/OpenPossible/OpenPossible.htm",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "esun-only",
+  "name": "玉山 Only 卡",
+  "short": "Only",
+  "bank": "玉山",
+  "network": [
+   "visa",
+   "mastercard",
+   "jcb"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "依年消費等級 1%～約 3%（看玉山 App 的等級）",
+    "cond": "這裡先用最低等級算；等級高的自己改"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.4
+   }
+  ],
+  "cap": "加碼點數每戶每月上限 1,500 點（部落格整理）。",
+  "conditions": "2026/9 起停發，到期會換成 Unicard。海外沒有固定的加碼，回饋跟著年消費等級。",
+  "source": "https://creditcards.com.tw/creditcard/esun-only-miles-cashback-credit-card/",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "esun-unicard",
+  "name": "玉山 Unicard",
+  "short": "Uni",
+  "bank": "玉山",
+  "network": [
+   "visa",
+   "mastercard",
+   "jcb"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 3.5,
+    "note": "「任意選」把「國外實體」選進 8 家",
+    "until": "2026-12-31",
+    "cond": "限國外實體面對面刷卡，不含網購、訂房網；加碼每月上限 1,000 點；基本 1% 要帳單 e 化＋玉山帳戶自扣"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1,
+    "cond": "帳單 e 化＋玉山帳戶自扣，否則 0.3%"
+   }
+  ],
+  "cap": "任意選／簡單選加碼每月 1,000 點；UP 選每月 5,000 點。",
+  "conditions": "要選方案：簡單選 3%、任意選 3.5%、UP 選 4.5%（每月花 149 點訂閱或達任務）。基本 1% 要帳單 e 化＋自扣。",
+  "source": "https://www.esunbank.com/zh-tw/personal/credit-card/intro/bank-card/unicard",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "esun-kumamon",
+  "name": "玉山 熊本熊卡",
+  "short": "熊本熊",
+  "bank": "玉山",
+  "network": [
+   "jcb"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "jp",
+    "kind": "all",
+    "rate": 2.5,
+    "note": "日本一般消費",
+    "until": "2026-12-31",
+    "cond": "帳單 e 化＋自扣；無上限"
+   },
+   {
+    "where": "jp",
+    "kind": "shop",
+    "rate": 8.5,
+    "note": "日本指定通路（連鎖藥妝、百貨）加碼 6%",
+    "until": "2026-12-31",
+    "cond": "要登錄（2025 登錄過的 2026 要重登一次）；加碼每期上限 500 元（約刷 NT$8,333）"
+   },
+   {
+    "where": "jp",
+    "kind": "move",
+    "rate": 8.5,
+    "note": "Suica／ICOCA／PASMO 儲值算指定通路",
+    "until": "2026-12-31",
+    "cond": "要登錄；與購物共用每期 500 元上限"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.5,
+    "cond": "電子帳單＋自扣"
+   }
+  ],
+  "cap": "指定通路加碼每期 500 元；一般日本 2.5% 無上限。",
+  "conditions": "指定通路加碼要登錄；只有 JCB。另有玉山 Wallet 綁 PayPay 最高 5%（每季 100 元）。",
+  "source": "https://moneymate.space/esun-kumamon-card/",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "ubot-jiho",
+  "name": "聯邦 吉鶴卡",
+  "short": "吉鶴",
+  "bank": "聯邦",
+  "network": [
+   "jcb"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "jp",
+    "kind": "all",
+    "rate": 2.5,
+    "note": "日幣請款一般消費",
+    "until": "2026-12-31",
+    "cond": "帳單以日幣請款；無上限"
+   },
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "非日幣的海外消費"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1
+   }
+  ],
+  "cap": "日本 2.5% 無上限；各項加碼另有每月 600～1,000 元上限。",
+  "conditions": "用 Apple Pay／Google Pay 感應另有加碼 1.5%（要登錄，單筆 ≥ NT$100；2026 下半年條款請到活動頁確認）。只有 JCB。",
+  "source": "https://activity.ubot.com.tw/2026JiHoCard/index.htm",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "sinopac-dual",
+  "name": "永豐 幣倍卡",
+  "short": "幣倍",
+  "bank": "永豐",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2,
+    "note": "外幣帳戶扣款",
+    "until": "2026-12-31",
+    "cond": "要電子帳單＋永豐台外幣帳戶自扣；外幣帳戶要有日圓餘額"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1
+   }
+  ],
+  "cap": "基本 2% 無上限；精選通路加碼每月 800 元。",
+  "conditions": "大戶等級或前月往來資產 ≥10 萬的人，國外實體精選通路最高 6%（含 Suica 等儲值）。這裡先用基本 2% 算。",
+  "source": "https://www.beurlife.com/2020/04/sinopac_dual_currency_card_intro.html",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "sinopac-dawho",
+  "name": "永豐 DAWHO 大戶卡",
+  "short": "大戶",
+  "bank": "永豐",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2,
+    "note": "國外一般消費基本回饋",
+    "until": "2026-12-31",
+    "cond": "無上限"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1
+   }
+  ],
+  "cap": "基本無上限；大戶加碼每期 400 元、大戶 Plus 1,000 元。",
+  "conditions": "大戶等級 4.5%、大戶 Plus 6%（要數位帳戶自扣＋電子帳單，等級隔月生效）。這裡先用基本 2% 算，有等級的自己改。",
+  "source": "https://www.beurlife.com/2019/06/sinopac-bank-high-rebate-dawho-card.html",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "hsbc-travel",
+  "name": "滙豐 旅人卡",
+  "short": "旅人卡",
+  "bank": "滙豐",
+  "network": [],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2,
+    "note": "御璽卡：每 15 元 1 點，換刷卡金約 2%（無限卡約 3%）",
+    "cond": "回饋是旅遊積分，要換成刷卡金才有現金價值"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.66,
+    "note": "每 18 元 1 點"
+   }
+  ],
+  "cap": "一般消費無上限；積分三年到期。",
+  "conditions": "回饋是積分不是現金，換算 % 看兌換方式；沒有日本加碼。無限卡的人把 2 改成 3。",
+  "source": "https://www.hsbc.com.tw/credit-cards/products/travel/",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "hsbc-live-plus",
+  "name": "滙豐 Live+ 現金回饋卡",
+  "short": "Live+",
+  "bank": "滙豐",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 0.88,
+    "note": "一般消費",
+    "until": "2026-12-31"
+   },
+   {
+    "where": "overseas",
+    "kind": "shop",
+    "rate": 3.88,
+    "note": "購物／娛樂通路加碼 3%",
+    "until": "2026-12-31",
+    "cond": "加碼每月上限 888 點（約刷 NT$29,600）；不含歐盟英國"
+   },
+   {
+    "where": "jp",
+    "kind": "food",
+    "rate": 4.88,
+    "note": "餐飲加碼 3%＋日本等精選國家再加 1%",
+    "until": "2026-12-31",
+    "cond": "限實體餐飲；精選國家加碼每月上限 200 點"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.88
+   }
+  ],
+  "cap": "三大通路加碼每月 888 點；日本餐飲 1% 每月 200 點。",
+  "conditions": "綁自動扣繳再加 1%（每月 200 點）。LINE Pay 等第三方支付只有 0.88%。",
+  "source": "https://creditcards.com.tw/creditcard/hsbc-live-plus/",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "dbs-eco",
+  "name": "星展 eco 永續卡",
+  "short": "eco",
+  "bank": "星展",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "jp",
+    "kind": "all",
+    "rate": 5,
+    "note": "日本實體店或 Apple Pay／Samsung Pay：1%＋加碼 4%",
+    "until": "2026-12-31",
+    "cond": "要是外幣交易；加碼每期上限 600 點（約刷 NT$15,000 內）；不含 Suica／PASMO 儲值"
+   },
+   {
+    "where": "jp",
+    "kind": "food",
+    "rate": 10,
+    "note": "海外餐飲加碼（9/1～12/31）",
+    "until": "2026-12-31",
+    "cond": "要登錄；每日最高 300 元、每月最高 1,000 元刷卡金"
+   },
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1,
+    "note": "一般（網購等非實體）"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1
+   }
+  ],
+  "cap": "加碼 4% 每期 600 點；海外餐飲每月 1,000 元。",
+  "conditions": "要實體刷卡或行動支付；餐飲 10% 要登錄。",
+  "source": "https://www.dbs.com.tw/personal-zh/cards/dbs_eco/index.html",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "ctbc-linepay",
+  "name": "中信 LINE Pay 卡",
+  "short": "LINE Pay",
+  "bank": "中國信託",
+  "network": [
+   "visa",
+   "jcb"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2.8,
+    "note": "海外實體刷卡 LINE Points",
+    "until": "2026-12-31",
+    "cond": "實體刷卡／感應，不含網購和第三方支付；加碼 2.2% 部分每月上限 450 點"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1
+   }
+  ],
+  "cap": "加碼部分每月 450 點（約刷 NT$20,000）。",
+  "conditions": "登錄活動有時可到 5%（名額有限）。中信官網抓不到，數字來自部落格，刷之前看一下中信 App。",
+  "source": "https://creditcards.com.tw/creditcard/line-pay-ctbcbank-credit-card/",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "megabank-leader",
+  "name": "兆豐 利多御璽卡",
+  "short": "利多",
+  "bank": "兆豐",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 3,
+    "note": "國外 2%＋加碼 1%",
+    "until": "2026-12-31",
+    "cond": "要電子帳單，且當期帳單有國內一般消費"
+   }
+  ],
+  "cap": "2%＋1% 無上限；再加碼 0.1% 每期 500 元。",
+  "conditions": "回饋是帳單抵用額度。日幣滿額贈活動 2026/6/30 已結束。",
+  "source": "https://www.megabank.com.tw/personal/credit-card/event/overview/2026h1lidoforeign",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "scsb-minion",
+  "name": "上海商銀 小小兵卡",
+  "short": "小小兵",
+  "bank": "上海商銀",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2.234,
+    "note": "國外一般消費",
+    "until": "2026-12-30"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.234,
+    "until": "2026-12-30"
+   }
+  ],
+  "cap": "國內外合計每月回饋上限 1,000 元。",
+  "conditions": "日韓 Apple Pay 加碼 5% 的活動只見於攻略文（到 2026/6/30），下半年未證實。",
+  "source": "https://apply.scsb.com.tw/content/minionscard/index.html",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "skb-universe",
+  "name": "新光 寰宇現金回饋卡",
+  "short": "寰宇",
+  "bank": "新光",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 3,
+    "note": "1.5%＋任務加碼 1.5%",
+    "until": "2026-12-27",
+    "cond": "電子帳單＋新光帳戶自扣；加碼每期上限 1,000 點"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1
+   }
+  ],
+  "cap": "基本無上限；任務加碼每期 1,000 點。",
+  "conditions": "2026/10/30 起停止申辦（已持卡不影響）；日韓專屬加碼 2026 年已取消；歐盟實體店不回饋。",
+  "source": "https://www.cardu.com.tw/card/card_info.php?cc_pk=3433&cc_group_id=1307",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "yuanta-diamond",
+  "name": "元大 鑽金卡",
+  "short": "鑽金",
+  "bank": "元大",
+  "network": [
+   "visa"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2.2,
+    "note": "鑽金紅利，1 點 = NT$1",
+    "until": "2026-12-31"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1.2
+   }
+  ],
+  "cap": "無門檻、無上限。",
+  "conditions": "點數有效期 6 個月；沒有日本加碼。數字來自第三方整理，未在官網證實。",
+  "source": "https://www.yuantabank.com.tw/bank/creditCard/creditCard/in.do?id=2756c6f0c700000309a9",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "hncb-richplus",
+  "name": "華南 Rich+ 富家卡",
+  "short": "富家",
+  "bank": "華南",
+  "network": [
+   "mastercard"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2,
+    "note": "國外基本現金回饋",
+    "until": "2026-11-30"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 1
+   }
+  ],
+  "cap": "基本無上限；儲蓄點依等級每月 500～10,000 點。",
+  "conditions": "鉅富家等級再加儲蓄點 3%，但要有基金／保單等理財才能折抵。權益寫到 2026/11/30，12 月以後請確認。",
+  "source": "https://pokem.tw/hncb-richplus-intro/",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "rakuten-pandaj",
+  "name": "台灣樂天 Panda J 卡",
+  "short": "熊貓J",
+  "bank": "台灣樂天",
+  "network": [
+   "jcb"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "jp",
+    "kind": "all",
+    "rate": 4,
+    "note": "日韓泰實體店加碼 2.5%",
+    "until": "2026-12-31",
+    "cond": "實體店、日圓結帳，免登錄；加碼每期上限 NT$300（約刷 NT$12,000）"
+   },
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 1.5,
+    "note": "海外一般消費",
+    "until": "2026-12-31"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.5
+   }
+  ],
+  "cap": "日韓泰加碼每期 NT$300；海外基本 1.5% 無上限。",
+  "conditions": "網購不算加碼。唐吉訶德、多慶屋另有樂天卡友優惠。",
+  "source": "https://www.card.rakuten.com.tw/corp/ads/04.xhtml",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "feib-yajia",
+  "name": "遠東商銀 樂家+ 卡",
+  "short": "樂家+",
+  "bank": "遠東商銀",
+  "network": [],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2.5,
+    "note": "海外一般消費",
+    "until": "2026-12-31"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.5
+   }
+  ],
+  "cap": "海外 2.5% 無上限；日本單月滿 6 萬登錄送 600 元（每戶每月一次）。",
+  "conditions": "滿額贈要消費當月登錄；跨月的行程兩個月要各自登錄、各自滿額。",
+  "source": "https://www.money101.com.tw/blog/日本旅遊信用卡推薦-pod",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ },
+ {
+  "id": "firstbank-ileo",
+  "name": "第一銀行 iLEO 卡",
+  "short": "iLEO",
+  "bank": "第一銀行",
+  "network": [
+   "visa",
+   "mastercard",
+   "jcb"
+  ],
+  "fx_fee": 1.5,
+  "rates": [
+   {
+    "where": "jp",
+    "kind": "all",
+    "rate": 3,
+    "note": "外幣 2%＋日圓實體店再加 1%",
+    "until": "2026-12-31",
+    "cond": "實體卡面對面、日圓結帳；一銀帳戶自扣＋電子帳單；加碼 1.5% 每期 500 元、1% 每期 200 元"
+   },
+   {
+    "where": "overseas",
+    "kind": "all",
+    "rate": 2,
+    "note": "外幣 0.5%＋加碼 1.5%",
+    "until": "2026-12-31",
+    "cond": "一銀帳戶自扣＋電子帳單；加碼每期上限 500 元"
+   },
+   {
+    "where": "home",
+    "kind": "all",
+    "rate": 0.5
+   }
+  ],
+  "cap": "外幣加碼每期 500 元；實體店加碼每期 200 元。",
+  "conditions": "新戶（核卡 90 天內）日本另加 10%，合計上限 500 元。歐洲實體店不適用。",
+  "source": "https://card.firstbank.com.tw/sites/card/zh_TW/1565698492326",
+  "checked_at": "2026-11-13",
+  "country": "tw"
+ }
+]

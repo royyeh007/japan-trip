@@ -100,6 +100,7 @@ fn-deploy:
 	supabase functions deploy flight-refresh --no-verify-jwt
 	supabase functions deploy optimize-day --no-verify-jwt
 	supabase functions deploy format-info --no-verify-jwt
+	supabase functions deploy card-lookup --no-verify-jwt
 
 ## Store the Claude API key for the Edge Functions: make secrets ANTHROPIC_API_KEY=sk-ant-...
 secrets:

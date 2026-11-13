@@ -4,9 +4,12 @@ import type { Session } from "@supabase/supabase-js";
 import { clearInvite, setStoredInvite, setStoredTrip, storedInvite, storedTrip, supabase } from "./supabase";
 import { labelOf as labelIn } from "./data";
 import type { ContactRow, Day, Family, FamilyId, InfoBlock, InfoPage, Member, Membership, TodoRow, Trip } from "./data";
+import type { Card } from "./cards";
 import { setTimezone } from "./now";
 
 export interface TripData { families: Family[]; days: Day[]; todos: TodoRow[]; contacts: ContactRow[]; notes: Record<string, string>; info: InfoPage[] }
+/** 信用卡：大家共用的卡片庫 + 這個人勾了哪幾張。`available` false = 資料庫還沒升級（沒有這兩張表）。 */
+export interface CardsState { ready: boolean; available: boolean; catalog: Card[]; mine: string[] }
 /** signedout → (join: an invite code is waiting) → pick: choose/create/join a trip → ready: inside a trip */
 export type Phase = "noconfig" | "loading" | "signedout" | "join" | "pick" | "ready" | "error";
 
@@ -31,10 +34,14 @@ interface Ctx {
   leaveToPicker: () => void;
   reload: () => Promise<void>;
   refreshMemberships: () => Promise<void>;
+  /** 信用卡資料（不分行程，跟著人） */
+  cards: CardsState;
+  reloadCards: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
 const EMPTY: TripData = { families: [], days: [], todos: [], contacts: [], notes: {}, info: [] };
+const NO_CARDS: CardsState = { ready: false, available: true, catalog: [], mine: [] };
 const TripContext = createContext<Ctx | null>(null);
 
 export function TripProvider({ children }: { children: ReactNode }) {
@@ -49,6 +56,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [tripLoaded, setTripLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewFam, setViewFam] = useState<FamilyId | null>(null);
+  const [cards, setCards] = useState<CardsState>(NO_CARDS);
 
   // 1. session (supabase-js also picks up the ?code= from the Google redirect; we then clean the URL)
   useEffect(() => {
@@ -106,6 +114,18 @@ export function TripProvider({ children }: { children: ReactNode }) {
   }, []);
   const leaveToPicker = useCallback(() => { setPickerOpen(true); setCurrentId(null); setStoredTrip(null); setTrip(EMPTY); setTripLoaded(false); setViewFam(null); }, []);
   const setInvite = useCallback((code: string | null) => { if (code) setStoredInvite(code); else clearInvite(); setInviteState(code); }, []);
+
+  // 3b. this person's credit cards and the shared catalog (not per trip); a missing table just hides the feature
+  const reloadCards = useCallback(async () => {
+    if (!supabase || !uid) { setCards(NO_CARDS); return; }
+    const [cat, mine] = await Promise.all([
+      supabase.from("card_catalog").select("id, name, short, bank, country, network, fx_fee, rates, cap, conditions, source, checked_at, created_by, updated_by_name, updated_at").order("bank").order("name"),
+      supabase.from("my_cards").select("card_id").eq("user_id", uid).order("added_at"),
+    ]);
+    if (cat.error || mine.error) { setCards({ ready: true, available: false, catalog: [], mine: [] }); return; }
+    setCards({ ready: true, available: true, catalog: (cat.data ?? []).map((c) => ({ ...c, fx_fee: Number(c.fx_fee) })) as Card[], mine: (mine.data ?? []).map((m) => m.card_id) });
+  }, [uid]);
+  useEffect(() => { reloadCards(); }, [reloadCards]);
 
   // 4. the open trip's content (RLS limits it to trips this person is in)
   const reload = useCallback(async () => {
@@ -191,7 +211,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     <TripContext.Provider value={{
       phase, error, session, memberships, current, member, trip,
       viewFam: viewFam ?? member?.family_id ?? families[0]?.id ?? "",
-      setViewFam, labelOf, invite, setInvite, enterTrip, leaveToPicker, reload, refreshMemberships, signOut,
+      setViewFam, labelOf, invite, setInvite, enterTrip, leaveToPicker, reload, refreshMemberships, signOut, cards, reloadCards,
     }}>
       {children}
     </TripContext.Provider>

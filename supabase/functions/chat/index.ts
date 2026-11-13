@@ -13,6 +13,8 @@ import { anthropic, CHAT_MODEL } from "../_shared/claude.ts";
 import { ProposalZ, dateOf, formatGuide, normalize } from "../_shared/proposal.ts";
 import type { GuideCtx } from "../_shared/proposal.ts";
 import { guideText } from "../_shared/guide.ts";
+import { COUNTRY_NAME, countryOf, summary as cardSummary } from "../_shared/cards.ts";
+import type { Card } from "../_shared/cards.ts";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
 
@@ -103,14 +105,21 @@ Deno.serve(handle(async (req) => {
   let lookup = false;
   const work = (async () => {
     try {
-      const [{ data: days }, { data: families }, { data: extras }, { data: todos }, { data: contacts }, pagesRes] = await Promise.all([
+      const [{ data: days }, { data: families }, { data: extras }, { data: todos }, { data: contacts }, pagesRes, myCardsRes] = await Promise.all([
         user.from("days").select("date_id, fam, d, w, city, title, hotel, items").eq("trip_id", trip.id),
         user.from("families").select("id, name, label, flights").eq("trip_id", trip.id).order("sort"),
         user.from("extras").select("key, data").eq("trip_id", trip.id),
         user.from("todos").select("fam, due, text, done").eq("trip_id", trip.id).order("sort"),
         user.from("contacts").select("fam, name, value").eq("trip_id", trip.id).order("sort"),
         user.from("info_pages").select("id, title, body, blocks").eq("trip_id", trip.id).order("sort"),
+        // 這個人勾的信用卡（資料庫還沒升級時會是 error，就當沒有）
+        user.from("my_cards").select("card_catalog(id, name, short, bank, country, network, fx_fee, rates, cap, conditions, source, checked_at)").eq("user_id", uid),
       ]);
+      const myCards = (myCardsRes.error ? [] : (myCardsRes.data ?? []).map((r) => (r as unknown as { card_catalog: Card | null }).card_catalog).filter((c): c is Card => !!c));
+      const dest = countryOf(trip.place);
+      const cardLine = myCards.length
+        ? `他勾的信用卡：${myCards.map((c) => `${c.name}（${COUNTRY_NAME[c.country]}，海外手續費 ${c.fx_fee}%）`).join("、")}。網站依卡片庫算出在${COUNTRY_NAME[dest]}各類消費推薦：${cardSummary(myCards, dest, trip.start_date)}（淨回饋＝回饋−手續費）。被問刷哪張卡就照這個回答，條件細節請他看「信用卡」頁或點開那一站的「刷哪張卡」。`
+        : "他還沒在「信用卡」頁勾自己的卡；問到刷哪張卡時，請他先去那一頁加卡。";
       const extrasMap = Object.fromEntries((extras ?? []).map((e) => [e.key, e.data]));
       // 其他資訊：info_pages（大家寫的 Markdown 頁）；資料庫還沒升級時退回舊的 extras.info
       type InfoPage = { id: string; title: string; body?: string | null; blocks?: unknown };
@@ -202,7 +211,7 @@ Deno.serve(handle(async (req) => {
           { type: "text", text: rules(guideCtx) },
           // 行程資料：同一個行程的人相同，快取共用（改行程會自動失效）
           { type: "text", text: `目前的行程資料（JSON）：\n${JSON.stringify(context, slim)}`, cache_control: cache },
-          { type: "text", text: `今天是 ${today}。現在跟你說話的是 ${who}（${fams.find((f) => f.id === member.family_id)?.label ?? member.family_id}${member.role === "admin" ? "，這個行程的管理員" : ""}）。` },
+          { type: "text", text: `今天是 ${today}。現在跟你說話的是 ${who}（${fams.find((f) => f.id === member.family_id)?.label ?? member.family_id}${member.role === "admin" ? "，這個行程的管理員" : ""}）。${cardLine}` },
         ],
         // 上網的兩個工具定義就要 6,500 token，一般問題不掛（前置內容少 23%）
         tools: web ? [propose, getInfo, webFetch, webSearch] : [propose, getInfo, lookupOnline],

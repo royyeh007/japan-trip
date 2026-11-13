@@ -6,6 +6,7 @@ import type { LinkedLeg } from "../maps";
 import { KIND, SEAL } from "../labels";
 import { useNow } from "../now";
 import { useTrip } from "../trip";
+import { CardChip } from "./CardPick";
 
 /** Every day of the viewed family's itinerary on one page: date, city, hotel, and the stops as a compact chain. */
 export function Overview({ onOpen }: { onOpen: (day: Day, stop: Stop, arrive?: LinkedLeg) => void }) {
@@ -54,6 +55,7 @@ export function Overview({ onOpen }: { onOpen: (day: Day, stop: Stop, arrive?: L
                           <span className="n">{it.n}</span>
                           {it.st && <span className={`seal ${it.st}`}>{SEAL[it.st]}</span>}
                           {it.ref && <span className="tag trip">↗ {it.ref.name}</span>}
+                          <CardChip kind={it.k} date={d.id} />
                         </button>
                       </li>
                     ))}

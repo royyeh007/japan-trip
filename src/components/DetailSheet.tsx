@@ -11,6 +11,7 @@ import type { LinkedLeg } from "../maps";
 import { ModeIcon, PinIcon } from "../icons";
 import { KIND_NAME, SEAL } from "../labels";
 import { editDayItems, findStop, removeStopAt, sameDayRow, sortByTime } from "../dayEdit";
+import { CardSection } from "./CardPick";
 
 function Copy({ value }: { value: string }) {
   const [done, setDone] = useState(false);
@@ -340,6 +341,7 @@ export function DetailSheet({ day: day0, stop: stop0, arrive: arrive0, onClose }
               {stop.rec && <div className="sec"><h4>推薦</h4><List items={stop.rec} /></div>}
               {info.length > 0 && <div className="sec"><h4>資訊</h4><List items={info} /></div>}
               {stop.tips && <div className="sec"><h4>提醒</h4><List items={stop.tips} /></div>}
+              <CardSection kind={stop.k} date={day.id} />
               <Memos day={day} stop={stop} />
               {!isViewer(member) && (
                 <div className="sec askrow">

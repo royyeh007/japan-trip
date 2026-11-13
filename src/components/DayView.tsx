@@ -13,6 +13,7 @@ import { openForm } from "../form";
 import { supabase } from "../supabase";
 import { useTrip } from "../trip";
 import { toMinutes, useNow, useNowLine } from "../now";
+import { CardChip } from "./CardPick";
 
 function LegRow({ leg, done, date }: { leg: LinkedLeg; done?: boolean; date?: string }) {
   const { travel, label } = MODE[leg.leg];
@@ -51,7 +52,7 @@ function LegRow({ leg, done, date }: { leg: LinkedLeg; done?: boolean; date?: st
   );
 }
 
-function StopRow({ stop, done, onOpen }: { stop: Stop; done?: boolean; onOpen: () => void }) {
+function StopRow({ stop, done, date, onOpen }: { stop: Stop; done?: boolean; date?: string; onOpen: () => void }) {
   const sub = stop.s || stop.book?.[0] || stop.rec?.[0] || "";
   return (
     <li className={`stop${done ? " done" : ""}`}>
@@ -64,6 +65,7 @@ function StopRow({ stop, done, onOpen }: { stop: Stop; done?: boolean; onOpen: (
           {stop.st && <span className={`seal ${stop.st}`}>{SEAL[stop.st]}</span>}
           {stop.who && <span className="who">{stop.who}</span>}
           {stop.ref && <span className="tag trip">↗ {stop.ref.name}</span>}
+          <CardChip kind={stop.k} date={date} />
           {stop.memo && stop.memo.length > 0 && <span className="memo-n">備註 {stop.memo.length}</span>}
           <span className="more">詳細資訊 ›</span>
         </div>
@@ -89,7 +91,7 @@ export function Timeline({ day, onOpen }: { day: Day; onOpen?: (s: Stop, arrive?
           {isLeg(it) ? (
             <LegRow leg={legs.get(i)!} done={isToday && i <= lastDone} date={day.id} />
           ) : (
-            <StopRow stop={it} done={isToday && i <= lastDone} onOpen={() => onOpen?.(it, arrive.get(i))} />
+            <StopRow stop={it} done={isToday && i <= lastDone} date={day.id} onOpen={() => onOpen?.(it, arrive.get(i))} />
           )}
           {isToday && i === lastDone && line}
         </Fragment>

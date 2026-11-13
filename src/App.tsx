@@ -16,6 +16,7 @@ import { Lightbox } from "./md";
 import { AdminView } from "./components/AdminView";
 import { Overview } from "./components/Overview";
 import { GuideView } from "./components/GuideView";
+import { CardsView } from "./components/CardsView";
 import { Login } from "./components/Login";
 import { JoinTrip } from "./components/JoinTrip";
 import { TripPicker } from "./components/TripPicker";
@@ -30,7 +31,7 @@ const store = {
   set(k: string, v: string) { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } },
 };
 
-const PAGES = ["overview", "todo", "upload", "info", "admin", "guide"];
+const PAGES = ["overview", "todo", "upload", "info", "cards", "admin", "guide"];
 function currentView(dayIds: string[], dayKey: string, todayId?: string) {
   const h = location.hash.slice(1);
   if (PAGES.includes(h) || dayIds.includes(h)) return h;
@@ -159,6 +160,7 @@ function TripMenu() {
         <small>{member?.name ?? member?.email}</small>
         <button type="button" onClick={() => { close(); leaveToPicker(); }}>切換行程</button>
         {member?.role === "admin" && <a href="#admin" onClick={close}>管理行程</a>}
+        <a href="#cards" onClick={close}>我的信用卡</a>
         <a href="#guide" onClick={close}>使用教學</a>
         <button type="button" onClick={rename}>改我的名字</button>
         <button type="button" className="danger" onClick={leave}>退出這個行程</button>
@@ -274,6 +276,7 @@ function Main() {
             <a className="btn" href="#todo" aria-current={view === "todo" ? "page" : undefined}>✓ 待辦・聯絡</a>
             {!isViewer(member) && <a className="btn" href="#upload" aria-current={view === "upload" ? "page" : undefined}>↑ 上傳行程</a>}
             {(trip.info.length > 0 || !isViewer(member)) && <a className="btn" href="#info" aria-current={view === "info" ? "page" : undefined}>ⓘ 其他資訊</a>}
+            <a className="btn" href="#cards" aria-current={view === "cards" ? "page" : undefined}>💳 信用卡</a>
             {member?.role === "admin" && <a className="btn" href="#admin" aria-current={view === "admin" ? "page" : undefined}>⚙ 管理</a>}
           </div>
         </header>
@@ -333,6 +336,7 @@ function Main() {
             : view === "todo" ? <TodoView />
             : view === "upload" ? <UploadView />
             : view === "info" ? <InfoView />
+            : view === "cards" ? <CardsView />
             : view === "admin" ? <AdminView />
             : view === "guide" ? <GuideView role={member?.role ?? "member"} />
             : cur && mode === "all" ? <AllFamiliesDay dateId={cur.id} onOpen={(day, stop, arrive) => setSelected({ day, stop, arrive })} />
